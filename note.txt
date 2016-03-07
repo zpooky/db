@@ -1,0 +1,23 @@
+Insert
+
+-Journal.begin
+-Reservation.reserve(table, sizeof(entry);
+    Reservation(TableFilePartition, index, size);
+-Journal.data(jorunalId, Reservation)
+-wite(reservation)
+-Journal.commit(journalId)
+
+
+Unique Tree Index
+-bool insert(column)
+    -if false = throw uniqueConstraintException
+
+
+
+File structure
+table/
+    .journal
+    partitions/
+        1.part
+        2.part
+        ...
