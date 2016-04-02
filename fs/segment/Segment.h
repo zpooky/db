@@ -9,6 +9,13 @@
 #include "../../shared/Assertions.h"
 #include "../File.h"
 
+/*
+ * Header:
+ * .----------------------.
+ * |Table name | Line size|
+ * `---------------------
+ */
+
 namespace db {
     namespace fs {
         class SegmentFile {

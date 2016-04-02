@@ -17,7 +17,7 @@ link_directories(${FS_LIB_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-set(SOURCE_FILES main.cpp TestTable.h)
+set(SOURCE_FILES main.cpp TestTable.h TableFacade.cpp TableFacade.h)
 add_executable(db ${SOURCE_FILES})
 target_link_libraries(db journal_lib)
 target_link_libraries(db config_lib)

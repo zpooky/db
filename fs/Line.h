@@ -35,8 +35,8 @@ namespace db {
             }
         };
 
-        template<typename P_Table>
-        auto to_line(P_Table &&table) -> Line<sizeof(P_Table)>;
+        template<typename T_Table>
+        auto to_line(T_Table &&table) -> Line<sizeof(T_Table)>;
 
         template<size_t LINE_SIZE>
         auto buffer(const Line<LINE_SIZE> &);
@@ -53,11 +53,11 @@ namespace db {
         }
 
 
-        template<typename P_Table>
-        auto to_line(P_Table &&table) -> Line<sizeof(P_Table)> {
+        template<typename T_Table>
+        auto to_line(T_Table &&table) -> Line<sizeof(T_Table)> {
 //            using std::move;
 //            Line<512> line{move(table)};
-            std::cout << "sizeof:" << sizeof(P_Table) << "\n";
+            std::cout << "sizeof:" << sizeof(T_Table) << "\n";
 //            sizeof(std::remove_const<std::remove_reference<std::decay<decltype(table)>::type>::type>::type) << "\n";
             Line<sizeof(table)> line{std::move(table)};
             return line;
