@@ -8,11 +8,16 @@
 #include "../shared/fs.h"
 
 struct TestTable : public db::Table {
+    char data[5];
     unsigned long id;
 
-    size_t size() const noexcept {
-        return sizeof(id);
+    TestTable() : id{1}, data{"hell"} {
+
     }
+
+//    size_t size() const noexcept {
+//        return sizeof(TestTable);
+//    }
 
 };
 

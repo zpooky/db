@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.2)
 
 set(CONFIG_LIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -10,7 +10,7 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Configuration.cpp ../fs/Reservation.cpp ../fs/Reservation.h)
+    set(SOURCE_FILES Configuration.cpp)
 
     add_library(config_lib STATIC ${SOURCE_FILES})
     set_target_properties(config_lib PROPERTIES LINKER_LANGUAGE CXX)

@@ -6,22 +6,24 @@
 #define DB_FS_H
 
 #include <stddef.h>
+#include <array>
 
 namespace db {
-    class Table {
-        virtual size_t size() const noexcept = 0;
-    };
-
     struct Reservation {
         const size_t position;
 
         Reservation(size_t p_position) : position{p_position} {
         }
     };
+
+    class Table {
+//        static size_t size() const noexcept = 0;
+    };
 //Raw
     using rid = unsigned long;
-    using crc32 = unsigned char[4];
-    using raw = unsigned char;
+    using crc32 = std::array<unsigned char, 4>;
+    template<size_t size>
+    using raw = std::array<unsigned char, size>;
     enum class State : unsigned char {
         RESERVED = 0, PREPARED, ROLLEDBACK, COMMITED
     };

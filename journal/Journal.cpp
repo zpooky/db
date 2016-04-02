@@ -3,7 +3,7 @@
 //
 
 #include "Journal.h"
-#include "../fs/Reservation.h"
+#include "../fs/segment/Reservation.h"
 
 namespace db {
     namespace journal {

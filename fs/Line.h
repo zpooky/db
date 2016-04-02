@@ -2,13 +2,15 @@
 // Created by spooky on 2016-03-03.
 //
 
-#ifndef DB_RAW_H
-#define DB_RAW_H
+#ifndef _SP_FS_LINE_H
+#define _SP_FS_LINE_H
 
 #include <stddef.h>
 #include "../shared/fs.h"
 #include <type_traits>
 #include <utility>
+#include "../shared/Buffer.h"
+#include <iostream>
 
 namespace db {
     namespace fs {
@@ -17,7 +19,7 @@ namespace db {
             db::rid id;
             db::crc32 checksum;
             db::State state;
-            db::raw data[BYTES];
+            db::raw<BYTES> data;
 
             Line(Table &&table) {
                 id = 1;
@@ -29,16 +31,37 @@ namespace db {
             }
 
             static constexpr size_t size() {
-                return sizeof(db::rid) + sizeof(db::crc32) + sizeof(db::State) + (sizeof(db::raw) * BYTES);
+                return sizeof(db::rid) + sizeof(db::crc32) + sizeof(db::State) + sizeof(db::raw<BYTES>);
             }
         };
 
-        auto line(db::Table &&table) {
-            using std::move;
-            Line<sizeof(table)> line{move(table)};
-            return line;
+        template<typename P_Table>
+        auto to_line(P_Table &&table) -> Line<sizeof(P_Table)>;
+
+        template<size_t LINE_SIZE>
+        auto buffer(const Line<LINE_SIZE> &);
+
+        template<size_t LINE_SIZE>
+        auto buffer(const Line<LINE_SIZE> &l) {
+            Buffer<Line<LINE_SIZE>::size()> buf{};
+            buf.put(l.id);
+            buf.put(l.checksum);
+            auto state = static_cast<unsigned char>(l.state);
+            buf.put(state);
+            buf.put(l.data);
+            return buf;
         }
 
+
+        template<typename P_Table>
+        auto to_line(P_Table &&table) -> Line<sizeof(P_Table)> {
+//            using std::move;
+//            Line<512> line{move(table)};
+            std::cout << "sizeof:" << sizeof(P_Table) << "\n";
+//            sizeof(std::remove_const<std::remove_reference<std::decay<decltype(table)>::type>::type>::type) << "\n";
+            Line<sizeof(table)> line{std::move(table)};
+            return line;
+        }
 //        template<typename T, size_t s = 0>
 //        struct Line_size {
 //            typedef T type;
@@ -61,4 +84,4 @@ namespace db {
     }
 }
 
-#endif //DB_RAW_H
+#endif //FS_LINE_H

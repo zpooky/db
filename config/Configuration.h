@@ -2,8 +2,8 @@
 // Created by spooky on 2016-03-03.
 //
 
-#ifndef DB_SYSTEM_H
-#define DB_SYSTEM_H
+#ifndef DB_CONFIG_H
+#define DB_CONFIG_H
 
 
 class Configuration {
@@ -11,4 +11,4 @@ class Configuration {
 };
 
 
-#endif //DB_SYSTEM_H
+#endif

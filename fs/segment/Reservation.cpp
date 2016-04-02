@@ -7,8 +7,5 @@
 
 namespace db {
     namespace fs {
-        Reservation Reservations::reserve() {
-            return {1l};
-        }
     }
 }
