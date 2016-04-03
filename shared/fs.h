@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <array>
 #include <string>
+#include <utility>
 
 namespace db {
     struct Reservation {
@@ -32,13 +33,7 @@ namespace db {
     using journal_id = unsigned long;
 
     //
-    struct Directory {
-        const std::string path;
 
-        explicit Directory(std::string &&p_path) : path{p_path} {
-
-        }
-    };
 }
 
 

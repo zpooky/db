@@ -5,9 +5,9 @@
 #ifndef FS_SEGMENT_H
 #define FS_SEGMENT_H
 
-#include "../../shared/fs.h"
+#include "../../shared/entities.h"
 #include "../../shared/Assertions.h"
-#include "../File.h"
+#include "../FileWriter.h"
 
 /*
  * Header:
@@ -18,13 +18,29 @@
 
 namespace db {
     namespace fs {
+        class SegmentFile;
+        namespace impl {
+            class SegmentFileInit {
+            private:
+                const File m_file;
+            public:
+                SegmentFile create(size_t line_size, size_t number) const;
+            };
+        }
+
         class SegmentFile {
         private:
-            const size_t m_filesize;
-            const File m_file;
+            const FileWriter m_file;
+            const size_t m_line_size;
+            const size_t m_number;
         public:
-            SegmentFile(const std::string &file, size_t filesize) : m_file{file}, m_filesize{filesize} {
+
+            SegmentFile(const File &file, size_t line_size, size_t number) : m_file{file},
+                                                                                    m_line_size{line_size},
+                                                                                    m_number{number} {
             }
+
+
         };
 
         template<typename t_Table>
@@ -36,8 +52,9 @@ namespace db {
             Segment(const SegmentFile &file) : m_file{file} {
                 db::assert_is_table<t_Table>();
             }
-            template <size_t SIZE>
-            bool write(const Reservation& r, const Line<SIZE> &line){
+
+            template<size_t SIZE>
+            bool write(const Reservation &r, const Line<SIZE> &line) {
                 return true;
             }
         };

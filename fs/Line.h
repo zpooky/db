@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <utility>
 #include "../shared/Buffer.h"
+#include "../shared/Assertions.h"
 #include <iostream>
 
 namespace db {
@@ -55,6 +56,7 @@ namespace db {
 
         template<typename T_Table>
         auto to_line(T_Table &&table) -> Line<sizeof(T_Table)> {
+            db::assert_is_table<T_Table>();
 //            using std::move;
 //            Line<512> line{move(table)};
             std::cout << "sizeof:" << sizeof(T_Table) << "\n";

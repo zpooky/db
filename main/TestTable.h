@@ -15,6 +15,10 @@ struct TestTable : public db::Table {
 
     }
 
+    constexpr static const char* table_name() {
+        return "test_table";
+    }
+
 //    size_t size() const noexcept {
 //        return sizeof(TestTable);
 //    }
