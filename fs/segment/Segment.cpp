@@ -15,11 +15,10 @@ namespace db {
                 using std::ofstream;
                 using std::ios;
                 using capacity = unsigned long long;
-//                ofstream stream(m_file.name.c_str(), ios::out | ios::binary);
                 FileWriter stream(m_file);
                 //
                 capacity target = line_size * number_of;
-                std::array<char, db::vfs::default_sector_size> buf{0};
+                std::array<char, db::vfs::page::default_size> buf{0};
                 do {
                     size_t counter = std::min<size_t>(buf.size(), target);
                     target = target - counter;

@@ -6,6 +6,7 @@
 #define DB_JOURNAL_H
 
 #include "../shared/fs.h"
+#include "../shared/Assertions.h"
 
 namespace db {
     namespace journal {
@@ -21,17 +22,15 @@ namespace db {
             }
         };
 
+        template<typename t_Table>
         class Journal {
         private:
-            const db::Table& m_table;
-
-            Journal(const Table &t) : m_table(t) {
-
-            }
+            Journal(const Journal<t_Table> &o) = delete;
 
         public:
-            static Journal instance(const Table &t) {
-                return {t};
+
+            Journal() {
+                assert_is_table<t_Table>();
             }
 
             journal_id begin();
@@ -40,6 +39,33 @@ namespace db {
 
             void commit(journal_id);
         };
+
+        template<typename t_Table>
+        Journal<t_Table> &instance();
+
+        template<typename t_Table>
+        Journal<t_Table> &instance() {
+            static Journal<t_Table> inst{};
+            return inst;
+        }
+
+
+        template<typename t_Table>
+        journal_id Journal<t_Table>::begin() {
+            return 1l;
+        }
+
+
+        template<typename t_Table>
+        void Journal<t_Table>::done(journal_id id, const db::Reservation &reservation) {
+
+        }
+
+
+        template<typename t_Table>
+        void Journal<t_Table>::commit(journal_id id) {
+
+        }
     }
 }
 

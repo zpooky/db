@@ -18,8 +18,29 @@
 
 namespace db {
     namespace vfs {
-        static const size_t default_sector_size = 512;
-        size_t sector_size(const char *s);
+        /**
+         * the harddrive sector size is the minimum amount of data the hdd can read/write in a single go.
+         */
+        namespace sector {
+            /**
+             * bytes
+             */
+            static const size_t default_size = 512;
+
+            size_t size(const char *s);
+        }
+        /**
+         * the page size is the minimum unit of data the OS kernel can read/write
+         */
+        namespace page {
+            /**
+             * bytes
+             */
+            static const size_t default_size = 4 * 1024;
+
+            size_t size();
+        }
+
         //
         void mkdir(const Directory &d);
     }

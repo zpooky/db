@@ -66,6 +66,10 @@ namespace db {
                 return static_cast< void *>(m_data.data());
             }
 
+            const void *data() const {
+                return static_cast< void *>(m_data.data());
+            }
+
             constexpr size_t capacity() const {
                 return t_capacity;
             }

@@ -15,12 +15,12 @@
 
 namespace db {
     namespace fs {
-        template<size_t BYTES>
+        template<size_t T_bytes, typename T_hash_type = std::array<unsigned char, 4>>//TODO make hash_type more dynamic
         struct Line {
             db::rid id;
-            db::crc32 checksum;
+            T_hash_type checksum;
             db::State state;
-            db::raw<BYTES> data;
+            db::raw<T_bytes> data;
 
             Line(Table &&table) {
                 id = 1;
@@ -28,11 +28,26 @@ namespace db {
             }
 
             static constexpr size_t bytes() {
-                return BYTES;
+                return T_bytes;
+            }
+
+            static constexpr size_t multipleOf(size_t size, size_t multiple) {
+                return size < multiple ? multiple : multipleOf(size, multiple * 2);
+            }
+
+            static constexpr size_t multipleOf(size_t size) {
+                return multipleOf(size, 8);
             }
 
             static constexpr size_t size() {
-                return sizeof(db::rid) + sizeof(db::crc32) + sizeof(db::State) + sizeof(db::raw<BYTES>);
+                return multipleOf(sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::State) + sizeof(db::raw<T_bytes>));
+            }
+        };
+
+        template<typename T_Table>
+        struct Line_size {
+            static constexpr size_t value() {
+                return Line<sizeof(T_Table)>::size();
             }
         };
 

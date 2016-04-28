@@ -36,7 +36,7 @@ namespace db {
     };
 
     struct Directory {
-        const string path;
+        string path;
 
         explicit Directory(string &&p_path) : path{p_path} {
 

@@ -10,33 +10,41 @@
 #include <linux/fs.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
-#include <unistd.h>/*close*/
+#include <unistd.h>/*close,..*/
 #include <stdexcept>
 
 
-size_t db::vfs::sector_size(const char *s) {
+size_t db::vfs::sector::size(const char *s) {
 
-    int fd = open("/dev/sda", O_RDONLY | O_NONBLOCK);
+    int fd = ::open("/dev/sda", O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
-        return default_sector_size;
+        return default_size;
     }
 //        printf("fd: %d\n", fd);
 
     int size = 0;
-    if (ioctl(fd, BLKGETSIZE, &size) != 0) {
+    if (::ioctl(fd, BLKGETSIZE, &size) != 0) {
 //            size = 0;
     }
 
     int logicalsectsize = 0;
-    int retval = ioctl(fd, BLKSSZGET, &logicalsectsize);
+    int retval = ::ioctl(fd, BLKSSZGET, &logicalsectsize);
+    ::close(fd);
     if (retval < 0) {
 //            printf("Can't get logical sector size. Return code: %d\n", retval);
 //            logicalsectsize = 0;
-        return default_sector_size;
+        return default_size;
     }
-    close(fd);
 //        printf("%d %d\n", size, logicalsectsize);
     return logicalsectsize;
+}
+
+size_t db::vfs::page::size() {
+    int result = ::getpagesize();
+    if (result < 0) {
+        return default_size;
+    }
+    return result;
 }
 
 

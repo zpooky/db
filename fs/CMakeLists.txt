@@ -15,7 +15,7 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Line.cpp FileWriter.cpp segment/Reservation.cpp segment/Reservation.h segment/Segment.cpp segment/Segment.h segment/SegmentComposite.cpp segment/SegmentComposite.h)
+    set(SOURCE_FILES Line.cpp FileWriter.cpp segment/SegmentReservations.cpp segment/SegmentReservations.h segment/Segment.cpp segment/Segment.h segment/SegmentComposite.cpp segment/SegmentComposite.h segment/Reservations.cpp segment/Reservations.h segment/Segments.cpp segment/Segments.h segment/SegmentJournal.cpp segment/SegmentJournal.h LineWriter.cpp LineWriter.h)
 
     add_library(fs_lib STATIC ${SOURCE_FILES})
     set_target_properties(fs_lib PROPERTIES LINKER_LANGUAGE CXX)

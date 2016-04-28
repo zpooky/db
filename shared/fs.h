@@ -23,7 +23,7 @@ namespace db {
     };
 //Raw
     using rid = unsigned long;
-    using crc32 = std::array<unsigned char, 4>;
+//    using crc32 = std::array<unsigned char, 4>;
     template<size_t size>
     using raw = std::array<unsigned char, size>;
     enum class State : unsigned char {

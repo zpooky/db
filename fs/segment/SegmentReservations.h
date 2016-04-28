@@ -26,11 +26,11 @@ namespace db {
          * |======|----------|
          */
         template<typename t_Table>
-        class Reservations {
+        class SegmentReservations {
         private:
             const Segment<t_Table> m_segment;
         public:
-            Reservations(const Segment<t_Table> &s) : m_segment{s} {
+            SegmentReservations(const Segment<t_Table> &s) : m_segment{s} {
                 db::assert_is_table<t_Table>();
             }
 
@@ -42,7 +42,7 @@ namespace db {
         };
 
         template<typename t_Table>
-        Reservation Reservations<t_Table>::reserve() {
+        Reservation SegmentReservations<t_Table>::reserve() {
             return {1l};
         }
     }
