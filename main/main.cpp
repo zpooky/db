@@ -32,7 +32,7 @@ int main(int argc, char *args[]) {
         auto reserv = reservations.reserve();
         auto line = to_line(move(table));
 //        segment.write(reserv, line);
-        journal.done(jid, reserv);
+        journal.prepare(jid, reserv);
         journal.commit(jid);
     }
     return 0;

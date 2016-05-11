@@ -76,6 +76,7 @@ namespace db {
         class Segment {
         private:
             SegmentFile m_file;
+            PresentSet m_lines;
             //State
         public:
             Segment(const SegmentFile &file) : m_file{file} {

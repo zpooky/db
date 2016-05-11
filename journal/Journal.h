@@ -35,7 +35,7 @@ namespace db {
 
             journal_id begin();
 
-            void done(journal_id, const db::Reservation &);
+            void prepare(journal_id, const db::Reservation &);
 
             void commit(journal_id);
         };
@@ -57,7 +57,7 @@ namespace db {
 
 
         template<typename t_Table>
-        void Journal<t_Table>::done(journal_id id, const db::Reservation &reservation) {
+        void Journal<t_Table>::prepare(journal_id id, const db::Reservation &reservation) {
 
         }
 

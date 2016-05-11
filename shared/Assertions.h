@@ -6,6 +6,7 @@
 #define PROJECT_ASSERTIONS_H
 
 #include "fs.h"
+#include "../config/Configuration.h"
 #include <type_traits>
 
 namespace db {
@@ -18,6 +19,7 @@ namespace db {
 template<typename T>
 void db::assert_is_table() {
     static_assert(std::is_base_of<db::Table, T>::value, "template is required to be of db::Table");
+    static_assert(std::is_same<decltype(T::table_name()), db::table::name::type>::value, "table should implement 'static constexpr table_name()'");
 }
 
 #endif //PROJECT_ASSERTIONS_H

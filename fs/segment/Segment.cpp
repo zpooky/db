@@ -12,8 +12,6 @@ namespace db {
     namespace fs {
         namespace impl {
             SegmentFile SegmentFileInit::create(size_t line_size, size_t number_of) const {
-                using std::ofstream;
-                using std::ios;
                 using capacity = unsigned long long;
                 FileWriter stream(m_file);
                 //

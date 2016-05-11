@@ -69,15 +69,25 @@ namespace hash {
     class crc {
     private:
     public:
-        using result_type =array<uint8_t, T_bytes>;
+        using type =array<uint8_t, T_bytes>;
+
 
         template<size_t t_size>
-        result_type digest(const array<uint8_t, t_size> &buff) {
+        type digest(const array<uint8_t, t_size> &buff) {
 //            const uint8_t *c = "123456789";
 //            gen_crc16(c, strlen(c));
 
-            result_type res{0};
+            type res{0};
 
+            return res;
+        }
+
+        void update() {
+
+        }
+
+        type digest() {
+            type res{0};
             return res;
         }
 

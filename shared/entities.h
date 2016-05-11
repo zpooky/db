@@ -24,10 +24,10 @@ namespace db {
         }
     };
 
-    struct Directoryname {
+    struct DirectoryName {
         const string name;
 
-        explicit Directoryname(string &&p_name) : name{p_name} {
+        explicit DirectoryName(string &&p_name) : name{p_name} {
         }
 
         operator string() const {
@@ -42,8 +42,19 @@ namespace db {
 
         }
 
-        Directory cd(string &&d) const;
+        template<typename Col>
+        Directory cd(Col &&d) const;
     };
+
+    template<typename Col>
+    Directory Directory::cd(Col &&d) const {
+        string copy = path;
+        if (copy.at(copy.length() - 1) == '/') {
+            copy.append("/");
+        }
+        copy.append({d.begin(), d.end()});
+        return Directory{std::move(copy)};
+    }
 
     struct File {
         const string path;
