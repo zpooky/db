@@ -11,11 +11,12 @@
 namespace db {
     namespace fs {
         namespace impl {
-            SegmentFile SegmentFileInit::create(size_t line_size, size_t number_of) const {
+            SegmentFile SegmentFileInit::create(const Filename &filename) const {
                 using capacity = unsigned long long;
-                FileWriter stream(m_file);
+                auto file = m_root.cd(filename);
+                FileWriter stream(file);
                 //
-                capacity target = line_size * number_of;
+                capacity target = m_line_size * m_lines;
                 std::array<char, db::vfs::page::default_size> buf{0};
                 do {
                     size_t counter = std::min<size_t>(buf.size(), target);

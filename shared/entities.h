@@ -12,6 +12,17 @@ namespace db {
 
     using std::string;
 
+    struct File {
+        const string path;
+
+        explicit File(string &&p_path) : path{p_path} {
+        }
+
+        operator string() const {
+            return path;
+        }
+    };
+
     struct Filename {
         const string name;
 
@@ -44,6 +55,8 @@ namespace db {
 
         template<typename Col>
         Directory cd(Col &&d) const;
+
+        File cd(const Filename &filename) const;
     };
 
     template<typename Col>
@@ -56,16 +69,6 @@ namespace db {
         return Directory{std::move(copy)};
     }
 
-    struct File {
-        const string path;
-
-        explicit File(string &&p_path) : path{p_path} {
-        }
-
-        operator string() const {
-            return path;
-        }
-    };
 
 
 };

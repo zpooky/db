@@ -13,9 +13,9 @@ namespace db {
             constexpr size_t length = 64;
             using type = std::array<char, length>;
         }
-        namespace segment {
-            using index_type = unsigned int;
-        }
+    }
+    namespace segment {
+        using index_type = unsigned int;
     }
 }
 

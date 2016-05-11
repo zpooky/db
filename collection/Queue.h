@@ -11,7 +11,7 @@ namespace sp {
     class Queue {
         void add(T &&);
 
-        T get();
+        T pop();
     };
 
     template<typename T>
@@ -19,7 +19,7 @@ namespace sp {
     }
 
     template<typename T>
-    T Queue<T>::get() {
+    T Queue<T>::pop() {
         return {};
     }
 

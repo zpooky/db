@@ -24,7 +24,7 @@ namespace db {
             };
 
             using name_type = db::table::name::type;
-            using index_type = db::table::segment::index_type;
+            using index_type = db::segment::index_type;
 
             template<typename hash_algh>
             struct SegmentLine {
@@ -95,16 +95,22 @@ namespace db {
 
         private:
             using name_type = db::table::name::type;
-            using index_type = db::table::segment::index_type;
+            using index_type = db::segment::index_type;
 
             SegmentLine<hash_algh> line(journal_id id, SJState state) const {
-                return SegmentLine<hash_algh>::make(id, state);
+                name_type name{0};
+                index_type idx = 0;
+                return SegmentLine<hash_algh>::make(id, name, idx, state);
+            }
+
+            SegmentLine<hash_algh> line(journal_id id, const name_type &name, index_type idx) const {
+                return SegmentLine<hash_algh>::make(id, name, idx, SJState::START);
             }
 
         public:
             journal_id start(const name_type &name, index_type idx) {
                 auto id = ++m_id;
-                m_consumer.add(line(id, SJState::START));
+                m_consumer.add(line(id, name, idx));
                 return id;
             }
 

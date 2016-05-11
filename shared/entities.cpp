@@ -7,4 +7,7 @@
 
 namespace db {
 
+    File Directory::cd(const Filename &filename) const{
+        return File{"placeholder"};
+    }
 }

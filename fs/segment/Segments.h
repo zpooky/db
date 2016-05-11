@@ -9,20 +9,22 @@
 #include <atomic>
 #include "../../shared/Assertions.h"
 
-template<typename T_Table>
-class Segments {
-private:
-    using index_type = db::table::segment::index_type;
-    std::atomic<index_type> m_seg_counter;
-public:
-    Segments(index_type id = 0l) : m_seg_counter{id} {
-        db::assert_is_table<T_Table>();
+namespace db {
+    namespace fs {
+        template<typename T_Table>
+        class Segments {
+        private:
+            using index_type = db::segment::index_type;
+            std::atomic<index_type> m_seg_counter;
+        public:
+            Segments(index_type id = 0l) : m_seg_counter{id} {
+                db::assert_is_table<T_Table>();
+            }
+
+            Segments(const Segments &o) = delete;
+
+            Reservation reserve();
+        };
     }
-
-    Segments(const Segments &o) = delete;
-
-
-
-};
-
+}
 #endif //PROJECT_SEGMENTS_H
