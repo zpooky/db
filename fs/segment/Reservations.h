@@ -24,8 +24,6 @@ namespace db {
     private:
         Directory m_root;
     public:
-        Reservations() : m_root{Directory("")} {
-        }
 
         Reservations(const Directory &root) : m_root{root} {
         }
