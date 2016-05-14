@@ -10,6 +10,8 @@
 #include "../../shared/Assertions.h"
 #include "../../shared/vfs.h"
 #include "Reservations.h"
+#include "Segment.h"
+#include "../../collection/List.h"
 
 namespace db {
     namespace fs {
@@ -17,9 +19,19 @@ namespace db {
             const db::Directory root;
             const db::segment::index_type start;
 
-            Context(const Directory &p_root, db::segment::index_type p_start) : root(p_root), start{p_start} { }
+            Context(const Directory &p_root, db::segment::index_type p_start) : root(p_root),
+                                                                                start{p_start} { }
         };
 
+        class ColSegments {
+        private:
+            const Directory m_root;
+//            sp::List<Segment> m_vec;
+        public:
+            ColSegments(const Directory &p_root) : m_root{p_root.cd("segment")} {
+                db::vfs::mkdir(m_root);
+            }
+        };
 
         template<typename T_Table>
         class Segments {
@@ -29,10 +41,11 @@ namespace db {
             std::atomic<index_type> m_seg_counter;
             Reservations<T_Table> m_res;
         public:
-            Segments(const Context &ctx) : m_root{ctx.root}, m_seg_counter{ctx.start}, m_res{ctx.root} {
+            Segments(const Context &ctx) : m_root{ctx.root.cd(T_Table::table_name())},
+                                           m_seg_counter{ctx.start},
+                                           m_res{m_root} {
                 db::assert_is_table<T_Table>();
-                auto table_root = m_root.cd(T_Table::table_name());
-                db::vfs::mkdir(table_root);
+                db::vfs::mkdir(m_root);
             }
 
             Segments(const Segments &o) = delete;

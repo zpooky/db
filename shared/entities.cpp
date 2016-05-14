@@ -7,7 +7,10 @@
 
 namespace db {
 
+    Directory Directory::cd(const DirectoryName &dir) const{
+        return Directory{concat(path, dir.name)};
+    }
     File Directory::cd(const Filename &filename) const{
-        return File{"placeholder"};
+        return File{concat(path, filename.name)};
     }
 }

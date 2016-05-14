@@ -69,7 +69,7 @@ namespace db {
 
                 void operator()() {
                     while (true) {
-                        auto entry = m_queue.get();
+                        auto entry = m_queue.pop();
                         if (entry.id != 0l) {
                         }
                     }

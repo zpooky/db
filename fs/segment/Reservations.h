@@ -22,7 +22,7 @@ namespace db {
     template<typename t_Table>
     class Reservations {
     private:
-        Directory m_root;
+        const Directory m_root;
     public:
 
         Reservations(const Directory &root) : m_root{root} {
