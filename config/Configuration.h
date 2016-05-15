@@ -20,8 +20,15 @@ namespace db {
     }
     template<typename T_table>
     struct Segment_name {
+        Segment_name() {
+        }
+
         static Filename name(segment::index_type idx) {
-            return Filename{""};//TODO
+            char buf[table::name::length + 1 + 32];
+            auto table_name = T_table::table_name();
+            string name{table_name.begin(), table_name.end()};
+            sprintf(buf, "%s-%l", name.c_str(), idx);
+            return Filename{buf};
         }
     };
 }

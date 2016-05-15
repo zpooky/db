@@ -32,7 +32,7 @@ private:
 public:
     constexpr static name_type table_name() {
 //        return to_array("test_table");
-        return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e'};
+        return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e', 0};
     }
 
 //    size_t size() const noexcept {

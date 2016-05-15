@@ -13,7 +13,7 @@ namespace db {
         namespace internal {
             SegmentFile SegmentFileInit::create(const Filename &filename) const {
                 using capacity = unsigned long long;
-                auto file = m_root.cd(filename);
+                File file = m_root.cd(filename);
                 FileWriter stream(file);
                 //
                 capacity target = m_line_size * m_lines;

@@ -7,6 +7,7 @@
 
 #include <string>
 #include <utility>
+#include <array>
 
 namespace db {
 
@@ -18,9 +19,9 @@ namespace db {
         explicit File(string &&p_path) : path{p_path} {
         }
 
-        operator string() const {
-            return path;
-        }
+//        operator string() const {
+//            return path;
+//        }
     };
 
     struct Filename {
@@ -30,9 +31,9 @@ namespace db {
 
         }
 
-        operator string() const {
-            return name;
-        }
+//        operator string() const {
+//            return name;
+//        }
     };
 
     struct DirectoryName {
@@ -41,9 +42,9 @@ namespace db {
         explicit DirectoryName(string &&p_name) : name{p_name} {
         }
 
-        operator string() const {
-            return name;
-        }
+//        operator string() const {
+//            return name;
+//        }
     };
 
     struct Directory {
@@ -66,6 +67,7 @@ namespace db {
                 auto &bah = copy.append("/");
 //                printf(":%s:\n", bah.c_str());
             }
+
             string xcc{d.begin(), d.end()};
 
 //            printf("|%s|\n", xcc.c_str());
@@ -77,7 +79,10 @@ namespace db {
     public:
 
         template<typename Col>
-        Directory cd(Col &&d) const;
+        Directory cdx(Col &&d) const;
+
+        template<size_t t_size, typename t_type>
+        Directory cdx(std::array<t_type, t_size> &&d) const;
 
         template<size_t N>
         Directory cd(const char (&d)[N]) const;
@@ -88,13 +93,29 @@ namespace db {
     };
 
     template<typename Col>
-    Directory Directory::cd(Col &&d) const {
+    Directory Directory::cdx(Col &&d) const {
         return Directory{concat(path, d)};
+    }
+
+    template<size_t t_size, typename t_type>
+    Directory Directory::cdx(std::array<t_type, t_size> &&d) const {
+        t_type a[t_size + 1];
+        auto it = d.begin();
+        auto ait = &a[0];
+        while (*it && it != d.end()) {
+            *ait = *it;
+            ++it;
+            ++ait;
+        }
+        *ait = 0;
+
+        string str{a};
+        return Directory{concat(path, str)};
     }
 
     template<size_t N>
     Directory Directory::cd(const char (&d)[N]) const {
-        return cd(string{d, N});
+        return cdx(string{d, N});
     }
 
 };

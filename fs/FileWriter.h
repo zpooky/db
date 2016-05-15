@@ -11,9 +11,13 @@
 #include "../shared/Buffer.h"
 #include "../shared/entities.h"
 #include <stdexcept>
+#include <cstring>
+
+extern int errno;
 
 namespace db {
     namespace fs {
+
         class FileWriter {
         private:
             const File m_file;
@@ -21,9 +25,7 @@ namespace db {
         public:
             FileWriter(const File &file) : m_file{file}, m_fd{open(file.path.c_str(), O_RDWR | O_CREAT,
                                                                    S_IRUSR | S_IWUSR | S_IRGRP)} {
-                if (m_fd == -1) {
-                    throw std::runtime_error("FileWriter");
-                }
+                error("FileWriter", m_fd);
             }
 
             ~FileWriter() {
@@ -50,9 +52,7 @@ namespace db {
                 size_t remaining = buf.capacity();
                 while (remaining > 0) {
                     ssize_t ret = ::pwrite(m_fd, buf.data(), remaining, position);
-                    if (ret < 0) {
-                        throw std::runtime_error("pwrite");
-                    }
+                    error("write", ret);
                     position = position + ret;
                     remaining = remaining - ret;
                 }
@@ -61,7 +61,8 @@ namespace db {
 
             template<size_t t_size>
             void init_write(const std::array<char, t_size> &buffer, size_t cnt) {
-                ::write(m_fd, buffer.begin(), cnt);
+                int ret = ::write(m_fd, buffer.begin(), cnt);
+                error("init_write", ret);
             }
 
             /*
@@ -73,10 +74,8 @@ namespace db {
              *     It also flushes metadata information associated with the file.
              */
             void flush_fd() {
-                auto err = ::fsync(m_fd);
-                if (err != 0) {
-                    throw std::runtime_error("flush");
-                }
+                auto ret = ::fsync(m_fd);
+                error("flush_fd", ret);
             }
 
             /**
@@ -94,8 +93,11 @@ namespace db {
                 int flags = SYNC_FILE_RANGE_WAIT_BEFORE | SYNC_FILE_RANGE_WRITE | SYNC_FILE_RANGE_WAIT_AFTER;
                 //there is a ARM version of this function called sync_file_range2
                 int ret = ::sync_file_range(m_fd, offset, nbytes, flags);
+                error("flush", ret);
             }
 
+        private:
+            void error(const char *fun, int ret) const;
         };
 
     }

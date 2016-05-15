@@ -38,7 +38,7 @@ namespace db {
             ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
                                                                        m_root{p_root.cd("segment")},
                                                                        m_journal(
-                                                                               File("/tmp/test_table/segment/j"),//m_root.cd(Filename("segment.journal")),
+                                                                               m_root.cd(Filename("segment.journal")),
                                                                                m_journal_thread, 0l) {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);
@@ -75,7 +75,7 @@ namespace db {
                     return this->make();
                 };
 
-                return m_vector.find(p, makex);
+                return m_vector.find(p, f);
             }
         };
 
@@ -85,7 +85,7 @@ namespace db {
             const db::Directory m_root;
             ColSegments<T_Table> m_segments;
         public:
-            Segments(const Context &ctx) : m_root{ctx.root.cd(T_Table::table_name())},
+            Segments(const Context &ctx) : m_root{ctx.root.cdx(T_Table::table_name())},
                                            m_segments{ctx.start, m_root} {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);
