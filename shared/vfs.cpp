@@ -50,8 +50,10 @@ size_t db::vfs::page::size() {
 
 void db::vfs::mkdir(const Directory &d) {
     const auto path = d.path.c_str();
+    printf("mkdir(%s) ", path);
     int status = ::mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (status != 0) {
-        printf("mkdir(%s) ret code: %d", path, status);
+        printf("ret code: %d", status);
     }
+    printf("\n");
 }

@@ -2,8 +2,8 @@
 // Created by spooky on 2016-05-10.
 //
 
-#ifndef SP_QUEUE_H
-#define SP_QUEUE_H
+#ifndef _SP_QUEUE_H
+#define _SP_QUEUE_H
 
 namespace sp {
 
@@ -24,4 +24,4 @@ namespace sp {
     }
 
 }
-#endif //PROJECT_LIST_H
+#endif

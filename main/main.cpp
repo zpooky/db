@@ -18,9 +18,18 @@ int main(int argc, char *args[]) {
 
     Context ctx{db::Directory("/tmp"), 0l};
     Segments<TestTable> segments{ctx};
-    auto res1 = segments.reserve();
+    auto &journal = db::journal::instance<TestTable>();
 
+    {
+        TestTable table;
 
+        auto jid = journal.begin();
+        auto reserv = segments.reserve();
+        auto line = to_line(move(table));
+//        segment.write(reserv, line);
+        journal.prepare(jid, reserv);
+        journal.commit(jid);
+    }
 
 
 

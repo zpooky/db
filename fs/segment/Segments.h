@@ -9,7 +9,6 @@
 #include <atomic>
 #include "../../shared/Assertions.h"
 #include "../../shared/vfs.h"
-#include "Reservations.h"
 #include "Segment.h"
 #include "../../collection/List.h"
 
@@ -23,27 +22,31 @@ namespace db {
                                                                                 start{p_start} { }
         };
 
+        template<typename T_Table>
         class ColSegments {
         private:
+            using index_type = db::segment::index_type;
+            std::atomic<index_type> m_seg_counter;
             const Directory m_root;
-//            sp::List<Segment> m_vec;
+            sp::List<Segment<T_Table>> m_vector;
         public:
-            ColSegments(const Directory &p_root) : m_root{p_root.cd("segment")} {
+            ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
+                                                                       m_root{p_root.cd("segment")} {
                 db::vfs::mkdir(m_root);
+            }
+            Reservation reserve(){
+                return {0};
             }
         };
 
         template<typename T_Table>
         class Segments {
         private:
-            using index_type = db::segment::index_type;
             const db::Directory m_root;
-            std::atomic<index_type> m_seg_counter;
-            Reservations<T_Table> m_res;
+            ColSegments<T_Table> m_segments;
         public:
             Segments(const Context &ctx) : m_root{ctx.root.cd(T_Table::table_name())},
-                                           m_seg_counter{ctx.start},
-                                           m_res{m_root} {
+                                           m_segments{ctx.start, m_root} {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);
             }
@@ -58,7 +61,7 @@ namespace db {
 
         template<typename T_table>
         Reservation Segments<T_table>::reserve() {
-            return m_res.reserve();
+            return m_segments.reserve();
         }
     }
 }

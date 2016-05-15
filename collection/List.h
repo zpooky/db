@@ -2,8 +2,8 @@
 // Created by spooky on 2016-05-12.
 //
 
-#ifndef SP_LIST_H
-#define SP_LIST_H
+#ifndef _SP_LIST_H
+#define _SP_LIST_H
 
 namespace sp {
     template <typename T>
@@ -12,4 +12,4 @@ namespace sp {
     };
 }
 
-#endif //PROJECT_LIST_H
+#endif

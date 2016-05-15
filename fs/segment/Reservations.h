@@ -7,44 +7,39 @@
 
 #include "../../shared/entities.h"
 #include "../../shared/fs.h"
+#include "Segment.h"
 #include <utility>
 #include <bitset>
 
 namespace db {
+    namespace fs {
+        template<size_t t_Size>
+        class ReservationSet {
+        private:
+            std::bitset<t_Size> m_b;
+        public:
+        };
 
-    template <size_t t_Size>
-    class ReservationSet {
-    private:
-        std::bitset<t_Size> m_b;
-    public:
-    };
+        template<typename t_Table>
+        class Reservations {
+        private:
+            const Segment<t_Table> m_res;
+        public:
 
-    template<typename t_Table>
-    class Reservations {
-    private:
-        const Directory m_root;
-    public:
-
-        Reservations(const Directory &root) : m_root{root} {
-        }
-
-        Reservations(const Reservations &o) = delete;
-
-        Reservations &operator=(Reservations<t_Table> &&other) {
-            if (this != &other) {
-                std::swap(m_root, other.m_root);
+            Reservations(const Segment<t_Table> &seg) : m_res{seg} {
             }
-            return *this;
+
+            Reservations(const Reservations &o) = delete;
+
+            Reservation reserve();
+        };
+
+        template<typename t_Table>
+        Reservation Reservations<t_Table>::reserve() {
+            return {1l};
         }
 
-        Reservation reserve();
-    };
-
-    template<typename t_Table>
-    Reservation Reservations<t_Table>::reserve() {
-        return {1l};
     }
-
 }
 
 #endif //PROJECT_RESERVATIONS_H

@@ -61,10 +61,16 @@ namespace db {
         template<typename Col>
         string concat(const string &p_path, const Col &d) const {
             string copy = p_path;
+//            printf("'%s'\n", copy.c_str());
             if (copy.at(copy.length() - 1) != '/') {
-                copy.append("/");
+                auto &bah = copy.append("/");
+//                printf(":%s:\n", bah.c_str());
             }
-            copy.append({d.begin(), d.end()});
+            string xcc{d.begin(), d.end()};
+
+//            printf("|%s|\n", xcc.c_str());
+            copy.append(xcc.c_str());
+//            printf("_%s_\n", copy.c_str());
             return copy;
         }
 
@@ -88,8 +94,7 @@ namespace db {
 
     template<size_t N>
     Directory Directory::cd(const char (&d)[N]) const {
-        string s{d, N};
-        return cd(s);
+        return cd(string{d, N});
     }
 
 };
