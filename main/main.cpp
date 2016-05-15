@@ -5,7 +5,7 @@
 #include "../fs/segment/SegmentReservations.h"
 #include "TestTable.h"
 #include "../shared/vfs.h"
-#include "TableFacade.h"
+#include "../fs/segment/Segments.h"
 
 
 using namespace db::journal;

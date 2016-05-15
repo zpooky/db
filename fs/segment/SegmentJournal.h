@@ -33,22 +33,11 @@ namespace db {
                 const name_type table;
                 const index_type idx;
                 const State state;
-            private:
-                SegmentLine(typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table,
-                            index_type p_index, State p_state)
+            public:
+                SegmentLine(typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table, index_type p_index, State p_state)
                         : hash{p_hash}, id{p_id}, table{p_table}, idx{p_index}, state{p_state} {
                 }
 
-            public:
-                template<typename t_hash_algh>
-                static auto make(journal_id p_id, const name_type &p_table, index_type p_index, State p_state) {
-                    t_hash_algh h;
-                    h.update(p_id);
-                    h.update(p_table);
-                    h.update(p_index);
-                    h.update(p_state);
-                    return SegmentLine {h.digest(), p_id, p_table, p_index, p_state};
-                }
             };
 
             template<typename T>
@@ -76,6 +65,18 @@ namespace db {
                 }
             };
         }
+
+        template<typename hash_algh>
+        internal::SegmentLine<hash_algh> segment_line(journal_id p_id, const db::table::name::type &p_table, db::segment::index_type p_index, internal::State p_state) {
+            hash_algh h;
+            h.update(p_id);
+            h.update(p_table);
+            h.update(p_index);
+//                h.update(p_state);//TODO support
+            return {h.digest(), p_id, p_table, p_index, p_state};
+        }
+
+
         using internal::SegmentJournalThread;
         using internal::SegmentLine;
         template<typename hash_algh>
@@ -84,7 +85,7 @@ namespace db {
         template<typename t_Table, typename hash_algh = hash::crc32>
         class SegmentJournal {
         private:
-            using SJState = internal::State;
+            using State = internal::State;
             const File &m_journal;
             SLConsumer<hash_algh> &m_consumer;
             atomic<journal_id> m_id;
@@ -97,14 +98,14 @@ namespace db {
             using name_type = db::table::name::type;
             using index_type = db::segment::index_type;
 
-            SegmentLine<hash_algh> line(journal_id id, SJState state) const {
+            SegmentLine<hash_algh> line(journal_id id, State state) const {
                 name_type name{0};
                 index_type idx = 0;
-                return SegmentLine<hash_algh>::make(id, name, idx, state);
+                return segment_line<hash_algh>(id, name, idx, state);
             }
 
             SegmentLine<hash_algh> line(journal_id id, const name_type &name, index_type idx) const {
-                return SegmentLine<hash_algh>::make(id, name, idx, SJState::START);
+                return segment_line<hash_algh>(id, name, idx, db::fs::internal::State::START);
             }
 
         public:
@@ -115,11 +116,11 @@ namespace db {
             }
 
             void prepare(journal_id id) {
-                m_consumer.add(line(id, SJState::PREPARED));
+                m_consumer.add(line(id, State::PREPARED));
             }
 
             void commit(journal_id id) {
-                m_consumer.add(line(id, SJState::COMMIT));
+                m_consumer.add(line(id, State::COMMIT));
             }
 
         };

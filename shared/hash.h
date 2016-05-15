@@ -82,8 +82,14 @@ namespace hash {
             return res;
         }
 
-        void update() {
+        void update(unsigned int) {
+        }
 
+        void update(unsigned long) {
+        }
+
+        template <size_t length>
+        void update(std::array<char, length>){
         }
 
         type digest() {

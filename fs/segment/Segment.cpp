@@ -10,7 +10,7 @@
 
 namespace db {
     namespace fs {
-        namespace impl {
+        namespace internal {
             SegmentFile SegmentFileInit::create(const Filename &filename) const {
                 using capacity = unsigned long long;
                 auto file = m_root.cd(filename);

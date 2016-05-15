@@ -9,6 +9,7 @@ namespace sp {
 
     template<typename T>
     class Queue {
+    public:
         void add(T &&);
 
         T pop();

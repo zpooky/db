@@ -64,7 +64,7 @@ namespace db {
             }
         };
 
-        namespace impl {
+        namespace internal {
             class SegmentFileInit {
             private:
                 const Directory m_root;
@@ -98,7 +98,8 @@ namespace db {
             template<typename T_Table>
             Segment<T_Table> SegmentFileInitJournal<T_Table>::create(db::segment::index_type idx) {
                 auto id = m_journal.start(T_Table::table_name(), idx);
-                SegmentFile result = m_init.create(db::Segment_name<T_Table>::name(idx));
+                auto seg_fname = db::Segment_name<T_Table>::name(idx);
+                SegmentFile result = m_init.create(seg_fname);
                 m_journal.prepare(id);
                 m_journal.commit(id);
                 return {result};

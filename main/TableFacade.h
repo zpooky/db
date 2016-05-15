@@ -5,11 +5,11 @@
 #ifndef PROJECT_TABLEFACADE_H
 #define PROJECT_TABLEFACADE_H
 
-#include "../shared/Assertions.h"
-#include "../shared/fs.h"
-#include "../fs/segment/Reservations.h"
-#include "../fs/segment/Segments.h"
-#include "../shared/vfs.h"
+//#include "../shared/Assertions.h"
+//#include "../shared/fs.h"
+//#include "../fs/segment/Reservations.h"
+//#include "../fs/segment/Segments.h"
+//#include "../shared/vfs.h"
 
 
 namespace db {

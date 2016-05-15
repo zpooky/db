@@ -20,7 +20,7 @@ namespace db {
         public:
             db::rid id;
             T_hash_type checksum;
-            db::State state;
+            db::RState state;
             db::raw<T_bytes> data;
 
             Line(Table &&table) {
@@ -42,7 +42,7 @@ namespace db {
         public:
 
             static constexpr size_t size() {
-                return multipleOf(sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::State) + sizeof(db::raw<T_bytes>));
+                return multipleOf(sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::RState) + sizeof(db::raw<T_bytes>));
             }
         };
 

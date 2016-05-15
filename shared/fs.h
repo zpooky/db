@@ -26,7 +26,7 @@ namespace db {
 //    using crc32 = std::array<unsigned char, 4>;
     template<size_t size>
     using raw = std::array<unsigned char, size>;
-    enum class State : unsigned char {
+    enum class RState : unsigned char {
         RESERVED = 0, PREPARED, ROLLEDBACK, COMMITED
     };
 //Journal

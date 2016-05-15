@@ -8,7 +8,10 @@
 namespace sp {
     template <typename T>
     class List {
-
+    public:
+        template <typename Predicate, typename Supplier>
+        T& find(Predicate p, Supplier s) {
+        }
     };
 }
 

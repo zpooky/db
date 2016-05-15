@@ -29,7 +29,7 @@ namespace db {
             Reservations(const Segment<t_Table> &seg) : m_res{seg} {
             }
 
-            Reservations(const Reservations &o) = delete;
+//            Reservations(const Reservations &o) = delete;
 
             Reservation reserve();
         };

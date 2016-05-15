@@ -16,12 +16,12 @@ namespace db {
         }
     }
     namespace segment {
-        using index_type = unsigned int;
+        using index_type = unsigned long;
     }
-    template <typename T_table>
+    template<typename T_table>
     struct Segment_name {
-        static Filename name(segment::index_type idx){
-            return Filename{""};
+        static Filename name(segment::index_type idx) {
+            return Filename{""};//TODO
         }
     };
 }
