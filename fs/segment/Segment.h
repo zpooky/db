@@ -54,7 +54,7 @@ namespace db {
             PresentSet m_lines;
             //State
         public:
-            Segment(const SegmentFile &file) : m_file{file} {
+            Segment(SegmentFile &&file) : m_file{std::move(file)} {
                 db::assert_is_table<t_Table>();
             }
 
@@ -99,7 +99,7 @@ namespace db {
             Segment<T_Table> SegmentFileInitJournal<T_Table>::create(db::segment::index_type idx) {
                 auto id = m_journal.start(T_Table::table_name(), idx);
                 auto seg_fname = db::Segment_name<T_Table>::name(idx);
-                SegmentFile result = m_init.create(seg_fname);
+                Segment<T_Table> result{m_init.create(seg_fname)};
                 m_journal.prepare(id);
                 m_journal.commit(id);
                 return {result};

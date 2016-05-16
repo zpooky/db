@@ -27,7 +27,7 @@ namespace db {
             char buf[table::name::length + 1 + 32];
             auto table_name = T_table::table_name();
             string name{table_name.begin(), table_name.end()};
-            sprintf(buf, "%s-%l", name.c_str(), idx);
+            sprintf(buf, "%s-%ld", name.c_str(), idx);
             return Filename{buf};
         }
     };

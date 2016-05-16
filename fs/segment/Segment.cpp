@@ -24,6 +24,7 @@ namespace db {
                     stream.init_write(buf, counter);
                 } while (target > 0);
                 stream.flush();
+                return {file, m_lines, m_lines};
             }
         }
 

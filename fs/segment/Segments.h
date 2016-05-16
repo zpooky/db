@@ -59,11 +59,11 @@ namespace db {
                 return {segment};
             }
 
-            static Reservations<T_Table> makex() {
-                SegmentFile sf{File(""), 1l, 1l};
-                Segment<T_Table> segment{sf};
-                return {segment};
-            }
+//            static Reservations<T_Table> makex() {
+//                SegmentFile sf{File(""), 1l, 1l};
+//                Segment<T_Table> segment{sf};
+//                return {segment};
+//            }
 
             Reservations<T_Table> &free() {
 //                std::function<bool()>
