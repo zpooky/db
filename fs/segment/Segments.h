@@ -55,15 +55,12 @@ namespace db {
                 const auto line_size = Line_size<T_Table>::value();
                 SegmentFileInit init{m_root, line_size, 1024l}; // TODO
                 SegmentFileInitJournal<T_Table> sfj{init, m_journal};
-                auto segment = sfj.create(m_seg_counter++);
-                return {segment};
+                return sfj.create(m_seg_counter++);
             }
 
-//            static Reservations<T_Table> makex() {
-//                SegmentFile sf{File(""), 1l, 1l};
-//                Segment<T_Table> segment{sf};
-//                return {segment};
-//            }
+            static Reservations<T_Table> makex() {
+                return {SegmentFile{File(""), 1l, 1l}};
+            }
 
             Reservations<T_Table> &free() {
 //                std::function<bool()>
@@ -91,7 +88,7 @@ namespace db {
                 db::vfs::mkdir(m_root);
             }
 
-            Segments(const Segments &o) = delete;
+            Segments(const Segments<T_Table> &o) = delete;
 
             Reservation reserve();
 

@@ -23,10 +23,13 @@ namespace db {
         template<typename t_Table>
         class Reservations {
         private:
-            const Segment<t_Table> m_res;
+            Segment<t_Table> m_segment;
         public:
 
-            Reservations(const Segment<t_Table> &seg) : m_res{seg} {
+            Reservations(Reservations<t_Table> &&o) : m_segment{std::move(o.m_segment)} {
+            }
+
+            Reservations(Segment<t_Table> &&seg) : m_segment{std::move(seg)} {
             }
 
 //            Reservations(const Reservations &o) = delete;

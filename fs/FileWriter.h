@@ -20,12 +20,19 @@ namespace db {
 
         class FileWriter {
         private:
-            const File m_file;
-            const int m_fd;
+            File m_file;
+            int m_fd;
         public:
-            FileWriter(const File &file) : m_file{file}, m_fd{open(file.path.c_str(), O_RDWR | O_CREAT,
-                                                                   S_IRUSR | S_IWUSR | S_IRGRP)} {
+            FileWriter(const File &file) : m_file{file},
+                                           m_fd{open(file.path.c_str(), O_RDWR | O_CREAT,
+                                                     S_IRUSR | S_IWUSR | S_IRGRP)} {
                 error("FileWriter", m_fd);
+            }
+
+            FileWriter(const FileWriter &) = delete;
+
+            FileWriter(FileWriter &&o) : m_file{o.m_file}, m_fd{o.m_fd} {
+                o.m_fd = -1;
             }
 
             ~FileWriter() {

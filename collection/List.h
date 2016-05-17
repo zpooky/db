@@ -16,7 +16,7 @@ namespace sp {
             T value;
             Node *next;
 
-            Node(T &&p_value) : value(p_value) {
+            Node(T &&p_value) : value(std::move(p_value)) {
 
             }
         };

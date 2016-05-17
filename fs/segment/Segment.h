@@ -36,14 +36,22 @@ namespace db {
 
         class SegmentFile {
         private:
-            const FileWriter m_file;
-            const size_t m_line_size;
-            const size_t m_number;
+            FileWriter m_file;
+            size_t m_line_size;
+            size_t m_number;
         public:
 
             SegmentFile(const File &file, size_t line_size, size_t number) : m_file{file},
                                                                              m_line_size{line_size},
                                                                              m_number{number} {
+            }
+
+            SegmentFile(const SegmentFile &) = delete;
+
+            SegmentFile(SegmentFile &&o) : m_file{std::move(o.m_file)},
+                                           m_line_size{o.m_line_size},
+                                           m_number{o.m_number} {
+
             }
         };
 
@@ -54,6 +62,10 @@ namespace db {
             PresentSet m_lines;
             //State
         public:
+            Segment(Segment<t_Table> &&o) : m_file{std::move(o.m_file)}, m_lines{std::move(o.m_lines)} {
+                db::assert_is_table<t_Table>();
+            }
+
             Segment(SegmentFile &&file) : m_file{std::move(file)} {
                 db::assert_is_table<t_Table>();
             }
@@ -102,7 +114,7 @@ namespace db {
                 Segment<T_Table> result{m_init.create(seg_fname)};
                 m_journal.prepare(id);
                 m_journal.commit(id);
-                return {result};
+                return result;
             }
         }
 
