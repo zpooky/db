@@ -75,13 +75,13 @@ namespace db {
                 }
 
                 void operator()() {
-                    while (true) {
+//                    while (true) {
                         auto entry = m_queue.pop();
                         if (entry.id != 0l) {
                         } else {
                             printf("www");
                         }
-                    }
+//                    }
                 }
             };
         }

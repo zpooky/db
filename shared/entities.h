@@ -27,7 +27,7 @@ namespace db {
     struct Filename {
         const string name;
 
-        Filename(string &&p_name) : name{p_name} {
+        explicit Filename(string &&p_name) : name{p_name} {
 
         }
 

@@ -66,7 +66,7 @@ namespace db {
                 db::assert_is_table<t_Table>();
             }
 
-            Segment(SegmentFile &&file) : m_file{std::move(file)} {
+            explicit Segment(SegmentFile &&file) : m_file{std::move(file)} {
                 db::assert_is_table<t_Table>();
             }
 
