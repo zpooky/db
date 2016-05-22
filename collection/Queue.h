@@ -10,18 +10,23 @@ namespace sp {
     template<typename T>
     class Queue {
     public:
-        void add(T &&);
+        T m_default;
+        explicit Queue(T && p_def) : m_default{std::move(p_def)} {
+
+        }
+
+        void push_front(T &&);
 
         T pop();
     };
 
     template<typename T>
-    void Queue<T>::add(T &&o) {
+    void Queue<T>::push_front(T &&o) {
     }
 
     template<typename T>
     T Queue<T>::pop() {
-        return {};
+        return m_default;
     }
 
 }

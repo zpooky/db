@@ -85,6 +85,9 @@ namespace hash {
         void update(unsigned int) {
         }
 
+        void update(unsigned short) {
+        }
+
         void update(unsigned long) {
         }
 

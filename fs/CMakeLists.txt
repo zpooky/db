@@ -7,6 +7,8 @@ if (TARGET fs_lib)
     message("fs_lib is already defined")
 
 else ()
+
+    find_package (Threads)
     # dependencies
     add_subdirectory(../shared shared_lib)
     include_directories(../shared)
@@ -28,4 +30,5 @@ else ()
     add_library(fs_lib STATIC ${SOURCE_FILES})
     set_target_properties(fs_lib PROPERTIES LINKER_LANGUAGE CXX)
     target_link_libraries(fs_lib shared_lib)
+    target_link_libraries(fs_lib Threads::Threads)
 endif ()

@@ -12,6 +12,7 @@
 #include "../../collection/Queue.h"
 #include "../../config/Configuration.h"
 #include <utility>
+#include <thread>
 
 namespace db {
     namespace fs {
@@ -20,7 +21,7 @@ namespace db {
         namespace internal {
 
             enum class State : unsigned short {
-                START, PREPARED, COMMIT
+                START, PREPARED, COMMIT, INTERNAL
             };
 
             using name_type = db::table::name::type;
@@ -34,11 +35,25 @@ namespace db {
                 const index_type idx;
                 const State state;
             public:
-                SegmentLine(typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table, index_type p_index, State p_state)
-                        : hash{p_hash}, id{p_id}, table{p_table}, idx{p_index}, state{p_state} {
+                SegmentLine(typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table,
+                            index_type p_index, State p_state)
+                        : hash{p_hash},
+                          id{p_id},
+                          table{p_table},
+                          idx{p_index},
+                          state{p_state} {
                 }
 
             };
+
+            template<typename hash_algh>
+            SegmentLine<hash_algh> empty_segment_line() {
+                typename hash_algh::type h{0};
+                name_type name{0};
+                index_type i{0};
+                State s = State::INTERNAL;
+                return {h, 0, name, i, s};
+            }
 
             template<typename T>
             struct Consumer {
@@ -51,15 +66,20 @@ namespace db {
                 using SegLine = SegmentLine<hash_algh>;
                 sp::Queue<SegLine> m_queue;
             public:
+                explicit SegmentJournalThread() : m_queue{db::fs::internal::empty_segment_line<hash_algh>()} {
+
+                }
 
                 void add(SegLine &&data) {
-                    m_queue.add(std::move(data));
+                    m_queue.push_front(std::move(data));
                 }
 
                 void operator()() {
                     while (true) {
                         auto entry = m_queue.pop();
                         if (entry.id != 0l) {
+                        } else {
+                            printf("www");
                         }
                     }
                 }
@@ -67,12 +87,13 @@ namespace db {
         }
 
         template<typename hash_algh>
-        internal::SegmentLine<hash_algh> segment_line(journal_id p_id, const db::table::name::type &p_table, db::segment::index_type p_index, internal::State p_state) {
+        internal::SegmentLine<hash_algh> segment_line(journal_id p_id, const db::table::name::type &p_table,
+                                                      db::segment::index_type p_index, internal::State p_state) {
             hash_algh h;
             h.update(p_id);
             h.update(p_table);
             h.update(p_index);
-//                h.update(p_state);//TODO support
+            h.update(static_cast<unsigned short>(p_state));
             return {h.digest(), p_id, p_table, p_index, p_state};
         }
 
@@ -88,10 +109,12 @@ namespace db {
             using State = internal::State;
             const File &m_journal;
             SLConsumer<hash_algh> &m_consumer;
-            atomic<journal_id> m_id;
+            atomic<journal_id> m_counter;
         public:
-            SegmentJournal(const File &journal, SLConsumer<hash_algh> &consumer, journal_id start = 0) :
-                    m_journal{journal}, m_consumer{consumer}, m_id{start} {
+            explicit SegmentJournal(const File &journal, SLConsumer<hash_algh> &consumer, journal_id start = 0) :
+                    m_journal{journal},
+                    m_consumer{consumer},
+                    m_counter{start} {
             }
 
         private:
@@ -110,14 +133,14 @@ namespace db {
 
         public:
             journal_id start(const name_type &name, index_type idx) {
-                auto id = ++m_id;
+                auto id = ++m_counter;
                 m_consumer.add(line(id, name, idx));
                 return id;
             }
 
-            void prepare(journal_id id) {
-                m_consumer.add(line(id, State::PREPARED));
-            }
+//            void prepare(journal_id id) {
+//                m_consumer.add(line(id, State::PREPARED));
+//            }
 
             void commit(journal_id id) {
                 m_consumer.add(line(id, State::COMMIT));

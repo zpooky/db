@@ -24,10 +24,13 @@ namespace db {
         }
 
         static Filename name(segment::index_type idx) {
-            char buf[table::name::length + 1 + 32];
-            auto table_name = T_table::table_name();
-            string name{table_name.begin(), table_name.end()};
-            sprintf(buf, "%s-%ld", name.c_str(), idx);
+            char buf[64];
+//            char buf[table::name::length + 1 + 32];
+//            auto table_name = T_table::table_name();
+//            string name{table_name.begin(), table_name.end()};
+//            sprintf(buf, "%s-%ld", name.c_str(), idx);
+
+            ::sprintf(buf, "%ld", idx);
             return Filename{buf};
         }
     };

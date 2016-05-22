@@ -20,8 +20,8 @@ namespace db {
             const db::Directory root;
             const db::segment::index_type start;
 
-            Context(const Directory &p_root, db::segment::index_type p_start) : root(p_root),
-                                                                                start{p_start} { }
+            explicit Context(const Directory &p_root, db::segment::index_type p_start) : root(p_root),
+                                                                                         start{p_start} { }
         };
 
         template<typename T_Table>
@@ -32,14 +32,18 @@ namespace db {
             const Directory m_root;
             sp::List<Reservations<T_Table>> m_vector;
 
-            SegmentJournalThread<hash::crc32> m_journal_thread;
+            SegmentJournalThread<hash::crc32> m_journal_runnable;
             SegmentJournal<T_Table, hash::crc32> m_journal;
+            std::thread m_journal_thread;
+
         public:
-            ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
-                                                                       m_root{p_root.cd("segment")},
-                                                                       m_journal(
-                                                                               m_root.cd(Filename("segment.journal")),
-                                                                               m_journal_thread, 0l) {
+            explicit ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
+                                                                                m_root{p_root.cd("segment")},
+                                                                                m_journal(
+                                                                                        m_root.cd(Filename(
+                                                                                                "segment.journal")),
+                                                                                        m_journal_runnable, 0l),
+                                                                                m_journal_thread{m_journal_runnable} {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);
             }
@@ -58,12 +62,7 @@ namespace db {
                 return sfj.create(m_seg_counter++);
             }
 
-            static Reservations<T_Table> makex() {
-                return {SegmentFile{File(""), 1l, 1l}};
-            }
-
             Reservations<T_Table> &free() {
-//                std::function<bool()>
                 auto p = [](const Reservations<T_Table> &r) -> bool {
                     return false;
                 };
