@@ -65,8 +65,10 @@ namespace db {
             private:
                 using SegLine = SegmentLine<hash_algh>;
                 sp::Queue<SegLine> m_queue;
+                std::atomic<bool> m_interrupted;
             public:
-                explicit SegmentJournalThread() : m_queue{db::fs::internal::empty_segment_line<hash_algh>()} {
+                SegmentJournalThread() : m_queue{db::fs::internal::empty_segment_line<hash_algh>()},
+                                         m_interrupted{false} {
 
                 }
 
@@ -74,14 +76,18 @@ namespace db {
                     m_queue.push_front(std::move(data));
                 }
 
+                void interrupt() {
+                    m_interrupted.store(true);
+                }
+
                 void operator()() {
-//                    while (true) {
+                    while (!m_interrupted) {
                         auto entry = m_queue.pop();
                         if (entry.id != 0l) {
                         } else {
                             printf("www");
                         }
-//                    }
+                    }
                 }
             };
         }
@@ -132,6 +138,7 @@ namespace db {
             }
 
         public:
+
             journal_id start(const name_type &name, index_type idx) {
                 auto id = ++m_counter;
                 m_consumer.add(line(id, name, idx));

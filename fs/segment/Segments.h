@@ -81,7 +81,7 @@ namespace db {
             const db::Directory m_root;
             ColSegments<T_Table> m_segments;
         public:
-            Segments(const Context &ctx) : m_root{ctx.root.cdx(T_Table::table_name())},
+            explicit Segments(const Context &ctx) : m_root{ctx.root.cdx(T_Table::table_name())},
                                            m_segments{ctx.start, m_root} {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);

@@ -51,8 +51,10 @@ namespace db {
     public:
         const string path;
 
-        explicit Directory(string &&p_path) : path{p_path} {
+//        explicit Directory(const Directory &o) : path{o.path} {
+//        }
 
+        explicit Directory(string &&p_path) : path{p_path} {
         }
 
     private:
