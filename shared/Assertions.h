@@ -12,8 +12,6 @@
 namespace db {
     template<typename T>
     void assert_is_table();
-
-
 }
 
 template<typename T>

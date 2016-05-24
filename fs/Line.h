@@ -53,11 +53,12 @@ namespace db {
             }
         };
 
-        template<typename T_Table>
-        auto to_line(T_Table &&table) -> Line<sizeof(T_Table)>;
 
         template<size_t LINE_SIZE>
         auto buffer(const Line<LINE_SIZE> &);
+
+        template<typename T_Table>
+        auto to_line(T_Table &&table) -> Line<sizeof(T_Table)>;
 
         template<size_t LINE_SIZE>
         auto buffer(const Line<LINE_SIZE> &l) {

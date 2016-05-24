@@ -88,7 +88,7 @@ namespace db {
                                                                                          m_lines{lines} {
                 }
 
-                SegmentFile create(const Filename &file) const;
+                SegmentFile create(const Filename &);
 
             };
 
@@ -103,18 +103,16 @@ namespace db {
                     db::assert_is_table<T_Table>();
                 }
 
-                Segment<T_Table> create(db::segment::index_type);
+                Segment<T_Table> create(db::segment::index_type idx) {
+                    auto id = m_journal.start(T_Table::table_name(), idx);
+                    auto seg_name = db::Segment_name<T_Table>::name(idx);
+                    Segment<T_Table> result{m_init.create(seg_name)};
+//                m_journal.prpare(id);
+                    m_journal.commit(id);
+                    return result;
+                }
             };
 
-            template<typename T_Table>
-            Segment<T_Table> SegmentFileInitJournal<T_Table>::create(db::segment::index_type idx) {
-                auto id = m_journal.start(T_Table::table_name(), idx);
-                auto seg_name = db::Segment_name<T_Table>::name(idx);
-                Segment<T_Table> result{m_init.create(seg_name)};
-//                m_journal.prepare(id);
-                m_journal.commit(id);
-                return result;
-            }
         }
 
 

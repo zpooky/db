@@ -11,7 +11,7 @@
 namespace db {
     namespace fs {
         namespace internal {
-            SegmentFile SegmentFileInit::create(const Filename &filename) const {
+            SegmentFile SegmentFileInit::create(const Filename &filename) {
                 using capacity = unsigned long long;
                 File file = m_root.cd(filename);
                 FileWriter stream(file);

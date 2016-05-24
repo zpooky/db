@@ -6,6 +6,7 @@
 #include "TestTable.h"
 #include "../shared/vfs.h"
 #include "../fs/segment/Segments.h"
+#include "../shared/TableMeta.h"
 
 
 using namespace db::journal;
@@ -17,7 +18,7 @@ int main(int argc, char *args[]) {
     cout << "page size:" << db::vfs::page::size() << endl;
 
     Context ctx{db::Directory("/tmp"), 0l};
-    Segments<TestTable> segments{ctx};
+    Segments< db::TableMeta<TestTable> > segments{ctx};
     auto &journal = db::journal::instance<TestTable>();
 
     {

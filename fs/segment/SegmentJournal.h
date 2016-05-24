@@ -126,6 +126,7 @@ namespace db {
                     m_journal{journal},
                     m_consumer{consumer},
                     m_counter{start} {
+                db::assert_is_table<t_Table>();
             }
 
         private:
@@ -139,7 +140,7 @@ namespace db {
             }
 
             SegmentLine<hash_algh> line(journal_id id, const name_type &name, index_type idx) const {
-                return segment_line<hash_algh>(id, name, idx, db::fs::internal::State::START);
+               return segment_line<hash_algh>(id, name, idx, db::fs::internal::State::START);
             }
 
         public:

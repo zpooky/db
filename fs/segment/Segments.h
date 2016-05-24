@@ -24,13 +24,14 @@ namespace db {
                                                                                          start{p_start} { }
         };
 
-        template<typename T_Table>
+        template<typename T_Meta>
         class ColSegments {
         private:
+            using T_Table = typename T_Meta::Table;
             using index_type = db::segment::index_type;
             std::atomic<index_type> m_seg_counter;
             const Directory m_root;
-            sp::List<Reservations<T_Table>> m_vector;
+            sp::List<Reservations<T_Meta>> m_vector;
 
             SegmentJournalThread<hash::crc32> m_journal_runnable;
             SegmentJournal<T_Table, hash::crc32> m_journal;
@@ -45,7 +46,7 @@ namespace db {
 //                                                                        ,
 //                                                                       m_journal_thread{m_journal_runnable}
             {
-                db::assert_is_table<T_Table>();
+//                db::assert_is_context<T_Meta>();
                 db::vfs::mkdir(m_root);
             }
 
@@ -60,9 +61,9 @@ namespace db {
 //
 //            }
 
-            ~ColSegments(){
+            ~ColSegments() {
                 m_journal_runnable.interrupt();
-                if(m_journal_thread.joinable()) {
+                if (m_journal_thread.joinable()) {
                     m_journal_thread.join();
                 }
             }
@@ -73,20 +74,20 @@ namespace db {
             }
 
         private:
-            Reservations<T_Table> make() {
+            Reservations<T_Meta> make() {
                 using namespace db::fs::internal;
                 const auto line_size = Line_size<T_Table>::value();
-                SegmentFileInit init{m_root, line_size, 1024l}; // TODO
+                SegmentFileInit init{m_root, line_size, T_Meta::lines()};
                 SegmentFileInitJournal<T_Table> sfj{init, m_journal};
-                return Reservations<T_Table>{sfj.create(m_seg_counter++)};
+                return Reservations<T_Meta>{sfj.create(m_seg_counter++)};
             }
 
-            Reservations<T_Table> &free() {
-                auto p = [](const Reservations<T_Table> &r) -> bool {
+            Reservations<T_Meta> &free() {
+                auto p = [](const Reservations<T_Meta> &r) -> bool {
                     return false;
                 };
 
-                auto f = [&]() -> Reservations<T_Table> {
+                auto f = [&]() {
                     return this->make();
                 };
 
@@ -94,19 +95,20 @@ namespace db {
             }
         };
 
-        template<typename T_Table>
+        template<typename T_Meta>
         class Segments {
         private:
+            using T_Table = typename T_Meta::Table;
             const db::Directory m_root;
-            ColSegments<T_Table> m_segments;
+            ColSegments<T_Meta> m_segments;
         public:
             explicit Segments(const Context &ctx) : m_root{ctx.root.cdx(T_Table::table_name())},
                                                     m_segments{ctx.start, m_root} {
-                db::assert_is_table<T_Table>();
+//                db::assert_is_context<T_Table>();
                 db::vfs::mkdir(m_root);
             }
 
-            Segments(const Segments<T_Table> &o) = delete;
+            Segments(const Segments<T_Meta> &o) = delete;
 
             Reservation reserve();
 
@@ -114,8 +116,8 @@ namespace db {
 
         };
 
-        template<typename T_table>
-        Reservation Segments<T_table>::reserve() {
+        template<typename T_Meta>
+        Reservation Segments<T_Meta>::reserve() {
             return m_segments.reserve();
         }
     }

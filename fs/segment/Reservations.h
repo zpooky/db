@@ -20,16 +20,20 @@ namespace db {
         public:
         };
 
-        template<typename t_Table>
+        template<typename T_Meta>
         class Reservations {
         private:
-            Segment<t_Table> m_segment;
+            using T_Table = typename T_Meta::Table;
+            Segment<T_Table> m_segment;
+            ReservationSet<T_Meta::lines()> m_reservations;
         public:
 
-            Reservations(Reservations<t_Table> &&o) : m_segment{std::move(o.m_segment)} {
+            Reservations(Reservations<T_Meta> &&o) : m_segment{std::move(o.m_segment)},
+                                                      m_reservations{std::move(o.m_reservations)} {
+//                db::assert_is_context<T_Meta>();
             }
 
-            explicit Reservations(Segment<t_Table> &&seg) : m_segment{std::move(seg)} {
+            explicit Reservations(Segment<T_Table> &&seg) : m_segment{std::move(seg)} {
             }
 
 //            Reservations(const Reservations &o) = delete;
@@ -37,8 +41,8 @@ namespace db {
             Reservation reserve();
         };
 
-        template<typename t_Table>
-        Reservation Reservations<t_Table>::reserve() {
+        template<typename T_Meta>
+        Reservation Reservations<T_Meta>::reserve() {
             return {1l};
         }
 

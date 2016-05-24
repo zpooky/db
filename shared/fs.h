@@ -21,6 +21,7 @@ namespace db {
     class Table {
 //        static size_t size() const noexcept = 0;
     };
+
 //Raw
     using rid = unsigned long;
 //    using crc32 = std::array<unsigned char, 4>;
