@@ -16,25 +16,12 @@ namespace sp {
             T value;
             Node *next;
 
-            Node(T &&p_value) : value(std::move(p_value)) {
+            explicit Node(T &&p_value) : value(std::move(p_value)), next{nullptr} {
 
             }
         };
 
         std::atomic<Node *> m_head;
-    public:
-        List() : m_head(nullptr) {
-        }
-
-        template<typename Predicate, typename Supplier>
-        T &find(Predicate p, Supplier s) {
-            auto node = find(p);
-            if (node == nullptr) {
-                node = push_front_i(s());
-            }
-            return node->value;
-        }
-
     private:
         Node *push_front_i(T &&v) {
             auto p = new Node(std::move(v));
@@ -54,6 +41,26 @@ namespace sp {
             }
             return nullptr;
         }
+
+    public:
+        List() : m_head(nullptr) {
+        }
+
+        List(const List<T> &) = delete;
+
+        List(List<T> &&o) : m_head{std::move(o.m_head)} {
+
+        }
+
+        template<typename Predicate, typename Supplier>
+        T &find(Predicate p, Supplier s) {
+            auto node = find(p);
+            if (node == nullptr) {
+                node = push_front_i(s());
+            }
+            return node->value;
+        }
+
     };
 }
 

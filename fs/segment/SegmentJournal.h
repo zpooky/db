@@ -72,6 +72,11 @@ namespace db {
 
                 }
 
+                SegmentJournalThread(SegmentJournalThread<hash_algh> &&o) : m_queue(std::move(o.m_queue)),
+                                                                          m_interrupted{o.m_interrupted} {
+
+                }
+
                 void add(SegLine &&data) {
                     m_queue.push_front(std::move(data));
                 }

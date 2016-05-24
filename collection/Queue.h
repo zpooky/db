@@ -15,6 +15,11 @@ namespace sp {
 
         }
 
+        Queue(const Queue<T> &) = delete;
+        Queue(Queue<T> && o) : m_default{std::move(o.m_default)}{
+
+        }
+
         void push_front(T &&);
 
         T pop();

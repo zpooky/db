@@ -29,7 +29,7 @@ namespace db {
             Reservations(Reservations<t_Table> &&o) : m_segment{std::move(o.m_segment)} {
             }
 
-            Reservations(Segment<t_Table> &&seg) : m_segment{std::move(seg)} {
+            explicit Reservations(Segment<t_Table> &&seg) : m_segment{std::move(seg)} {
             }
 
 //            Reservations(const Reservations &o) = delete;

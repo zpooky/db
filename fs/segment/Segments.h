@@ -37,15 +37,34 @@ namespace db {
             std::thread m_journal_thread;
 
         public:
-            explicit ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
-                                                                                m_root{p_root.cd("segment")},
-                                                                                m_journal(
-                                                                                        m_root.cd(Filename(
-                                                                                                "segment.journal")),
-                                                                                        m_journal_runnable, 0l),
-                                                                                m_journal_thread{m_journal_runnable} {
+            explicit
+            ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
+                                                                       m_root{p_root.cd("segment")},
+                                                                       m_journal(m_root.cd(Filename("segment.journal")),
+                                                                                 m_journal_runnable, 0l)
+//                                                                        ,
+//                                                                       m_journal_thread{m_journal_runnable}
+            {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);
+            }
+
+//            ColSegments(ColSegments<T_Table> && o) : m_seg_counter{o.m_seg_counter},
+//                                                     m_root{o.m_root},
+//                                                     m_vector{std::move(o.m_vector)},
+//                                                     m_journal_runnable{std::move(o.m_journal_thread)},
+//                                                     m_journal{std::move(o.m_journal)},
+//                                                     m_journal_thread{std::move(o.m_journal_thread)}
+//
+//            {
+//
+//            }
+
+            ~ColSegments(){
+                m_journal_runnable.interrupt();
+                if(m_journal_thread.joinable()) {
+                    m_journal_thread.join();
+                }
             }
 
             Reservation reserve() {
@@ -59,7 +78,7 @@ namespace db {
                 const auto line_size = Line_size<T_Table>::value();
                 SegmentFileInit init{m_root, line_size, 1024l}; // TODO
                 SegmentFileInitJournal<T_Table> sfj{init, m_journal};
-                return sfj.create(m_seg_counter++);
+                return Reservations<T_Table>{sfj.create(m_seg_counter++)};
             }
 
             Reservations<T_Table> &free() {
@@ -82,7 +101,7 @@ namespace db {
             ColSegments<T_Table> m_segments;
         public:
             explicit Segments(const Context &ctx) : m_root{ctx.root.cdx(T_Table::table_name())},
-                                           m_segments{ctx.start, m_root} {
+                                                    m_segments{ctx.start, m_root} {
                 db::assert_is_table<T_Table>();
                 db::vfs::mkdir(m_root);
             }
