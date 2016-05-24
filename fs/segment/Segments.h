@@ -40,14 +40,13 @@ namespace db {
         public:
             explicit
             ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
-                                                                       m_root{p_root.cd("segment")},
+                                                                       m_root{db::vfs::mkdir(p_root.cd("segment"))},
                                                                        m_journal(m_root.cd(Filename("segment.journal")),
                                                                                  m_journal_runnable, 0l)
 //                                                                        ,
 //                                                                       m_journal_thread{m_journal_runnable}
             {
 //                db::assert_is_context<T_Meta>();
-                db::vfs::mkdir(m_root);
             }
 
 //            ColSegments(ColSegments<T_Table> && o) : m_seg_counter{o.m_seg_counter},
@@ -102,10 +101,9 @@ namespace db {
             const db::Directory m_root;
             ColSegments<T_Meta> m_segments;
         public:
-            explicit Segments(const Context &ctx) : m_root{ctx.root.cdx(T_Table::table_name())},
+            explicit Segments(const Context &ctx) : m_root{db::vfs::mkdir(ctx.root.cdx(T_Table::table_name()))},
                                                     m_segments{ctx.start, m_root} {
 //                db::assert_is_context<T_Table>();
-                db::vfs::mkdir(m_root);
             }
 
             Segments(const Segments<T_Meta> &o) = delete;

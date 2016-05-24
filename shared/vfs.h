@@ -42,7 +42,7 @@ namespace db {
         }
 
         //
-        void mkdir(const Directory &d);
+        db::Directory mkdir(const Directory &d);
     }
 }
 
