@@ -69,7 +69,7 @@ namespace db {
 
             Reservation reserve() {
                 auto &resvs = free();
-                return {0};
+                return Reservation{0};
             }
 
         private:

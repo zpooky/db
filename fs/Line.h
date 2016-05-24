@@ -23,7 +23,7 @@ namespace db {
             db::RState state;
             db::raw<T_bytes> data;
 
-            Line(Table &&table) {
+            explicit Line(Table &&table) {
                 id = 1;
 
             }

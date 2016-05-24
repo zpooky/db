@@ -23,7 +23,7 @@ namespace db {
             File m_file;
             int m_fd;
         public:
-            FileWriter(const File &file) : m_file{file},
+            explicit FileWriter(const File &file) : m_file{file},
                                            m_fd{open(file.path.c_str(), O_RDWR | O_CREAT,
                                                      S_IRUSR | S_IWUSR | S_IRGRP)} {
                 error("FileWriter", m_fd);
@@ -38,6 +38,7 @@ namespace db {
             ~FileWriter() {
                 if (m_fd != -1) {
                     ::close(m_fd);
+                    m_fd = -1;
                 }
             }
 
