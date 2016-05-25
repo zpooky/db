@@ -8,8 +8,9 @@
 #include <array>
 #include <string.h>
 
-namespace hash {
-    using std::array;
+namespace sp {
+    namespace hash {
+        using std::array;
 
 
 //    uint16_t gen_crc16(const uint8_t *data, uint16_t size) {
@@ -65,45 +66,45 @@ namespace hash {
 //        return crc;
 //    }
 
-    template<size_t T_bytes>
-    class crc {
-    private:
-    public:
-        using type =array<uint8_t, T_bytes>;
+        template<size_t T_bytes>
+        class crc {
+        private:
+        public:
+            using type =array<uint8_t, T_bytes>;
 
 
-        template<size_t t_size>
-        type digest(const array<uint8_t, t_size> &buff) {
+            template<size_t t_size>
+            type digest(const array<uint8_t, t_size> &buff) {
 //            const uint8_t *c = "123456789";
 //            gen_crc16(c, strlen(c));
 
-            type res{0};
+                type res{0};
 
-            return res;
-        }
+                return res;
+            }
 
-        void update(unsigned int) {
-        }
+            void update(unsigned int) {
+            }
 
-        void update(unsigned short) {
-        }
+            void update(unsigned short) {
+            }
 
-        void update(unsigned long) {
-        }
+            void update(unsigned long) {
+            }
 
-        template <size_t length>
-        void update(std::array<char, length>){
-        }
+            template<size_t length>
+            void update(std::array<char, length>) {
+            }
 
-        type digest() {
-            type res{0};
-            return res;
-        }
+            type digest() {
+                type res{0};
+                return res;
+            }
 
 
-    };
+        };
 
-    using crc32 = crc<4>;
+        using crc32 = crc<4>;
+    }
 }
-
 #endif //_SP_HASH_H

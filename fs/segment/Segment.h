@@ -55,23 +55,24 @@ namespace db {
             }
         };
 
-        template<typename t_Table>
+        template<typename T_Meta>
         class Segment {
         private:
+            using hash_algh = typename T_Meta::hash_algh;
             SegmentFile m_file;
             PresentSet m_lines;
             //State
         public:
-            Segment(Segment<t_Table> &&o) : m_file{std::move(o.m_file)}, m_lines{std::move(o.m_lines)} {
-                db::assert_is_table<t_Table>();
+            Segment(Segment<T_Meta> &&o) : m_file{std::move(o.m_file)}, m_lines{std::move(o.m_lines)} {
+//                db::assert_is_meta<T_Meta>();
             }
 
             explicit Segment(SegmentFile &&file) : m_file{std::move(file)} {
-                db::assert_is_table<t_Table>();
+//                db::assert_is_meta<T_Meta>();
             }
 
             template<size_t SIZE>
-            bool write(const Reservation &r, const Line<SIZE> &line) {
+            bool write(const Reservation &r, const Line<SIZE, hash_algh> &line) {
                 return true;
             }
         };
@@ -92,21 +93,22 @@ namespace db {
 
             };
 
-            template<typename T_Table>
+            template<typename T_Meta>
             class SegmentFileInitJournal {
             private:
+                using T_Table = typename T_Meta::Table;
                 SegmentFileInit &m_init;
-                SegmentJournal<T_Table> &m_journal;
+                SegmentJournal<T_Meta> &m_journal;
             public:
-                SegmentFileInitJournal(SegmentFileInit &init, SegmentJournal<T_Table> &journal) : m_init{init},
-                                                                                                  m_journal{journal} {
-                    db::assert_is_table<T_Table>();
+                SegmentFileInitJournal(SegmentFileInit &init, SegmentJournal<T_Meta> &journal) : m_init{init},
+                                                                                                 m_journal{journal} {
+//                    db::assert_is_table<T_Table>();
                 }
 
-                Segment<T_Table> create(db::segment::index_type idx) {
+                Segment<T_Meta> create(db::segment::index_type idx) {
                     auto id = m_journal.start(T_Table::table_name(), idx);
-                    auto seg_name = db::Segment_name<T_Table>::name(idx);
-                    Segment<T_Table> result{m_init.create(seg_name)};
+                    Filename seg_name{db::Segment_name<T_Table>::name(idx)};
+                    Segment<T_Meta> result{m_init.create(seg_name)};
 //                m_journal.prpare(id);
                     m_journal.commit(id);
                     return result;

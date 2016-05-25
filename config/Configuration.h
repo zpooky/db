@@ -6,7 +6,7 @@
 #define DB_CONFIG_H
 
 #include <array>
-#include "../shared/entities.h"
+#include <string>
 
 namespace db {
     namespace table {
@@ -23,7 +23,7 @@ namespace db {
         Segment_name() {
         }
 
-        static Filename name(segment::index_type idx) {
+        static std::string name(segment::index_type idx) {
             char buf[64];
 //            char buf[table::name::length + 1 + 32];
 //            auto table_name = T_table::table_name();
@@ -31,7 +31,7 @@ namespace db {
 //            sprintf(buf, "%s-%ld", name.c_str(), idx);
 
             ::sprintf(buf, "%ld", idx);
-            return Filename{buf};
+            return std::string{buf};
         }
     };
 }

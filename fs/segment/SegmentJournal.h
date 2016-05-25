@@ -73,7 +73,7 @@ namespace db {
                 }
 
                 SegmentJournalThread(SegmentJournalThread<hash_algh> &&o) : m_queue(std::move(o.m_queue)),
-                                                                          m_interrupted{o.m_interrupted} {
+                                                                            m_interrupted{o.m_interrupted} {
 
                 }
 
@@ -114,9 +114,11 @@ namespace db {
         template<typename hash_algh>
         using SLConsumer = internal::Consumer<SegmentLine<hash_algh>>;
 
-        template<typename t_Table, typename hash_algh = hash::crc32>
+        template<typename T_Meta>
         class SegmentJournal {
         private:
+            using hash_algh = typename T_Meta::hash_algh;
+            using T_Table = typename T_Meta::Table;
             using State = internal::State;
             const File &m_journal;
             SLConsumer<hash_algh> &m_consumer;
@@ -126,7 +128,7 @@ namespace db {
                     m_journal{journal},
                     m_consumer{consumer},
                     m_counter{start} {
-                db::assert_is_table<t_Table>();
+//                db::assert_is_meta<T_Meta>();
             }
 
         private:
@@ -140,7 +142,7 @@ namespace db {
             }
 
             SegmentLine<hash_algh> line(journal_id id, const name_type &name, index_type idx) const {
-               return segment_line<hash_algh>(id, name, idx, db::fs::internal::State::START);
+                return segment_line<hash_algh>(id, name, idx, db::fs::internal::State::START);
             }
 
         public:

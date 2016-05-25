@@ -24,16 +24,16 @@ namespace db {
         class Reservations {
         private:
             using T_Table = typename T_Meta::Table;
-            Segment<T_Table> m_segment;
+            Segment<T_Meta> m_segment;
             ReservationSet<T_Meta::lines()> m_reservations;
         public:
 
             Reservations(Reservations<T_Meta> &&o) : m_segment{std::move(o.m_segment)},
                                                       m_reservations{std::move(o.m_reservations)} {
-//                db::assert_is_context<T_Meta>();
+//                db::assert_is_meta<T_Meta>();
             }
 
-            explicit Reservations(Segment<T_Table> &&seg) : m_segment{std::move(seg)} {
+            explicit Reservations(Segment<T_Meta> &&seg) : m_segment{std::move(seg)} {
             }
 
 //            Reservations(const Reservations &o) = delete;

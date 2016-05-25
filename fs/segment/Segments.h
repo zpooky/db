@@ -29,16 +29,16 @@ namespace db {
         private:
             using T_Table = typename T_Meta::Table;
             using index_type = db::segment::index_type;
+            using hash_algh = typename T_Meta::hash_algh;
             std::atomic<index_type> m_seg_counter;
             const Directory m_root;
             sp::List<Reservations<T_Meta>> m_vector;
 
-            SegmentJournalThread<hash::crc32> m_journal_runnable;
-            SegmentJournal<T_Table, hash::crc32> m_journal;
+            SegmentJournalThread<hash_algh> m_journal_runnable;
+            SegmentJournal<T_Meta> m_journal;
             std::thread m_journal_thread;
 
         public:
-            explicit
             ColSegments(index_type p_index, const Directory &p_root) : m_seg_counter{p_index},
                                                                        m_root{db::vfs::mkdir(p_root.cd("segment"))},
                                                                        m_journal(m_root.cd(Filename("segment.journal")),
@@ -75,9 +75,9 @@ namespace db {
         private:
             Reservations<T_Meta> make() {
                 using namespace db::fs::internal;
-                const auto line_size = Line_size<T_Table>::value();
+                const auto line_size = Line_size<T_Meta>::value();
                 SegmentFileInit init{m_root, line_size, T_Meta::lines()};
-                SegmentFileInitJournal<T_Table> sfj{init, m_journal};
+                SegmentFileInitJournal<T_Meta> sfj{init, m_journal};
                 return Reservations<T_Meta>{sfj.create(m_seg_counter++)};
             }
 
@@ -106,7 +106,7 @@ namespace db {
 //                db::assert_is_context<T_Table>();
             }
 
-            Segments(const Segments<T_Meta> &o) = delete;
+            Segments(const Segments<T_Meta> &) = delete;
 
             Reservation reserve();
 

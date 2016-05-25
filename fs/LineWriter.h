@@ -17,8 +17,8 @@ namespace db {
             LineWriter(const File &file) : m_fileWriter{file} {
             }
 
-            template<size_t size>
-            void write(const Reservation &r, const Line<size> &l) {
+            template<size_t size, typename T_hash_type>
+            void write(const Reservation &r, const Line<size, T_hash_type> &l) {
                 auto buf = buffer(l);
                 m_fileWriter.write(buf, r.position);
             }

@@ -5,19 +5,20 @@
 #ifndef PROJECT_TABLECONTEXT_H
 #define PROJECT_TABLECONTEXT_H
 
-//#include "Assertions.h"
 #include <cstddef>
 #include <type_traits>
 
 namespace db {
 
-    template<typename T_Table>
+    template<typename T_Table, typename T_Hash_Algh>
     struct TableMeta {
         TableMeta() {
             db::assert_is_table<T_Table>();
         }
 
         using Table = T_Table;
+
+        using hash_algh = T_Hash_Algh;
 
         static constexpr size_t lines() {
             return 1024ul;

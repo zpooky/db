@@ -7,18 +7,20 @@
 #include "../shared/vfs.h"
 #include "../fs/segment/Segments.h"
 #include "../shared/TableMeta.h"
+#include "../shared/hash.h"
 
 
 using namespace db::journal;
 using namespace db::fs;
 using namespace std;
+using namespace sp::hash;
 
 int main(int argc, char *args[]) {
     cout << "sector size:" << db::vfs::sector::size("") << endl;
     cout << "page size:" << db::vfs::page::size() << endl;
-
+    using TTT = db::TableMeta<TestTable, crc<4> >;
     Context ctx{db::Directory("/tmp"), 0l};
-    Segments< db::TableMeta<TestTable> > segments{ctx};
+    Segments<TTT> segments{ctx};
     auto &journal = db::journal::instance<TestTable>();
 
     {
@@ -26,7 +28,7 @@ int main(int argc, char *args[]) {
 
         auto jid = journal.begin();
         auto reserv = segments.reserve();
-        auto line = to_line(move(table));
+//        auto line = to_line(move(table));
 //        segment.write(reserv, line);
         journal.prepare(jid, reserv);
         journal.commit(jid);
