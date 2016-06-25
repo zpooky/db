@@ -66,7 +66,7 @@ namespace db {
             string copy = p_path;
 //            printf("'%s'\n", copy.c_str());
             if (copy.at(copy.length() - 1) != '/') {
-                auto &bah = copy.append("/");
+                copy.append("/");
 //                printf(":%s:\n", bah.c_str());
             }
 

@@ -14,7 +14,7 @@ namespace db {
         private:
             FileWriter m_fileWriter;
         public:
-            LineWriter(const File &file) : m_fileWriter{file} {
+            explicit LineWriter(const File &file) : m_fileWriter{file} {
             }
 
             template<size_t size, typename T_hash_type>

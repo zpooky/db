@@ -48,7 +48,7 @@ size_t db::vfs::page::size() {
 }
 
 
-db::Directory db::vfs::mkdir(const db::Directory &d) {
+const db::Directory& db::vfs::mkdir(const db::Directory &d) {
     const auto &path = d.path;
     printf("mkdir(%s) ", path.c_str());
     int status = ::mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);

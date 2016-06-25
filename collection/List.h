@@ -48,8 +48,8 @@ namespace sp {
 
         List(const List<T> &) = delete;
 
-        List(List<T> &&o) : m_head{std::move(o.m_head)} {
-
+        List(List<T> &&o) : m_head{o.m_head.load()} {
+            o.m_head = nullptr;
         }
 
         template<typename Predicate, typename Supplier>
