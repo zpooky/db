@@ -7,6 +7,11 @@ if (TARGET shared_lib)
     message("shared_lib is already defined")
 
 else ()
+    # boost
+    include_directories(${BOOST_INCLUDEDIR}) #include the headers
+    link_directories(${BOOST_LIBRARY_DIR})
+    find_package(Boost COMPONENTS filesystem REQUIRED)
+    #
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
@@ -14,4 +19,5 @@ else ()
 
     add_library(shared_lib STATIC ${SOURCE_FILES})
     set_target_properties(shared_lib PROPERTIES LINKER_LANGUAGE CXX)
+    target_link_libraries(shared_lib ${Boost_LIBRARIES})
 endif ()

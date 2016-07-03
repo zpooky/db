@@ -52,6 +52,10 @@ namespace sp {
             o.m_head = nullptr;
         }
 
+        ~List() {
+
+        }
+
         template<typename Predicate, typename Supplier>
         T &find(Predicate p, Supplier s) {
             auto node = find(p);

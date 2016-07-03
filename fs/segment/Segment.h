@@ -63,7 +63,9 @@ namespace db {
             PresentSet m_lines;
             //State
         public:
-            Segment(Segment<T_Meta> &&o) : m_file{std::move(o.m_file)}, m_lines{std::move(o.m_lines)} {
+            Segment(Segment<T_Meta> &&o) :
+                    m_file{std::move(o.m_file)},
+                    m_lines{std::move(o.m_lines)} {
 //                db::assert_is_meta<T_Meta>();
             }
 

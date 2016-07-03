@@ -8,21 +8,14 @@
 #include <string>
 #include <utility>
 #include <array>
+#include <vector>
+
+//#include <boost/filesystem.hpp>
 
 namespace db {
 
+//    using boost::filesystem::path;
     using std::string;
-
-    struct File {
-        const string path;
-
-        explicit File(string &&p_path) : path{p_path} {
-        }
-
-//        operator string() const {
-//            return path;
-//        }
-    };
 
     struct Filename {
         const string name;
@@ -36,7 +29,38 @@ namespace db {
 //        }
     };
 
+    struct File {
+    private:
+    public:
+        const string path;
+
+        explicit File(const string &p_path) : path{p_path} {
+        }
+        explicit File(string &&p_path) : path{std::move(p_path)} {
+        }
+//        explicit File(const boost::filesystem::path &p) : path{p.string()}{
+//
+//        }
+
+
+        Filename filename() const {
+            auto index = path.rfind('/');
+            if (index != string::npos) {
+                auto file = path.substr(index);
+                return Filename{std::move(file)};
+            }
+            return Filename{path.substr()};
+        }
+
+//        operator string() const {
+//            return path;
+//        }
+    };
+
+
     struct DirectoryName {
+    private:
+    public:
         const string name;
 
         explicit DirectoryName(string &&p_name) : name{p_name} {
@@ -48,6 +72,7 @@ namespace db {
     };
 
     struct Directory {
+    private:
     public:
         const string path;
 
@@ -56,6 +81,10 @@ namespace db {
 
         explicit Directory(string &&p_path) : path{p_path} {
         }
+
+//        boost::filesystem::path to_path() const {
+//            return {path};
+//        }
 
     private:
 //        template<typename Col>
@@ -104,7 +133,7 @@ namespace db {
         t_type a[t_size + 1];
         auto it = d.begin();
         auto ait = &a[0];
-        while (*it && it != d.end()) {
+        while (it != d.end() && *it) {
             *ait = *it;
             ++it;
             ++ait;
@@ -120,6 +149,7 @@ namespace db {
         return cdx(string{d, N});
     }
 
+    std::vector<File> files(const Directory&);
 };
 
 #endif //SHARED_ENTITIES_H

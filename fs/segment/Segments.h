@@ -13,6 +13,8 @@
 #include "../../collection/List.h"
 #include "Reservations.h"
 #include <functional>
+#include <vector>
+#include <algorithm>
 
 namespace db {
     namespace fs {
@@ -82,8 +84,9 @@ namespace db {
             sp::List<Reservations<T_Meta>> m_vector;
 
         public:
-            ColSegments(SegmentFileFactory<T_Meta> &&factory) :
-                    m_factory{std::move(factory)} {
+            ColSegments(SegmentFileFactory<T_Meta> &&factory, sp::List<Reservations<T_Meta>> &&p_vector) :
+                    m_factory{std::move(factory)},
+                    m_vector{std::move(p_vector)} {
 //                db::assert_is_context<T_Meta>();
             }
 
@@ -116,11 +119,41 @@ namespace db {
             }
 
         public:
+            class DD {
+            private:
+                const Directory &m_root;
+            public:
+                explicit DD(const Directory &root) :
+                        m_root(root) {
+                }
+
+                std::tuple<unsigned long, std::vector<File>> operator()() {
+                    std::vector<File> segments = files(m_root);
+
+                    std::vector<unsigned long> num_segments(segments.size());
+                    std::transform(segments.begin(), segments.end(), num_segments.begin(), [](const auto &file) {
+                        auto filename = file.filename();
+                        return atoi(filename.name.c_str());
+                    });
+
+                    auto max_it = std::max_element(num_segments.begin(), num_segments.end());
+                    auto max = max_it != num_segments.end() ? *max_it : 1l;
+
+                    return std::make_tuple(max, segments);
+                }
+            };
 
             static ColSegments apply(const Directory &p_root) {
-                //TODO
-                SegmentFileFactory<T_Meta> sff{1l, db::vfs::mkdir(p_root.cd("segment"))};
-                return {std::move(sff)};
+                auto seg_root = db::vfs::mkdir(p_root.cd("segment"));
+
+                DD d(seg_root);
+
+                unsigned long seg_cnt;
+                std::vector<File> fs;
+                std::tie(seg_cnt, fs) = d();
+
+                SegmentFileFactory<T_Meta> sff{seg_cnt + 1, seg_root};
+                return {std::move(sff), {}};
             }
         };
 

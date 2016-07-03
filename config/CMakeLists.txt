@@ -10,7 +10,7 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES )
+    set(SOURCE_FILES Configuration.h)
 
     add_library(config_lib STATIC ${SOURCE_FILES})
     set_target_properties(config_lib PROPERTIES LINKER_LANGUAGE CXX)
