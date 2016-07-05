@@ -12,6 +12,7 @@ namespace db {
 
     template<typename T_Table, typename T_Hash_Algh>
     struct TableMeta {
+    public:
         TableMeta() {
             db::assert_is_table<T_Table>();
         }
@@ -23,6 +24,7 @@ namespace db {
         static constexpr size_t lines() {
             return 1024ul;
         }
+
     };
 
 //    template<typename T>

@@ -67,9 +67,7 @@ namespace db {
 
             Segment<T_Meta> operator()() {
                 using namespace db::fs::internal;
-                const auto line_size = Line_size<T_Meta>::value();
-                SegmentFileInit init{m_root, line_size, T_Meta::lines()};
-                SegmentFileInitJournal<T_Meta> sfj{init, m_journal};
+                SegmentFileInitJournal<T_Meta> sfj{m_root, m_journal};
                 return sfj.create(m_seg_counter++);
             }
         };

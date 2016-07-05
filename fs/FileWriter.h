@@ -24,8 +24,8 @@ namespace db {
             int m_fd;
         public:
             explicit FileWriter(const File &file) : m_file{file},
-                                           m_fd{open(file.path.c_str(), O_RDWR | O_CREAT,
-                                                     S_IRUSR | S_IWUSR | S_IRGRP)} {
+                                                    m_fd{open(file.path.c_str(), O_RDWR | O_CREAT,
+                                                              S_IRUSR | S_IWUSR | S_IRGRP)} {
                 error("FileWriter", m_fd);
             }
 
@@ -37,6 +37,7 @@ namespace db {
 
             ~FileWriter() {
                 if (m_fd != -1) {
+//                    flush();
                     ::close(m_fd);
                     m_fd = -1;
                 }
@@ -102,6 +103,10 @@ namespace db {
                 //there is a ARM version of this function called sync_file_range2
                 int ret = ::sync_file_range(m_fd, offset, nbytes, flags);
                 error("flush", ret);
+            }
+
+            const File &file() const {
+                return m_file;
             }
 
         private:

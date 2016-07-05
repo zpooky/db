@@ -67,13 +67,15 @@ namespace db {
                 sp::Queue<SegLine> m_queue;
                 std::atomic<bool> m_interrupted;
             public:
-                SegmentJournalThread() : m_queue{db::fs::internal::empty_segment_line<hash_algh>()},
-                                         m_interrupted{false} {
+                SegmentJournalThread() :
+                        m_queue{db::fs::internal::empty_segment_line<hash_algh>()},
+                        m_interrupted{false} {
 
                 }
 
-                SegmentJournalThread(SegmentJournalThread<hash_algh> &&o) : m_queue(std::move(o.m_queue)),
-                                                                            m_interrupted{o.m_interrupted} {
+                SegmentJournalThread(SegmentJournalThread<hash_algh> &&o) :
+                        m_queue(std::move(o.m_queue)),
+                        m_interrupted{o.m_interrupted} {
 
                 }
 
@@ -120,7 +122,7 @@ namespace db {
             using hash_algh = typename T_Meta::hash_algh;
             using T_Table = typename T_Meta::Table;
             using State = internal::State;
-            const File &m_journal;
+            const File m_journal;
             SLConsumer<hash_algh> &m_consumer;
             atomic<journal_id> m_counter;
         public:

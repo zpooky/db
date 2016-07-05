@@ -3,29 +3,10 @@
 //
 
 #include "Segment.h"
-#include <fstream>
-#include <array>
-#include <algorithm>
-#include "../../shared/vfs.h"
 
 namespace db {
     namespace fs {
         namespace internal {
-            SegmentFile SegmentFileInit::create(const Filename &filename) {
-                using capacity = unsigned long long;
-                File file = m_root.cd(filename);
-                FileWriter stream(file);
-                //
-                capacity target = m_line_size * m_lines;
-                std::array<char, db::vfs::page::default_size> buf{0};
-                do {
-                    size_t counter = std::min<size_t>(buf.size(), target);
-                    target = target - counter;
-                    stream.init_write(buf, counter);
-                } while (target > 0);
-                stream.flush();
-                return {file, m_lines, m_lines};
-            }
         }
 
     }

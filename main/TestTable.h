@@ -16,6 +16,10 @@ struct TestTable : public db::Table {
 
     }
 
+    static constexpr size_t latest_version() {
+        return 1l;
+    }
+
 private:
     using name_type = db::table::name::type;
 
