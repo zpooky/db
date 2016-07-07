@@ -17,17 +17,20 @@ namespace db {
     namespace fs {
         template<size_t T_bytes, typename T_hash_type>
         struct Line {
+        private:
+            using raw_type = db::raw<T_bytes>;
         public:
             db::rid id;
             T_hash_type checksum;
             db::RState state;
-            db::raw<T_bytes> data;
+            raw_type data;
 
             explicit Line(Table &&table) {
                 id = 1;
             }
-            template <size_t bytes>
-            explicit Line(const Buffer<bytes> &buf){
+
+            template<size_t bytes>
+            explicit Line(const Buffer<bytes> &buf) {
 
             }
 
@@ -48,7 +51,20 @@ namespace db {
 
             static constexpr size_t size() {
                 return multipleOf(
-                        sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::RState) + sizeof(db::raw<T_bytes>));
+                        sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::RState) + sizeof(raw_type));
+            }
+        };
+
+        template<typename T_Table>
+        struct Table_size {
+        private:
+        public:
+            Table_size() {
+                db::assert_is_table<T_Table>();
+            }
+
+            static constexpr size_t value() {
+                return sizeof(T_Table);
             }
         };
 
@@ -59,11 +75,11 @@ namespace db {
             using hash_algh = typename T_Meta::hash_algh;
         public:
             Line_size() {
-//                db::assert_is_meta<T_Meta>();
+                db::assert_is_table<T_Table>();
             }
 
             static constexpr size_t value() {
-                return Line<sizeof(T_Table), hash_algh>::size();
+                return Line<Table_size<T_Table>::value(), hash_algh>::size();
             }
         };
 

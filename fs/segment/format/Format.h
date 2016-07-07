@@ -9,6 +9,7 @@
 #include "../SegmentFile.h"
 #include "../../FileReader.h"
 #include "../PresentSet.h"
+#include "../../Line.h"
 /*
  * Header:
  * size in bytes:
@@ -65,8 +66,8 @@ namespace db {
         template<typename T_Meta>
         SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
             using capacity = unsigned long long;
-            const size_t line_size = Line_size<T_Meta>::value();
-            const size_t lines = T_Meta::lines();
+            constexpr size_t line_size = Line_size<T_Meta>::value();
+            constexpr size_t lines = T_Meta::lines();
             capacity target = line_size * lines;
             //
             File file = m_root.cd(filename);
@@ -87,6 +88,7 @@ namespace db {
             using db::fs::FileReader;
             using db::fs::Buffer;
             using db::fs::Line;
+            using db::fs::Table_size;
             //
             const size_t line_size = Line_size<T_Meta>::value();
             constexpr size_t lines = T_Meta::lines();
@@ -97,7 +99,7 @@ namespace db {
             while(current++ < lines) {
                 Buffer<line_size> buffer({0});
                 fr.read(buffer);
-                Line<T_Table::size(), typename T_Meta::hash_type> line{buffer};
+                Line<Table_size<T_Table>::value(), typename T_Meta::hash_algh> line{buffer};
                 if(line.id == 0){
                     res[current] = false;
                 } else {

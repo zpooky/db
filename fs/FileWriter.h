@@ -25,7 +25,7 @@ namespace db {
         public:
             explicit FileWriter(const File &file) :
                     m_file(file),
-                    m_fd{::open(file.path.c_str(), O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP)} {
+                    m_fd{::open(file.path.c_str(), O_RDWR| O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP)} {
                 error("FileWriter", m_fd);
             }
 
