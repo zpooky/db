@@ -25,6 +25,9 @@ namespace db {
 
             explicit Line(Table &&table) {
                 id = 1;
+            }
+            template <size_t bytes>
+            explicit Line(const Buffer<bytes> &buf){
 
             }
 

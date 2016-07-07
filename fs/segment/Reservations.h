@@ -9,24 +9,23 @@
 #include "../../shared/fs.h"
 #include "Segment.h"
 #include <utility>
-#include <bitset>
+#include "ReservationSet.h"
 
 namespace db {
     namespace fs {
-        template<size_t t_Size>
-        class ReservationSet {
-        private:
-            std::bitset<t_Size> m_b;
-        public:
-        };
 
         template<typename T_Meta>
         class Reservations {
         private:
             using T_Table = typename T_Meta::Table;
             Segment <T_Meta> m_segment;
-            ReservationSet<T_Meta::lines()> m_reservations;
+            db::ReservationSet<T_Meta::lines()> m_reservations;
         public:
+
+            explicit Reservations(Segment <T_Meta> &&seg) :
+                    m_segment{std::move(seg)},
+                    m_reservations{m_segment.present_set()}{
+            }
 
             Reservations(Reservations<T_Meta> &&o) :
                     m_segment{std::move(o.m_segment)},
@@ -34,18 +33,20 @@ namespace db {
 //                db::assert_is_meta<T_Meta>();
             }
 
-            explicit Reservations(Segment <T_Meta> &&seg) :
-                    m_segment{std::move(seg)} {
-            }
 
-//            Reservations(const Reservations &o) = delete;
+            Reservations(const Reservations &) = delete;
 
             Reservation reserve();
+
+            void unreserve(const Reservation &);
         };
 
         template<typename T_Meta>
         Reservation Reservations<T_Meta>::reserve() {
             return {1l};
+        }
+        template<typename T_Meta>
+        void Reservations<T_Meta>::unreserve(const Reservation &r){
         }
 
     }

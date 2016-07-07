@@ -15,6 +15,7 @@
 #include <functional>
 #include <vector>
 #include <algorithm>
+#include "format/SegmentFileParser.h"
 
 namespace db {
     namespace fs {
@@ -72,6 +73,9 @@ namespace db {
             }
         };
 
+
+
+
         template<typename T_Meta>
         class ColSegments {
         private:
@@ -82,9 +86,12 @@ namespace db {
             sp::List<Reservations<T_Meta>> m_vector;
 
         public:
-            ColSegments(SegmentFileFactory<T_Meta> &&factory, sp::List<Reservations<T_Meta>> &&p_vector) :
-                    m_factory{std::move(factory)},
-                    m_vector{std::move(p_vector)} {
+            ColSegments(SegmentFileFactory<T_Meta> &&factory, const std::vector<File> &p_segments) :
+                    m_factory{std::move(factory)} {
+                for (const auto &file : p_segments) {
+                    SegmentFileParser<T_Meta> parser(file);
+                    m_vector.push_front(Reservations<T_Meta>{parser.parse()});
+                }
 //                db::assert_is_context<T_Meta>();
             }
 
@@ -125,6 +132,8 @@ namespace db {
                         m_root(root) {
                 }
 
+                DD(const DD &) = delete;
+
                 std::tuple<unsigned long, std::vector<File>> operator()() {
                     std::vector<File> segments = files(m_root);
 
@@ -147,11 +156,11 @@ namespace db {
                 DD d(seg_root);
 
                 unsigned long seg_cnt;
-                std::vector<File> fs;
-                std::tie(seg_cnt, fs) = d();
+                std::vector<File> segments;
+                std::tie(seg_cnt, segments) = d();
 
                 SegmentFileFactory<T_Meta> sff{seg_cnt + 1, seg_root};
-                return {std::move(sff), {}};
+                return {std::move(sff), segments};
             }
         };
 

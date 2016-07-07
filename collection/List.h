@@ -49,7 +49,7 @@ namespace sp {
         List(const List<T> &) = delete;
 
         List(List<T> &&o) : m_head{o.m_head.load()} {
-            o.m_head = nullptr;
+            o.m_head.store(nullptr);
         }
 
         ~List() {
@@ -65,7 +65,15 @@ namespace sp {
             return node->value;
         }
 
+        void push_front(T &&data);
     };
+
+    template<typename T>
+    void List<T>::push_front(T &&data) {
+        push_front_i(std::move(data));
+    }
+
+
 }
 
 #endif

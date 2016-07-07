@@ -9,25 +9,26 @@
 #include <glob.h>
 #include <array>
 
-using std::array;
 
 namespace db {
     namespace fs {
+        using std::array;
+
         template<size_t t_capacity>
         class Buffer {
         private:
-            array<char, t_capacity> m_data;
+            using Arr = array<char, t_capacity>;
+            Arr m_data;
             size_t m_position;
             size_t m_size;
         public:
-
+            explicit Buffer(Arr &&data) :
+                    m_data(std::move(data)) {
+            }
 
             Buffer() : m_position{0}, m_size{0} {
 
             }
-
-//            Buffer(array<char, size> data) : m_data{data} {
-//            }
 
             void put(const unsigned char datum[], size_t length) {
                 auto begin = &datum[0];

@@ -7,6 +7,8 @@
 
 #include "../../../shared/vfs.h"
 #include "../SegmentFile.h"
+#include "../../FileReader.h"
+#include "../PresentSet.h"
 /*
  * Header:
  * size in bytes:
@@ -30,26 +32,38 @@ namespace db {
         using db::fs::SegmentFile;
         using db::fs::Line_size;
         using db::fs::FileWriter;
+        using db::PresentSet;
+
+
         template<typename T_Meta>
-        class Format {
+        class V1SegmentInit {
         private:
             using T_Table = typename T_Meta::Table;
             const Directory m_root;
         public:
-            using latest = Format<T_Meta>;
-
-            explicit Format(const Directory &root) :
+            explicit V1SegmentInit(const Directory &root) :
                     m_root{root} {
                 db::assert_is_table<T_Table>();
             }
 
             SegmentFile create(const Filename &);
+        };
 
+
+        template<typename T_Meta>
+        class V1SegmentParser {
         private:
+            using T_Table = typename T_Meta::Table;
+        public:
+            V1SegmentParser() {
+                db::assert_is_table<T_Table>();
+            }
+
+            PresentSet<T_Meta> parse(const File &);
         };
 
         template<typename T_Meta>
-        SegmentFile Format<T_Meta>::create(const Filename &filename) {
+        SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
             using capacity = unsigned long long;
             const size_t line_size = Line_size<T_Meta>::value();
             const size_t lines = T_Meta::lines();
@@ -67,6 +81,45 @@ namespace db {
             stream.flush();
             return SegmentFile{file, line_size, lines};
         }
+
+        template<typename T_Meta>
+        PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const File &file) {
+            using db::fs::FileReader;
+            using db::fs::Buffer;
+            using db::fs::Line;
+            //
+            const size_t line_size = Line_size<T_Meta>::value();
+            constexpr size_t lines = T_Meta::lines();
+            //
+            std::bitset<line_size> res;
+            FileReader fr(file);
+            size_t current = 0;
+            while(current++ < lines) {
+                Buffer<line_size> buffer({0});
+                fr.read(buffer);
+                Line<T_Table::size(), typename T_Meta::hash_type> line{buffer};
+                if(line.id == 0){
+                    res[current] = false;
+                } else {
+                    res[current] = true;
+                }
+            }
+            return PresentSet<T_Meta>{res};
+        }
+
+        class Format {
+        private:
+        public:
+            template<typename T_Meta>
+            using latest = V1SegmentInit<T_Meta>;
+
+            //TODO
+            template<typename T_Meta>
+            static constexpr V1SegmentParser<T_Meta> parser(/*unsigned short version*/) {
+                return V1SegmentParser<T_Meta>{};
+            }
+
+        };
     }
 }
 
