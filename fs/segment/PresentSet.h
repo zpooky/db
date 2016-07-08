@@ -6,7 +6,7 @@
 #define PROJECT_PRESENTSET_H
 
 #include <bitset>
-#include "../../shared/CBitset.h"
+#include "../../collection/CBitset.h"
 #include "../Line.h"
 
 namespace db {
@@ -14,15 +14,16 @@ namespace db {
     template<typename T_Meta>
     class PresentSet {
     private:
-        sp::CBitset<db::fs::Line_size<T_Meta>::value()> m_bitset;
+        using Bitset_t = sp::CBitset<T_Meta::lines()>;
+        Bitset_t m_bitset;
     public:
         PresentSet() :
                 m_bitset{} {
 
         }
 
-        explicit PresentSet(const std::bitset<db::fs::Line_size<T_Meta>::value()> &init) :
-                m_bitset{init} {
+        explicit PresentSet(const std::bitset<T_Meta::lines()> &init) :
+                m_bitset(init) {
 
         }
 

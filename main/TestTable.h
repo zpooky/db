@@ -9,15 +9,11 @@
 #include <array>
 
 struct TestTable : public db::Table {
-    char data[5];
-    unsigned long id;
+    const char data[5];
+    const unsigned long id;
 
     TestTable() : id{1}, data{"hell"} {
 
-    }
-
-    static constexpr size_t latest_version() {
-        return 1l;
     }
 
 private:

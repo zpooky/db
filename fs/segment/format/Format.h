@@ -93,14 +93,14 @@ namespace db {
             const size_t line_size = Line_size<T_Meta>::value();
             constexpr size_t lines = T_Meta::lines();
             //
-            std::bitset<line_size> res;
+            std::bitset<lines> res;
             FileReader fr(file);
             size_t current = 0;
-            while(current++ < lines) {
+            while (current++ < lines) {
                 Buffer<line_size> buffer({0});
                 fr.read(buffer);
                 Line<Table_size<T_Table>::value(), typename T_Meta::hash_algh> line{buffer};
-                if(line.id == 0){
+                if (line.id == db::EMPTY_LINE) {
                     res[current] = false;
                 } else {
                     res[current] = true;
@@ -117,7 +117,7 @@ namespace db {
 
             //TODO
             template<typename T_Meta>
-            static constexpr V1SegmentParser<T_Meta> parser(/*unsigned short version*/) {
+            static constexpr V1SegmentParser<T_Meta> parser(unsigned short version) {
                 return V1SegmentParser<T_Meta>{};
             }
 

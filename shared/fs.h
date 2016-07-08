@@ -24,6 +24,7 @@ namespace db {
 
 //Raw
     using rid = unsigned long;
+    constexpr rid EMPTY_LINE = 0ul;
     template<size_t size>
     using raw = std::array<unsigned char, size>;
     enum class RState : unsigned char {

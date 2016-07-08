@@ -15,8 +15,8 @@ namespace db {
         class SegmentFile {
         private:
             FileWriter m_file;
-            size_t m_line_size;
-            size_t m_number;
+            const size_t m_line_size;
+            const size_t m_number;
         public:
 
             SegmentFile(const File &file, size_t line_size, size_t number) :

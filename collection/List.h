@@ -16,17 +16,43 @@ namespace sp {
             T value;
             Node *next;
 
-            explicit Node(T &&p_value) : value(std::move(p_value)), next{nullptr} {
-
+            explicit Node(T &&p_value) :
+                    value(std::move(p_value)),
+                    next{nullptr} {
             }
         };
 
         std::atomic<Node *> m_head;
+        std::atomic<unsigned long> m_cnt;
+    public:
+        List() :
+                m_head(nullptr),
+                m_cnt(0) {
+        }
+
+        List(const List<T> &) = delete;
+
+        List(List<T> &&o) :
+                m_head(o.m_head.load()),
+                m_cnt(o.m_cnt.load()) {
+            o.m_head.store(nullptr);
+        }
+
+        ~List() {
+            Node *node = m_head.load();
+            while (node != nullptr) {
+                auto next = node->next;
+                delete node;
+                node = next;
+            }
+        }
+
     private:
         Node *push_front_i(T &&v) {
             auto p = new Node(std::move(v));
             p->next = m_head;
-            while (m_head.compare_exchange_weak(p->next, p)) { }
+            while (!m_head.compare_exchange_weak(p->next, p)) { }
+            m_cnt++;
             return p;
         }
 
@@ -43,18 +69,6 @@ namespace sp {
         }
 
     public:
-        List() : m_head(nullptr) {
-        }
-
-        List(const List<T> &) = delete;
-
-        List(List<T> &&o) : m_head{o.m_head.load()} {
-            o.m_head.store(nullptr);
-        }
-
-        ~List() {
-
-        }
 
         template<typename Predicate, typename Supplier>
         T &find(Predicate p, Supplier s) {

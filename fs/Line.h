@@ -20,17 +20,18 @@ namespace db {
         private:
             using raw_type = db::raw<T_bytes>;
         public:
-            db::rid id;
+            const db::rid id;
             T_hash_type checksum;
             db::RState state;
             raw_type data;
 
-            explicit Line(Table &&table) {
-                id = 1;
+            explicit Line(Table &&table) :
+                    id(1){
             }
 
             template<size_t bytes>
-            explicit Line(const Buffer<bytes> &buf) {
+            explicit Line(const Buffer<bytes> &buf) :
+                    id(1){
 
             }
 
@@ -50,8 +51,7 @@ namespace db {
         public:
 
             static constexpr size_t size() {
-                return multipleOf(
-                        sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::RState) + sizeof(raw_type));
+                return multipleOf(sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::RState) + sizeof(raw_type));
             }
         };
 

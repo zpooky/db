@@ -15,15 +15,16 @@ namespace db {
             const File m_seg_file;
         public:
             explicit SegmentFileParser(const File &seg_file) :
-                    m_seg_file{seg_file} {
+                    m_seg_file(seg_file) {
             }
 
             Segment<T_Meta> parse() {
                 // TODO parse version
-//                unsigned short v = 1u;
-                auto parser = db::segment::Format::parser<T_Meta>();
-                // TODO make Line_size dynamic(based on version)
-                // TODO calculate no of lines
+                unsigned short version = 1u;
+                auto parser = db::segment::Format::parser<T_Meta>(version);
+                // TODO make Line_size dynamic(based o:n version)
+                // TODO calculate no of lines and have a linked bitset list if there are more lines present in file than in lines() constexpr-
+                // should work with present set and reservation set
                 SegmentFile sf{m_seg_file, Line_size<T_Meta>::value(), T_Meta::lines()};
                 return Segment<T_Meta>{std::move(sf), parser.parse(m_seg_file)};
             }
