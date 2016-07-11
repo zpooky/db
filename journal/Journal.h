@@ -45,6 +45,7 @@ namespace db {
 
         template<typename t_Table>
         Journal<t_Table> &instance() {
+            db::assert_is_table<t_Table>();
             static Journal<t_Table> inst{};
             return inst;
         }

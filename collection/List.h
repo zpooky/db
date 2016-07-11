@@ -20,11 +20,35 @@ namespace sp {
                     value(std::move(p_value)),
                     next{nullptr} {
             }
+
+            Node *operator++() {
+                return next;
+            }
+
+            T &operator*() {
+                return value;
+            }
+
+            const T &operator*() const {
+                return value;
+            }
+
+            T *operator->() {
+                return &value;
+            }
+
+            const T *operator->() const {
+                return &value;
+            }
         };
 
         std::atomic<Node *> m_head;
         std::atomic<unsigned long> m_cnt;
     public:
+        using element_type = T;
+        using iterator = Node *;
+        using const_iterator = const iterator;
+
         List() :
                 m_head(nullptr),
                 m_cnt(0) {
@@ -45,6 +69,22 @@ namespace sp {
                 delete node;
                 node = next;
             }
+        }
+
+        iterator begin() {
+            return m_head;
+        }
+
+        const_iterator begin() const {
+            return m_head;
+        }
+
+        iterator end() {
+            return nullptr;
+        }
+
+        const_iterator end() const {
+            return nullptr;
         }
 
     private:
@@ -86,8 +126,6 @@ namespace sp {
     void List<T>::push_front(T &&data) {
         push_front_i(std::move(data));
     }
-
-
 }
 
 #endif

@@ -10,6 +10,7 @@
 #include "Segment.h"
 #include <utility>
 #include "ReservationSet.h"
+#include "../../shared/Maybe.h"
 
 namespace db {
     namespace fs {
@@ -24,7 +25,7 @@ namespace db {
 
             explicit Reservations(Segment <T_Meta> &&seg) :
                     m_segment{std::move(seg)},
-                    m_reservations{m_segment.present_set()}{
+                    m_reservations{m_segment.present_set()} {
             }
 
             Reservations(Reservations<T_Meta> &&o) :
@@ -36,17 +37,25 @@ namespace db {
 
             Reservations(const Reservations &) = delete;
 
-            Reservation reserve();
+            sp::Maybe<Reservation> reserve();
 
             void unreserve(const Reservation &);
+
+            bool has_free() const;
         };
 
         template<typename T_Meta>
-        Reservation Reservations<T_Meta>::reserve() {
-            return {1l};
+        sp::Maybe<Reservation> Reservations<T_Meta>::reserve() {
+            return sp::Maybe<Reservation>{};
         }
+
         template<typename T_Meta>
-        void Reservations<T_Meta>::unreserve(const Reservation &r){
+        void Reservations<T_Meta>::unreserve(const Reservation &r) {
+        }
+
+        template<typename T_Meta>
+        bool Reservations<T_Meta>::has_free() const {
+            return m_reservations.has_free();
         }
 
     }

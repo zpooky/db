@@ -3,3 +3,6 @@
 //
 
 #include "ReservationSet.h"
+
+namespace db {
+}

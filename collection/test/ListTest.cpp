@@ -106,8 +106,8 @@ template<typename T>
 void contains(const vector<unordered_set<T>> &vals, const T &find) {
     bool found = false;
     for (const auto &v : vals) {
-        auto it = v.find(v);
-        if (it != v.end()) {
+//        const auto it = ;
+        if (v.find(find) != v.end()) {
             if (found) {
                 ASSERT_EQ("", "duplicate in thread");
             }
@@ -115,7 +115,7 @@ void contains(const vector<unordered_set<T>> &vals, const T &find) {
         }
     }
     if (!found) {
-        ASSERT_EQ("found", "not found");
+        ASSERT_EQ(-1, find);
     }
 }
 
@@ -127,6 +127,9 @@ TEST(List, threaded_find) {
     vector<Future_t> v;
     std::atomic<size_t> cnt(0);
     for (size_t i = 0; i < 4; ++i) {
+        /**
+         * setup threds
+         */
         std::packaged_task<Vec_t()> task([i, &cnt, &list]() {
             size_t i = 0;
             Vec_t result;
@@ -141,11 +144,16 @@ TEST(List, threaded_find) {
         thread t(std::move(task));
         t.detach();
     }
-
+    /**
+     * collect data
+     */
     vector<Vec_t> thread_result = join(v);
-    for (Vec_t &t : thread_result) {
-        cout << *t.begin() << endl;
-    }
+    /**
+     * test
+     */
+//    for (const auto &c : list) {
+//        contains(thread_result, *c);
+//    }
 }
 
 

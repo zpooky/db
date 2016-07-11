@@ -74,8 +74,6 @@ namespace db {
         };
 
 
-
-
         template<typename T_Meta>
         class ColSegments {
         private:
@@ -105,15 +103,20 @@ namespace db {
             }
 
             Reservation reserve() {
-                auto &reservations = free();
-                return Reservation{0};
+                while(true) {
+                    auto &reservations = free();
+                    auto maybe_res = reservations.reserve();
+                    if (maybe_res.is_present()) {
+                        return maybe_res.get();
+                    }
+                }
             }
 
         private:
 
             Reservations<T_Meta> &free() {
                 auto p = [](const Reservations<T_Meta> &r) -> bool {
-                    return false;
+                    return r.has_free();
                 };
 
                 auto f = [&]() {

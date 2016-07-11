@@ -14,7 +14,8 @@ namespace db {
     struct Reservation {
         const size_t position;
 
-        explicit Reservation(size_t p_position) : position{p_position} {
+        explicit Reservation(size_t p_position) :
+                position{p_position} {
         }
     };
 
