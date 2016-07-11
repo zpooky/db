@@ -9,36 +9,16 @@
 using std::cout;
 using std::endl;
 using sp::CBitset;
-using std::atomic;
-using Byte_t = uint8_t;
-using Entry_t =atomic<Byte_t>;
-static constexpr size_t byte_size = sizeof(Byte_t) * 8;
 
-size_t byte_index(size_t idx) {
-    return std::ceil((double) idx / byte_size);
-}
+class CBitsetTest : public ::testing::TestWithParam<const char *> {
 
+};
 
-using ttttt  =unsigned long long;
+INSTANTIATE_TEST_CASE_P(InstantiationName, CBitsetTest, ::testing::Values(
+        "byte"
+));
 
-TEST(CBitset, test) {
-    size_t bitIdx = 19;
-//    size_t byteIdx = byte_index(bitIdx);
-
-    const Byte_t offset = bitIdx - (ttttt(bitIdx / byte_size) * 8);
-
-    constexpr Byte_t one_ = 1 << (byte_size - 1);//10000000
-    const Byte_t mask = one_ >> offset;
-
-    Byte_t bbb = Byte_t(128) | mask;
-    std::bitset<byte_size> b{mask};
-    cout << endl;
-    cout << b << endl;
-}
-
-
-
-TEST(CBitset, test_empty) {
+TEST_F(CBitsetTest, test_empty) {
     constexpr size_t bits = 1024;
     CBitset<bits> b;
     for (size_t i = 0; i < bits; ++i) {
@@ -46,13 +26,103 @@ TEST(CBitset, test_empty) {
     }
 }
 
-TEST(CBitset, test_seq_setTrue_get) {
-    constexpr size_t bits = 1024;
-    CBitset<bits> b;
+template<size_t bits, typename T>
+void true_set(CBitset<bits, T> &b) {
     for (size_t i = 0; i < bits; ++i) {
         for (size_t a = 0; a < i; ++a) {
             ASSERT_TRUE(b.test(a));
         }
         ASSERT_TRUE(b.set(i, true));
+        for (size_t a = bits - 1; a > i; --a) {
+            ASSERT_FALSE(b.test(a));
+        }
     }
+}
+
+template<size_t bits, typename T>
+void false_set(CBitset<bits, T> &b) {
+    for (size_t i = 0; i < bits; ++i) {
+        for (size_t a = 0; a < i; ++a) {
+            ASSERT_FALSE(b.test(a));
+        }
+        ASSERT_TRUE(b.set(i, false));
+        for (size_t a = bits - 1; a > i; --a) {
+            ASSERT_TRUE(b.test(a));
+        }
+    }
+}
+
+template<typename T>
+void test_seq_setFalse_get() {
+    constexpr size_t bits = 1024;
+    CBitset<bits, T> b;
+    true_set(b);
+    false_set(b);
+
+}
+
+
+TEST_F(CBitsetTest, test_seq_setFalse_get_short) {
+    test_seq_setFalse_get<uint16_t>();
+}
+
+TEST_F(CBitsetTest, test_seq_setFalse_get_int) {
+    test_seq_setFalse_get<uint32_t>();
+}
+
+
+TEST_F(CBitsetTest, test_seq_setFalse_get_byte) {
+    test_seq_setFalse_get<uint8_t>();
+}
+
+TEST_F(CBitsetTest, test_seq_setFalse_get_long) {
+    test_seq_setFalse_get<uint64_t>();
+}
+
+std::string random_binary(size_t cnt) {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(0, 1);
+    std::string stream = "";
+    for (size_t i = 0; i < cnt; ++i) {
+        if (dist(mt)) {
+            stream.append("1");
+        } else {
+            stream.append("0");
+        }
+    }
+    return stream;
+}
+
+template<typename F>
+auto time(F f) -> decltype(F()) {
+    return f();
+}
+
+template<typename T>
+void test_init() {
+    constexpr size_t bits(1024 * 80);
+    std::string str = random_binary(bits);
+    std::bitset<bits> init(str);
+    using Bitset_t = CBitset<bits, T>;
+//    cout << endl << init << endl;
+    auto b = time([&]() -> Bitset_t {
+        return Bitset_t(init);
+    });
+//    cout << b << endl;
+    for (size_t i = 0; i < init.size(); ++i) {
+        ASSERT_EQ(init.test(i), b.test(i));
+    }
+}
+
+TEST_F(CBitsetTest, init_long) {
+    test_init<uint64_t>();
+}
+
+//TEST_F(CBitsetTest, tesst) {
+//    cout << endl << GetParam() << endl;
+//}
+
+TEST_F(CBitsetTest, test_true_random) {
+
 }

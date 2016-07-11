@@ -7,37 +7,46 @@
 
 #include <bitset>
 #include <atomic>
+#include <type_traits>
 #include <cmath>
 #include <array>
+#include <iostream>
 
 namespace sp {
     using std::atomic;
 
-    template<size_t T_Size>
+    template<size_t T_Size, typename Byte_t = uint8_t>
     class CBitset {
     private:
-        using Byte_t = uint8_t;
         using Entry_t =atomic<Byte_t>;
         static constexpr size_t bits = sizeof(Byte_t) * 8;
-        static constexpr Byte_t one_ = 1 << (bits - 1);//10000000
+        static constexpr size_t T_Size_based_on_bits = size_t(std::ceil(double(T_Size) / bits));
+        static constexpr Byte_t one_ = Byte_t(1) << size_t(bits - 1);//10000000
 
         struct Entry {
+        private:
+            static constexpr void assert_valid() {
+                static_assert(std::is_scalar<Byte_t>::value, "Backing structure is required to be a scalar");
+                static_assert(std::is_integral<Byte_t>::value, "Backing structure is required to be a integral");
+                static_assert(T_Size % 8 == 0, "Size should be evenly divisable with 8");
+            }
+
         public:
-            std::array<Entry_t, T_Size> m_data;
+            std::array<Entry_t, T_Size_based_on_bits> m_data;
 
             Entry() :
-                    m_data(){
+                    m_data() {
+                assert_valid();
             }
 
             explicit Entry(const std::bitset<T_Size> &init) {
-                for (size_t i = 0; i < init.size(); ++i) {
-                    set(i, init[i]);
-                }
+                assert_valid();
+                transfer(init);
             }
 
         private:
-            size_t byte_index(size_t idx) const {
-                return std::ceil(double(idx) / bits);
+            constexpr size_t byte_index(size_t idx) const {
+                return size_t(double(idx) / bits);
             }
 
             Entry_t &word_for(size_t byteIdx) {
@@ -45,11 +54,42 @@ namespace sp {
             }
 
             const Entry_t &word_for(size_t byteIdx) const {
+                constexpr auto max = T_Size_based_on_bits;
+                if (byteIdx >= max) {
+                    throw std::runtime_error(std::string(""));
+                }
                 return m_data[byteIdx];
+            }
+
+            void store(size_t wordIdx, Byte_t value) {
+                auto &entry = word_for(wordIdx);
+                entry.store(value);
             }
 
         public:
             using ttttt  =unsigned long long;
+
+
+            void transfer(const std::bitset<T_Size> &init) {
+                Byte_t word(0);
+                size_t entryIdx(0);
+                size_t i(0);
+                for (; i < init.size(); ++i) {
+                    if (init[i]) {
+                        size_t bitoffset = (bits - 1) - (i % bits);
+                        Byte_t cbits = Byte_t(1) << bitoffset;
+                        word = word | cbits;
+                    }
+
+                    if (size_t(i + 1) % bits == size_t(0)) {
+                        store(entryIdx++, word);
+                        word = Byte_t(0);
+                    }
+                }
+                if(size_t(i + 1) % bits != size_t(0)){
+                    store(entryIdx, word);
+                }
+            }
 
             bool set(size_t bitIdx, bool b) {
                 size_t byteIdx = byte_index(bitIdx);
@@ -76,17 +116,19 @@ namespace sp {
                 return true;
             }
 
-            const Byte_t word_index(size_t bitIdx) const {
+            constexpr Byte_t word_index(size_t bitIdx) const {
                 return bitIdx - ttttt(ttttt(bitIdx / bits) * bits);
             }
 
             bool test(size_t bitIdx) const {
                 size_t byteIdx = byte_index(bitIdx);
                 const Entry_t &e = word_for(byteIdx);
+
                 auto wordIdx = word_index(bitIdx);
                 const Byte_t mask = one_ >> wordIdx;
+
                 auto word = e.load();
-                return word & mask != Byte_t(0);
+                return Byte_t(word & mask) != Byte_t(0);
             }
         };
 
@@ -119,12 +161,17 @@ namespace sp {
             }
         }
 
+        constexpr size_t size() const {
+            return T_Size;
+        }
+
         bool set(size_t bitIdx, bool b) {
             return m_entry->set(bitIdx, b);
         }
 
         bool test(size_t idx) const {
-            return m_entry->test(idx);
+            bool ret = m_entry->test(idx);
+            return ret;
         }
 
         bool operator[](size_t idx) const {
@@ -133,9 +180,15 @@ namespace sp {
 
     };
 
-    template<size_t size>
-    std::ostream &operator<<(std::ostream &os, CBitset<size> b) {
-
+    template<size_t size, typename Type>
+    std::ostream &operator<<(std::ostream &os, const CBitset<size, Type> &b) {
+        for (size_t i = b.size(); i > 0; --i) {
+            if (b[i - 1]) {
+                std::cout << '1';
+            } else {
+                std::cout << '0';
+            }
+        }
         return os;
     }
 }
