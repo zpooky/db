@@ -80,8 +80,7 @@ TEST_F(CBitsetTest, test_seq_setFalse_get_long) {
 }
 
 std::string random_binary(size_t cnt) {
-    std::random_device rd;
-    std::mt19937 mt(rd());
+    std::mt19937 mt(0);
     std::uniform_int_distribution<int> dist(0, 1);
     std::string stream = "";
     for (size_t i = 0; i < cnt; ++i) {
@@ -94,8 +93,22 @@ std::string random_binary(size_t cnt) {
     return stream;
 }
 
+struct Timer {
+public:
+    const std::clock_t start;
+
+    Timer() : start{std::clock()} {
+    }
+
+    ~Timer() {
+        std::clock_t stop = std::clock();
+        cout << endl << (stop - start) << "ns" << endl;
+    }
+};
+
 template<typename F>
-auto time(F f) -> decltype(F()) {
+auto time(F f) -> decltype(f()) {
+    Timer t;
     return f();
 }
 
@@ -119,6 +132,17 @@ TEST_F(CBitsetTest, init_long) {
     test_init<uint64_t>();
 }
 
+TEST_F(CBitsetTest, init_set_fill) {
+    constexpr size_t bits(1024 * 80);
+    std::string str = random_binary(bits);
+    std::bitset<bits> init(str);
+    CBitset<bits, unsigned long> bb;
+    time([&] {
+        for (size_t i = 0; i < bits; ++i) {
+            bb.set(i, init[i]);
+        }
+    });
+}
 //TEST_F(CBitsetTest, tesst) {
 //    cout << endl << GetParam() << endl;
 //}
