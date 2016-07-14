@@ -5,17 +5,18 @@
 #include "gtest/gtest.h"
 #include "../CBitset.h"
 #include <iostream>
+#include <unordered_set>
 
 using std::cout;
 using std::endl;
 using sp::CBitset;
 
-class CBitsetTest : public ::testing::TestWithParam<const char *> {
+class CBitsetTest : public ::testing::TestWithParam<bool> {
 
 };
 
-INSTANTIATE_TEST_CASE_P(InstantiationName, CBitsetTest, ::testing::Values(
-        "byte"
+INSTANTIATE_TEST_CASE_P(PreFill, CBitsetTest, ::testing::Values(
+        true, false
 ));
 
 TEST_F(CBitsetTest, test_empty) {
@@ -143,10 +144,58 @@ TEST_F(CBitsetTest, init_set_fill) {
         }
     });
 }
+
 //TEST_F(CBitsetTest, tesst) {
 //    cout << endl << GetParam() << endl;
 //}
 
-TEST_F(CBitsetTest, test_true_random) {
+template<typename T>
+void test_set_random(bool v) {
+    constexpr size_t bits(1024);
+    CBitset<bits, T> bb(!v);
+    std::array<size_t, bits> in;
+    {
+        size_t val = 0;
+        std::generate(in.begin(), in.end(), [&] {
+            return val++;
+        });
+    }
+    std::shuffle(in.begin(), in.end(), std::default_random_engine(0));
+    std::unordered_set<size_t> present;
+    for (const size_t &it : in) {
+        ASSERT_TRUE(bb.set(it, v));
+        ASSERT_TRUE(present.insert(it).second);
+        for (size_t i = 0; i < bb.size(); ++i) {
+            if (present.find(i) != present.end()) {
+                if (v) {
+                    ASSERT_TRUE(bb.test(i));
+                } else {
+                    ASSERT_FALSE(bb.test(i));
+                }
+            } else {
+                if (v) {
+                    ASSERT_FALSE(bb.test(i));
+                } else {
+                    ASSERT_TRUE(bb.test(i));
+                }
+            }
+        }
+    }
 
+}
+
+TEST_P(CBitsetTest, test_long_random) {
+    test_set_random<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_int_random) {
+    test_set_random<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_short_random) {
+    test_set_random<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_byte_random) {
+    test_set_random<uint8_t>(GetParam());
 }

@@ -44,6 +44,11 @@ namespace sp {
                 transfer(init);
             }
 
+            explicit Entry(bool v) {
+                assert_valid();
+                init_with(v ? ~Byte_t(0) : Byte_t(0));
+            }
+
         private:
             constexpr size_t byte_index(size_t idx) const {
                 return size_t(double(idx) / bits);
@@ -56,7 +61,7 @@ namespace sp {
             const Entry_t &word_for(size_t byteIdx) const {
                 constexpr auto max = T_Size_based_on_bits;
                 if (byteIdx >= max) {
-                    throw std::runtime_error(std::string(""));
+                    throw std::out_of_range(std::string(""));
                 }
                 return m_data[byteIdx];
             }
@@ -66,9 +71,14 @@ namespace sp {
                 entry.store(value);
             }
 
-        public:
             using ttttt  =unsigned long long;
 
+            void init_with(Byte_t def) {
+                for (size_t idx = 0; idx < T_Size_based_on_bits; ++idx) {
+                    m_data[idx].store(def);
+                }
+
+            }
 
             void transfer(const std::bitset<T_Size> &init) {
                 Byte_t word(0);
@@ -86,11 +96,12 @@ namespace sp {
                         word = Byte_t(0);
                     }
                 }
-                if(size_t(i + 1) % bits != size_t(0)){
+                if (size_t(i + 1) % bits != size_t(0)) {
                     store(entryIdx, word);
                 }
             }
 
+        public:
             bool set(size_t bitIdx, bool b) {
                 size_t byteIdx = byte_index(bitIdx);
                 Entry_t &e = word_for(byteIdx);
@@ -147,6 +158,14 @@ namespace sp {
                 CBitset{new Entry(init)} {
         }
 
+        /**
+     *  @brief init the bitset with
+     *  @param  b  the value to fill with
+     */
+        explicit CBitset(bool v)
+                : CBitset(new Entry(v)) {
+        }
+
         CBitset(const CBitset &) = delete;
 
         CBitset(CBitset &&o) :
@@ -165,6 +184,12 @@ namespace sp {
             return T_Size;
         }
 
+        /**
+     *  @brief sets the specified bit to b
+     *  @param  bitIdx  The index of a bit.
+     *  @return wether b is set to b allready true, otherwise false
+     *  @throw  std::out_of_range  If @a pos is bigger the size of the %set.
+     */
         bool set(size_t bitIdx, bool b) {
             return m_entry->set(bitIdx, b);
         }
