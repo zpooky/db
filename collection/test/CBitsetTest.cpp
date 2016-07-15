@@ -199,3 +199,69 @@ TEST_P(CBitsetTest, test_short_random) {
 TEST_P(CBitsetTest, test_byte_random) {
     test_set_random<uint8_t>(GetParam());
 }
+
+template<typename T>
+void test_find(bool v) {
+    constexpr size_t bits(1024);
+    CBitset<bits, T> bb{!v};
+    for (size_t i = 0; i < bits; ++i) {
+        bb.find_first(v);
+        ASSERT_TRUE(bb.set(i, v));
+    }
+}
+
+TEST_P(CBitsetTest, test_findlong_random) {
+    test_find<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_findint_random) {
+    test_find<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_findshort_random) {
+    test_find<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_findbyte_random) {
+    test_find<uint8_t>(GetParam());
+}
+
+
+template<typename T>
+void test_find_random(bool v) {
+
+}
+
+TEST_P(CBitsetTest, test_find_randomlong_random) {
+    test_find_random<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_find_randomint_random) {
+    test_find_random<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_find_randomshort_random) {
+    test_find_random<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_find_randombyte_random) {
+    test_find_random<uint8_t>(GetParam());
+}
+
+TEST_F(CBitsetTest, testt) {
+    using Byte_t = uint8_t;
+    bool find = true;
+    const Byte_t mask = find ? ~Byte_t(0) : Byte_t(0);
+    Byte_t in = Byte_t(170);
+    const Byte_t res = (in | mask);
+    constexpr Byte_t one_ = Byte_t(1) << size_t(sizeof(Byte_t) - 1);//10000000
+    if (res != in) {
+        for (size_t bit = 0; bit < sizeof(Byte_t); ++bit) {
+            Byte_t vmask = one_ >> bit;
+            if (true) {
+
+            }
+            cout << endl << res << endl;
+        }
+    }
+}

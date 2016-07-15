@@ -14,20 +14,29 @@ namespace db {
     class ReservationSet {
     private:
         sp::CBitset<T_Size> m_bitset;
+        std::atomic<size_t> m_cnt;
     public:
         template<typename t_Meta>
-        explicit ReservationSet(const PresentSet<t_Meta> &p) {
+        explicit ReservationSet(const PresentSet<t_Meta> &p)
+                : m_bitset{p.get_bitset()},
+                  m_cnt{m_bitset.find_first(false)} {
         }
 
         ReservationSet(const ReservationSet &) = delete;
 
         ReservationSet(ReservationSet &&o) :
-                m_bitset{std::move(o.m_bitset)} {
+                m_bitset{std::move(o.m_bitset)},
+                m_cnt{o.m_cnt.load()}{
+        }
+
+        void reserve() {
+            size_t reserved = m_bitset.swap_first_starting_with(m_cnt, false);
+            m_cnt.store(reserved);
         }
 
 
         bool has_free() const {
-            return false;
+            return !m_bitset.all(true);
         }
     };
 }

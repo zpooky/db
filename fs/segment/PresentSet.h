@@ -14,15 +14,15 @@ namespace db {
     template<typename T_Meta>
     class PresentSet {
     private:
-        using Bitset_t = sp::CBitset<T_Meta::lines()>;
+        using Bitset_t = std::bitset<T_Meta::lines()>;
         Bitset_t m_bitset;
     public:
         PresentSet() :
-                m_bitset{} {
+                m_bitset() {
 
         }
 
-        explicit PresentSet(const std::bitset<T_Meta::lines()> &init) :
+        explicit PresentSet(const Bitset_t &init) :
                 m_bitset(init) {
 
         }
@@ -34,7 +34,12 @@ namespace db {
 
         }
 
+        const Bitset_t &get_bitset() const {
+            return m_bitset;
+        }
+
     private:
+
     };
 
 }

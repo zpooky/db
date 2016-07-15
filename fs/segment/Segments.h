@@ -24,8 +24,9 @@ namespace db {
             const db::Directory root;
             const index_type start;
 
-            explicit Context(const Directory &p_root, index_type p_start) : root(p_root),
-                                                                            start{p_start} { }
+            explicit Context(const Directory &p_root, index_type p_start) :
+                    root(p_root),
+                    start{p_start} { }
 
         };
 
@@ -103,7 +104,7 @@ namespace db {
             }
 
             Reservation reserve() {
-                while(true) {
+                while (true) {
                     auto &reservations = free();
                     auto maybe_res = reservations.reserve();
                     if (maybe_res.is_present()) {

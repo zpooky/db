@@ -21,7 +21,7 @@ namespace sp {
         using Entry_t =atomic<Byte_t>;
         static constexpr size_t bits = sizeof(Byte_t) * 8;
         static constexpr size_t T_Size_based_on_bits = size_t(std::ceil(double(T_Size) / bits));
-        static constexpr Byte_t one_ = Byte_t(1) << size_t(bits - 1);//10000000
+        static constexpr Byte_t one_ = Byte_t(1) << size_t(bits - 1);//10000...
 
         struct Entry {
         private:
@@ -75,7 +75,7 @@ namespace sp {
 
             void init_with(Byte_t def) {
                 for (size_t idx = 0; idx < T_Size_based_on_bits; ++idx) {
-                    m_data[idx].store(def);
+                    word_for(idx).store(def);
                 }
 
             }
@@ -141,6 +141,36 @@ namespace sp {
                 auto word = e.load();
                 return Byte_t(word & mask) != Byte_t(0);
             }
+
+            bool all(Byte_t test) const {
+                for (size_t idx = 0; idx < T_Size_based_on_bits; ++idx) {
+                    size_t current = m_data[idx].load();
+                    if ((current & test) != test) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            size_t find_first(size_t bitIdx, bool find) const {
+                size_t byteIdx = byte_index(bitIdx);
+                auto wordIdx = word_index(bitIdx);
+
+                const Byte_t mask = find ? ~Byte_t(0) : Byte_t(0);
+
+                for (; byteIdx < T_Size_based_on_bits; ++byteIdx) {
+                    const auto word = word_for(byteIdx).load();
+
+                    const Byte_t res = (word | mask);
+                    if (res != word) {
+                        for (size_t bit = wordIdx; bit < bits; ++bit) {
+
+                        }
+                    }
+                    wordIdx = Byte_t(0);
+                }
+                return size_t(0);
+            }
         };
 
         Entry *m_entry;
@@ -159,9 +189,9 @@ namespace sp {
         }
 
         /**
-     *  @brief init the bitset with
-     *  @param  b  the value to fill with
-     */
+        *  @brief init the bitset with
+        *  @param  b  the value to fill with
+        */
         explicit CBitset(bool v)
                 : CBitset(new Entry(v)) {
         }
@@ -194,16 +224,29 @@ namespace sp {
             return m_entry->set(bitIdx, b);
         }
 
-        bool test(size_t idx) const {
-            bool ret = m_entry->test(idx);
+        bool test(size_t bitIdx) const {
+            bool ret = m_entry->test(bitIdx);
             return ret;
         }
 
-        bool operator[](size_t idx) const {
-            return test(idx);
+        bool operator[](size_t bitIdx) const {
+            return test(bitIdx);
+        }
+
+        bool all(bool test) const {
+            return m_entry->all(test ? ~Byte_t(0) : Byte_t(0));
+        }
+
+        size_t find_first(bool find) const {
+            return m_entry->find_first(size_t(0), find);
+        }
+
+        size_t find_first(size_t bitIdx, bool find) const {
+            return m_entry->find_first(bitIdx, find);
         }
 
     };
+
 
     template<size_t size, typename Type>
     std::ostream &operator<<(std::ostream &os, const CBitset<size, Type> &b) {

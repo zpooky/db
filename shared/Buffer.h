@@ -17,18 +17,21 @@ namespace db {
         template<size_t t_capacity>
         class Buffer {
         private:
-            using Arr = array<char, t_capacity>;
+            using Arr = array<uint8_t, t_capacity>;
             Arr m_data;
             size_t m_position;
             size_t m_size;
         public:
             explicit Buffer(Arr &&data) :
-                    m_data(std::move(data)) {
+                    m_data(std::move(data)),
+                    m_position{0},
+                    m_size{0} {
             }
 
-            Buffer() : m_position{0}, m_size{0} {
+            Buffer() : Buffer(Arr{0}) {
 
             }
+
 
             void put(const unsigned char datum[], size_t length) {
                 auto begin = &datum[0];
