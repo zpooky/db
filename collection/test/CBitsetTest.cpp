@@ -96,20 +96,23 @@ std::string random_binary(size_t cnt) {
 
 struct Timer {
 public:
+    const std::string m_msg;
     const std::clock_t start;
 
-    Timer() : start{std::clock()} {
+    Timer(const std::string &msg) :
+            start{std::clock()},
+            m_msg{msg} {
     }
 
     ~Timer() {
         std::clock_t stop = std::clock();
-        cout << endl << (stop - start) << "ns" << endl;
+        cout << endl << m_msg << ": " << (stop - start) << "ns" << endl;
     }
 };
 
 template<typename F>
-auto time(F f) -> decltype(f()) {
-    Timer t;
+auto time(const std::string &msg, F f) -> decltype(f()) {
+    Timer t(msg);
     return f();
 }
 
@@ -120,7 +123,8 @@ void test_init() {
     std::bitset<bits> init(str);
     using Bitset_t = CBitset<bits, T>;
 //    cout << endl << init << endl;
-    auto b = time([&]() -> Bitset_t {
+
+    auto b = time(__PRETTY_FUNCTION__, [&]() -> Bitset_t {
         return Bitset_t(init);
     });
 //    cout << b << endl;
@@ -133,21 +137,30 @@ TEST_F(CBitsetTest, init_long) {
     test_init<uint64_t>();
 }
 
+TEST_F(CBitsetTest, init_int) {
+    test_init<uint32_t>();
+}
+
+TEST_F(CBitsetTest, init_short) {
+    test_init<uint16_t>();
+}
+
+TEST_F(CBitsetTest, init_byte) {
+    test_init<uint8_t>();
+}
+
 TEST_F(CBitsetTest, init_set_fill) {
     constexpr size_t bits(1024 * 80);
     std::string str = random_binary(bits);
     std::bitset<bits> init(str);
     CBitset<bits, unsigned long> bb;
-    time([&] {
+    time("init_set<unsigned long>", [&] {
         for (size_t i = 0; i < bits; ++i) {
             bb.set(i, init[i]);
         }
     });
 }
 
-//TEST_F(CBitsetTest, tesst) {
-//    cout << endl << GetParam() << endl;
-//}
 
 template<typename T>
 void test_set_random(bool v) {
@@ -231,46 +244,28 @@ TEST_P(CBitsetTest, test_findbyte) {
 
 
 template<typename T>
-void test_find_random(bool v) {
-
-}
-
-TEST_P(CBitsetTest, test_find_randomlong_random) {
-    test_find_random<uint64_t>(GetParam());
-}
-
-TEST_P(CBitsetTest, test_find_randomint_random) {
-    test_find_random<uint32_t>(GetParam());
-}
-
-TEST_P(CBitsetTest, test_find_randomshort_random) {
-    test_find_random<uint16_t>(GetParam());
-}
-
-TEST_P(CBitsetTest, test_find_randombyte_random) {
-    test_find_random<uint8_t>(GetParam());
-}
-
-TEST_F(CBitsetTest, testt) {
-    cout << endl;
-    using Byte_t = uint8_t;
-//    Byte_t in = Byte_t(170);
-    Byte_t in = Byte_t(0);
-//    Byte_t in = Byte_t(255);
-//    Byte_t in = Byte_t(152);
-    constexpr size_t bits = sizeof(Byte_t) * 8;
-    constexpr Byte_t one_ = Byte_t(1) << size_t(bits - 1);//10000000
-    bool find = false;
-    const Byte_t mask = find ? Byte_t(0) : ~Byte_t(0);
-//    const Byte_t res = (in ^ mask);
-    if (in != mask) {
-        for (size_t bit = 0; bit < bits; ++bit) {
-            Byte_t vmask = one_ >> bit;
-            Byte_t cmp = find ? vmask : Byte_t(0);
-            if (Byte_t(vmask & in) == cmp) {
-                cout << bit << endl;
-            }
-        }
-        cout << endl;
+void test_find_reverse(bool v) {
+    constexpr size_t bits(1024);
+    CBitset<bits, T> bb{!v};
+    for (size_t i = bb.size() - 1; i >= 0; --i) {
+        ASSERT_TRUE(bb.set(i, v));
+        ASSERT_EQ(v, bb.test(i));
+        ASSERT_EQ(i, bb.find_first(v));
     }
+}
+
+TEST_P(CBitsetTest, test_findlong_reverse) {
+    test_find<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_findint_reverse) {
+    test_find<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_findshort_reverse) {
+    test_find<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_findbyte_reverse) {
+    test_find<uint8_t>(GetParam());
 }

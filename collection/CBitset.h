@@ -96,7 +96,7 @@ namespace sp {
                         word = Byte_t(0);
                     }
                 }
-                if (size_t(i + 1) % bits != size_t(0)) {
+                if (i % bits != size_t(0)) {
                     store(entryIdx, word);
                 }
             }
