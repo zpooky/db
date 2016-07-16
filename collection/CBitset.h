@@ -22,30 +22,26 @@ namespace sp {
         static constexpr size_t bits = sizeof(Byte_t) * 8;
         static constexpr size_t T_Size_based_on_bits = size_t(std::ceil(double(T_Size) / bits));
         static constexpr Byte_t one_ = Byte_t(1) << size_t(bits - 1);//10000...
+        //
+        static_assert(std::is_scalar<Byte_t>::value, "Backing structure is required to be a scalar");
+        static_assert(std::is_integral<Byte_t>::value, "Backing structure is required to be a integral");
+        static_assert(T_Size % 8 == 0, "Size should be evenly divisable with 8");
 
         struct Entry {
         private:
-            static constexpr void assert_valid() {
-                static_assert(std::is_scalar<Byte_t>::value, "Backing structure is required to be a scalar");
-                static_assert(std::is_integral<Byte_t>::value, "Backing structure is required to be a integral");
-                static_assert(T_Size % 8 == 0, "Size should be evenly divisable with 8");
-            }
 
         public:
             std::array<Entry_t, T_Size_based_on_bits> m_data;
 
             Entry() :
                     m_data() {
-                assert_valid();
             }
 
             explicit Entry(const std::bitset<T_Size> &init) {
-                assert_valid();
                 transfer(init);
             }
 
             explicit Entry(bool v) {
-                assert_valid();
                 init_with(v ? ~Byte_t(0) : Byte_t(0));
             }
 
@@ -55,6 +51,10 @@ namespace sp {
             }
 
             Entry_t &word_for(size_t byteIdx) {
+                constexpr auto max = T_Size_based_on_bits;
+                if (byteIdx >= max) {
+                    throw std::out_of_range(std::string(""));
+                }
                 return m_data[byteIdx];
             }
 
@@ -152,24 +152,33 @@ namespace sp {
                 return true;
             }
 
+            size_t bit_index(size_t byteIdx, Byte_t wordIdx) const {
+                return size_t(byteIdx * bits) + wordIdx;
+            }
+
             size_t find_first(size_t bitIdx, bool find) const {
                 size_t byteIdx = byte_index(bitIdx);
                 auto wordIdx = word_index(bitIdx);
 
-                const Byte_t mask = find ? ~Byte_t(0) : Byte_t(0);
+                const Byte_t mask = find ? Byte_t(0) : ~Byte_t(0);
 
                 for (; byteIdx < T_Size_based_on_bits; ++byteIdx) {
-                    const auto word = word_for(byteIdx).load();
+                    const Byte_t word = word_for(byteIdx).load();
 
-                    const Byte_t res = (word | mask);
-                    if (res != word) {
+                    if (mask != word) {
                         for (size_t bit = wordIdx; bit < bits; ++bit) {
 
+                            Byte_t vmask = one_ >> bit;
+                            Byte_t cmp = find ? vmask : Byte_t(0);
+
+                            if (Byte_t(vmask & word) == cmp) {
+                                return bit_index(byteIdx, wordIdx);
+                            }
                         }
                     }
                     wordIdx = Byte_t(0);
                 }
-                return size_t(0);
+                return size_t(T_Size - 1);
             }
         };
 

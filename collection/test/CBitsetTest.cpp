@@ -205,24 +205,27 @@ void test_find(bool v) {
     constexpr size_t bits(1024);
     CBitset<bits, T> bb{!v};
     for (size_t i = 0; i < bits; ++i) {
-        bb.find_first(v);
+//        cout << "(" << v << ")" << i << endl;
+        ASSERT_EQ(bb.size() - 1, bb.find_first(i, v));
         ASSERT_TRUE(bb.set(i, v));
+        ASSERT_EQ(v, bb.test(i));
+        ASSERT_EQ(i, bb.find_first(i, v));
     }
 }
 
-TEST_P(CBitsetTest, test_findlong_random) {
+TEST_P(CBitsetTest, test_findlong) {
     test_find<uint64_t>(GetParam());
 }
 
-TEST_P(CBitsetTest, test_findint_random) {
+TEST_P(CBitsetTest, test_findint) {
     test_find<uint32_t>(GetParam());
 }
 
-TEST_P(CBitsetTest, test_findshort_random) {
+TEST_P(CBitsetTest, test_findshort) {
     test_find<uint16_t>(GetParam());
 }
 
-TEST_P(CBitsetTest, test_findbyte_random) {
+TEST_P(CBitsetTest, test_findbyte) {
     test_find<uint8_t>(GetParam());
 }
 
@@ -249,19 +252,25 @@ TEST_P(CBitsetTest, test_find_randombyte_random) {
 }
 
 TEST_F(CBitsetTest, testt) {
+    cout << endl;
     using Byte_t = uint8_t;
-    bool find = true;
-    const Byte_t mask = find ? ~Byte_t(0) : Byte_t(0);
-    Byte_t in = Byte_t(170);
-    const Byte_t res = (in | mask);
-    constexpr Byte_t one_ = Byte_t(1) << size_t(sizeof(Byte_t) - 1);//10000000
-    if (res != in) {
-        for (size_t bit = 0; bit < sizeof(Byte_t); ++bit) {
+//    Byte_t in = Byte_t(170);
+    Byte_t in = Byte_t(0);
+//    Byte_t in = Byte_t(255);
+//    Byte_t in = Byte_t(152);
+    constexpr size_t bits = sizeof(Byte_t) * 8;
+    constexpr Byte_t one_ = Byte_t(1) << size_t(bits - 1);//10000000
+    bool find = false;
+    const Byte_t mask = find ? Byte_t(0) : ~Byte_t(0);
+//    const Byte_t res = (in ^ mask);
+    if (in != mask) {
+        for (size_t bit = 0; bit < bits; ++bit) {
             Byte_t vmask = one_ >> bit;
-            if (true) {
-
+            Byte_t cmp = find ? vmask : Byte_t(0);
+            if (Byte_t(vmask & in) == cmp) {
+                cout << bit << endl;
             }
-            cout << endl << res << endl;
         }
+        cout << endl;
     }
 }

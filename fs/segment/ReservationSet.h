@@ -8,6 +8,7 @@
 #include <bitset>
 #include <utility>
 #include "PresentSet.h"
+#include "../../shared/Maybe.h"
 
 namespace db {
     template<size_t T_Size>
@@ -29,14 +30,15 @@ namespace db {
                 m_cnt{o.m_cnt.load()}{
         }
 
-        void reserve() {
-            size_t reserved = m_bitset.swap_first_starting_with(m_cnt, false);
+        sp::Maybe<Reservation> reserve() {
+            size_t reserved = m_bitset.swap_first(m_cnt, false);
             m_cnt.store(reserved);
+            return {};
         }
 
 
         bool has_free() const {
-            return !m_bitset.all(true);
+            return !m_bitset.all(m_cnt, true);
         }
     };
 }
