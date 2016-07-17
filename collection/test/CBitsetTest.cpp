@@ -96,10 +96,10 @@ std::string random_binary(size_t cnt) {
 
 struct Timer {
 public:
-    const std::string m_msg;
     const std::clock_t start;
+    const std::string m_msg;
 
-    Timer(const std::string &msg) :
+    explicit Timer(const std::string &msg) :
             start{std::clock()},
             m_msg{msg} {
     }
@@ -247,7 +247,7 @@ template<typename T>
 void test_find_reverse(bool v) {
     constexpr size_t bits(1024);
     CBitset<bits, T> bb{!v};
-    for (size_t i = bb.size() - 1; i >= 0; --i) {
+    for (size_t i = bb.size(); i-- > 0;) {
         ASSERT_TRUE(bb.set(i, v));
         ASSERT_EQ(v, bb.test(i));
         ASSERT_EQ(i, bb.find_first(v));
@@ -268,4 +268,33 @@ TEST_P(CBitsetTest, test_findshort_reverse) {
 
 TEST_P(CBitsetTest, test_findbyte_reverse) {
     test_find<uint8_t>(GetParam());
+}
+
+template<typename T>
+void test_all_reverse(bool v) {
+    constexpr size_t bits(1024);
+    CBitset<bits, T> bb{!v};
+    cout << endl;
+    for (size_t i = bb.size(); i-- > 0;) {
+        cout << "|" << i << endl;
+        ASSERT_FALSE(bb.all(i, v));
+        ASSERT_TRUE(bb.set(i, v));
+//        ASSERT_TRUE(bb.all(i, v));
+    }
+}
+
+TEST_P(CBitsetTest, test_all_reverselong_reverse) {
+    test_all_reverse<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_all_reverseint_reverse) {
+    test_all_reverse<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_all_reverseshort_reverse) {
+    test_all_reverse<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_all_reversebyte_reverse) {
+    test_all_reverse<uint8_t>(GetParam());
 }

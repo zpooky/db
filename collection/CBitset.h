@@ -142,12 +142,18 @@ namespace sp {
                 return Byte_t(word & mask) != Byte_t(0);
             }
 
-            bool all(Byte_t test) const {
-                for (size_t idx = 0; idx < T_Size_based_on_bits; ++idx) {
-                    size_t current = m_data[idx].load();
-                    if ((current & test) != test) {
+            bool all(size_t bitIdx, Byte_t test) const {
+                size_t idx = byte_index(bitIdx);
+                Byte_t wordIdx = word_index(bitIdx);
+
+                Byte_t mask = test >> wordIdx;
+
+                for (; idx < T_Size_based_on_bits; ++idx) {
+                    Byte_t current = word_for(idx).load();
+                    if (Byte_t(current & mask) != mask) {
                         return false;
                     }
+                    mask = test;
                 }
                 return true;
             }
@@ -242,16 +248,20 @@ namespace sp {
             return test(bitIdx);
         }
 
-        bool all(bool test) const {
-            return m_entry->all(test ? ~Byte_t(0) : Byte_t(0));
+        bool all(size_t bitIdx, bool test) const {
+            return m_entry->all(bitIdx, test ? ~Byte_t(0) : Byte_t(0));
         }
 
-        size_t find_first(bool find) const {
-            return m_entry->find_first(size_t(0), find);
+        bool all(bool test) const {
+            return all(size_t(0), test);
         }
 
         size_t find_first(size_t bitIdx, bool find) const {
             return m_entry->find_first(bitIdx, find);
+        }
+
+        size_t find_first(bool find) const {
+            return find_first(size_t(0), find);
         }
 
     };
