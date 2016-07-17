@@ -178,7 +178,7 @@ namespace sp {
                             Byte_t cmp = find ? vmask : Byte_t(0);
 
                             if (Byte_t(vmask & word) == cmp) {
-                                return bit_index(byteIdx, wordIdx);
+                                return bit_index(byteIdx, bit);
                             }
                         }
                     }
@@ -186,7 +186,22 @@ namespace sp {
                 }
                 return size_t(T_Size - 1);
             }
+
+            size_t swap_first(size_t bitIdx, bool set) {
+//                size_t byteIdx = byte_index(bitIdx);
+//                auto wordIdx = word_index(bitIdx);
+//
+//
+//                for (; byteIdx < T_Size_based_on_bits; ++byteIdx) {
+//                    Entry_t aword = word_for(byteIdx);
+//                }
+
+                size_t found = find_first(bitIdx, !set);
+
+                return 0;
+            }
         };
+
 
         Entry *m_entry;
     private:
@@ -264,6 +279,14 @@ namespace sp {
             return find_first(size_t(0), find);
         }
 
+        size_t swap_first(size_t idx, bool set) {
+            return m_entry->swap_first(idx, set);
+        }
+
+
+        size_t swap_first(bool set) {
+            return swap_first(size_t(0), set);
+        }
     };
 
 

@@ -12,7 +12,9 @@ struct TestTable : public db::Table {
     const char data[5];
     const unsigned long id;
 
-    TestTable() : id{1}, data{"hell"} {
+    TestTable() :
+            data{"hell"},
+            id{1} {
 
     }
 

@@ -255,19 +255,19 @@ void test_find_reverse(bool v) {
 }
 
 TEST_P(CBitsetTest, test_findlong_reverse) {
-    test_find<uint64_t>(GetParam());
+    test_find_reverse<uint64_t>(GetParam());
 }
 
 TEST_P(CBitsetTest, test_findint_reverse) {
-    test_find<uint32_t>(GetParam());
+    test_find_reverse<uint32_t>(GetParam());
 }
 
 TEST_P(CBitsetTest, test_findshort_reverse) {
-    test_find<uint16_t>(GetParam());
+    test_find_reverse<uint16_t>(GetParam());
 }
 
 TEST_P(CBitsetTest, test_findbyte_reverse) {
-    test_find<uint8_t>(GetParam());
+    test_find_reverse<uint8_t>(GetParam());
 }
 
 template<typename T>
@@ -297,4 +297,35 @@ TEST_P(CBitsetTest, test_all_reverseshort_reverse) {
 
 TEST_P(CBitsetTest, test_all_reversebyte_reverse) {
     test_all_reverse<uint8_t>(GetParam());
+}
+
+template<typename T>
+void test_swap_first(bool v) {
+    constexpr size_t bits(1024);
+    CBitset<bits, T> bb{!v};
+    for (size_t i = 0; i < bb.size(); ++i) {
+        for (size_t a = i; a < bb.size(); ++a) {
+            ASSERT_EQ(!v, bb.test(a));
+        }
+        ASSERT_EQ(i, bb.swap_first(v, 0));
+        for (size_t a = 0; a <= i; ++a) {
+            ASSERT_EQ(v, bb.test(a));
+        }
+    }
+}
+
+TEST_P(CBitsetTest, test_swap_firstlong_reverse) {
+    test_swap_first<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_swap_firstint_reverse) {
+    test_swap_first<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_swap_firstshort_reverse) {
+    test_swap_first<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_swap_firstbyte_reverse) {
+    test_swap_first<uint8_t>(GetParam());
 }

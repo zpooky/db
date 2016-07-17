@@ -58,7 +58,7 @@ namespace db {
 
 
         template<typename t_Table>
-        void Journal<t_Table>::prepare(journal_id id, const db::Reservation &reservation) {
+        void Journal<t_Table>::prepare(journal_id id, const db::Reservation &r) {
 
         }
 

@@ -32,7 +32,7 @@ namespace sp {
 
         }
 
-        const bool is_present() const {
+        bool is_present() const {
             return m_present;
         }
 
