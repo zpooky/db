@@ -276,10 +276,10 @@ void test_all_reverse(bool v) {
     CBitset<bits, T> bb{!v};
     cout << endl;
     for (size_t i = bb.size(); i-- > 0;) {
-        cout << "|" << i << endl;
+        cout << "(" << v << ")" << i << endl;
         ASSERT_FALSE(bb.all(i, v));
         ASSERT_TRUE(bb.set(i, v));
-//        ASSERT_TRUE(bb.all(i, v));
+        ASSERT_TRUE(bb.all(i, v));
     }
 }
 
@@ -307,7 +307,7 @@ void test_swap_first(bool v) {
         for (size_t a = i; a < bb.size(); ++a) {
             ASSERT_EQ(!v, bb.test(a));
         }
-        ASSERT_EQ(i, bb.swap_first(v, 0));
+        ASSERT_EQ(i, bb.swap_first(0, v));
         for (size_t a = 0; a <= i; ++a) {
             ASSERT_EQ(v, bb.test(a));
         }
@@ -328,4 +328,44 @@ TEST_P(CBitsetTest, test_swap_firstshort_reverse) {
 
 TEST_P(CBitsetTest, test_swap_firstbyte_reverse) {
     test_swap_first<uint8_t>(GetParam());
+}
+
+template<typename T, size_t S>
+size_t find_next_(size_t off, bool v, const CBitset<S, T> &bb) {
+    for (size_t i = off; i < bb.size(); ++i) {
+        if (bb.test(i) == v) {
+            return i;
+        }
+    }
+    return bb.size();
+}
+
+template<typename T>
+void test_swap_first_random(bool v) {
+    constexpr size_t bits(1024);
+    std::string str = random_binary(bits);
+    std::bitset<bits> init(str);
+    CBitset<bits, T> bb{init};
+    size_t pos(0);
+    cout << endl << bb.to_string() << endl;
+    while (pos != bb.size()) {
+        pos = find_next_(pos, !v, bb);
+        ASSERT_EQ(pos, bb.swap_first(pos, v));
+    }
+}
+
+TEST_P(CBitsetTest, test_swap_first_randomlong) {
+    test_swap_first_random<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_swap_first_randomint) {
+    test_swap_first_random<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_swap_first_randomshort) {
+    test_swap_first_random<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_swap_first_randombyte) {
+    test_swap_first_random<uint8_t>(GetParam());
 }

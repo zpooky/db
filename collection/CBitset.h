@@ -150,10 +150,12 @@ namespace sp {
 
                 for (; idx < T_Size_based_on_bits; ++idx) {
                     Byte_t current = word_for(idx).load();
-                    if (Byte_t(current & mask) != mask) {
+                    current = current >> wordIdx;
+                    if (Byte_t(current | mask) != mask) {
                         return false;
                     }
                     mask = test;
+                    wordIdx = Byte_t(0);
                 }
                 return true;
             }
@@ -163,6 +165,7 @@ namespace sp {
             }
 
             size_t find_first(size_t bitIdx, bool find) const {
+                //TODO
                 size_t byteIdx = byte_index(bitIdx);
                 auto wordIdx = word_index(bitIdx);
 
@@ -175,7 +178,7 @@ namespace sp {
                         for (size_t bit = wordIdx; bit < bits; ++bit) {
 
                             Byte_t vmask = one_ >> bit;
-                            Byte_t cmp = find ? vmask : Byte_t(0);
+                            Byte_t cmp = find ? vmask : Byte_t(0);//TODO
 
                             if (Byte_t(vmask & word) == cmp) {
                                 return bit_index(byteIdx, bit);
@@ -188,17 +191,39 @@ namespace sp {
             }
 
             size_t swap_first(size_t bitIdx, bool set) {
-//                size_t byteIdx = byte_index(bitIdx);
-//                auto wordIdx = word_index(bitIdx);
-//
-//
-//                for (; byteIdx < T_Size_based_on_bits; ++byteIdx) {
-//                    Entry_t aword = word_for(byteIdx);
-//                }
+                size_t byteIdx = byte_index(bitIdx);
+                auto wordIdx = word_index(bitIdx);
+                /**
+                 * we only need to look in words which is not:
+                 * all 1 if 'set' is true
+                 * all 0 if 'set' is false
+                 */
+                const Byte_t mask = set ? ~Byte_t(0) : Byte_t(0);
 
-                size_t found = find_first(bitIdx, !set);
+                while (byteIdx < T_Size_based_on_bits) {
+                    auto &current = word_for(byteIdx);
+                    Byte_t word = current.load();
 
-                return 0;
+                    if (mask != word) {
+                        for (size_t bit = wordIdx; bit < bits; ++bit) {
+                            /**
+                             * Mask for current bit: 0001000
+                             */
+                            const Byte_t vmask = one_ >> bit;
+                            const Byte_t cmp = set ? Byte_t(0) : vmask;
+
+                            if (Byte_t(vmask & word) == cmp) {
+                                Byte_t value = set ? Byte_t(word | vmask) : Byte_t(word & Byte_t(vmask ^ ~Byte_t(0)));
+                                if (current.compare_exchange_strong(word, value)) {
+                                    return bit_index(byteIdx, bit);
+                                }
+                            }
+                        }
+                    }
+                    wordIdx = Byte_t(0);
+                    ++byteIdx;
+                }
+                return T_Size;
             }
         };
 
@@ -245,11 +270,11 @@ namespace sp {
         }
 
         /**
-     *  @brief sets the specified bit to b
-     *  @param  bitIdx  The index of a bit.
-     *  @return wether b is set to b allready true, otherwise false
-     *  @throw  std::out_of_range  If @a pos is bigger the size of the %set.
-     */
+        *  @brief sets the specified bit to b
+        *  @param  bitIdx  The index of a bit.
+        *  @return wether b is set to b allready true, otherwise false
+        *  @throw  std::out_of_range  If @a pos is bigger the size of the %set.
+        */
         bool set(size_t bitIdx, bool b) {
             return m_entry->set(bitIdx, b);
         }
@@ -283,20 +308,32 @@ namespace sp {
             return m_entry->swap_first(idx, set);
         }
 
-
         size_t swap_first(bool set) {
             return swap_first(size_t(0), set);
         }
-    };
 
+        std::string to_string() {
+            std::string res;
+            for (size_t i = 0; i < size(); ++i) {
+                char c;
+                if (this->test(i)) {
+                    c = '1';
+                } else {
+                    c = '0';
+                }
+                res.push_back(c);
+            }
+            return res;
+        }
+    };
 
     template<size_t size, typename Type>
     std::ostream &operator<<(std::ostream &os, const CBitset<size, Type> &b) {
-        for (size_t i = b.size(); i > 0; --i) {
-            if (b[i - 1]) {
-                std::cout << '1';
+        for (size_t i = b.size(); i-- > 0;) {
+            if (b[i]) {
+                os << '1';
             } else {
-                std::cout << '0';
+                os << '0';
             }
         }
         return os;
