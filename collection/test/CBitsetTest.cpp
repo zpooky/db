@@ -369,3 +369,37 @@ TEST_P(CBitsetTest, test_swap_first_randomshort) {
 TEST_P(CBitsetTest, test_swap_first_randombyte) {
     test_swap_first_random<uint8_t>(GetParam());
 }
+
+std::string reverse(const std::string &s){
+    std::string res;
+    res.reserve(s.size());
+    for(size_t i=s.size();i-- > 0;){
+        res.push_back(s[i]);
+    }
+    return res;
+}
+
+template<typename T>
+void test_to_string() {
+    constexpr size_t bits(1024);
+    std::string str = random_binary(bits);
+    std::bitset<bits> init(str);
+    CBitset<bits, T> bb{init};
+    ASSERT_EQ(init.to_string(), reverse(bb.to_string()));
+}
+
+TEST_F(CBitsetTest, test_to_stringlong) {
+    test_to_string<uint64_t>();
+}
+
+TEST_F(CBitsetTest, test_to_stringint) {
+    test_to_string<uint32_t>();
+}
+
+TEST_F(CBitsetTest, test_to_stringshort) {
+    test_to_string<uint16_t>();
+}
+
+TEST_F(CBitsetTest, test_to_stringbyte) {
+    test_to_string<uint8_t>();
+}

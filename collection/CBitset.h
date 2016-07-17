@@ -313,7 +313,9 @@ namespace sp {
         }
 
         std::string to_string() {
+            //this print in an reverse order to << operator
             std::string res;
+            res.reserve(size());
             for (size_t i = 0; i < size(); ++i) {
                 char c;
                 if (this->test(i)) {
