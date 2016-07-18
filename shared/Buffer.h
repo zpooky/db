@@ -160,15 +160,15 @@ namespace db {
         }
 
         void put(uint8_t datum) {
-            if (postion() >= capacity()) {
-                throw std::runtime_error("put position() >= capacity()");
+            if (postion() >= size()) {
+                throw std::runtime_error("put position() >= size()");
             }
             i_put(datum);
         }
 
         void put(const uint8_t *datum, size_t length) {
-            if (postion() + length >= capacity()) {
-                throw std::runtime_error("put position()+length >= capacity()");
+            if (postion() + length >= size()) {
+                throw std::runtime_error("put position()+length >= size()");
             }
             auto begin = &datum[0];
             auto end = begin + length;
@@ -188,9 +188,9 @@ namespace db {
         }
 
 
-        void put(uint32_t datum) {
-
-        }
+//        void put(uint32_t datum) {
+//
+//        }
 
         uint8_t get() {
             if (postion() >= size()) {
@@ -201,18 +201,25 @@ namespace db {
 
         template<size_t bytes>
         void get(std::array<uint8_t, bytes> &buff) {
-            if (postion() + bytes >= capacity()) {
-                throw std::runtime_error("get position() + bytes >= capacity()");
+            if (postion() + bytes >= size()) {
+                throw std::runtime_error("get position() + bytes >= size()");
             }
             i_get(buff);
         }
 
-        void *data() {
-            return static_cast< void *>(m_data.data());
+        uint8_t *writable_data() {
+            return m_data.data() + postion();
         }
 
-        const void *data() const {
-            return static_cast< void *>(m_data.data());
+        const uint8_t *full_data() const {
+            return m_data.data();
+        }
+
+        void position(size_t pos) {
+            m_position = pos;
+            if (postion() > size()) {
+                m_size = pos;
+            }
         }
 
         constexpr size_t capacity() const {

@@ -46,7 +46,7 @@ namespace db {
 
         template<typename T_Meta>
         sp::Maybe<Reservation> Reservations<T_Meta>::reserve() {
-            return sp::Maybe<Reservation>{};
+            return m_reservations.reserve();
         }
 
         template<typename T_Meta>

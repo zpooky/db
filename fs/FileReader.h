@@ -8,6 +8,8 @@
 #include "../shared/entities.h"
 #include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <cstring>
 #include "../shared/Buffer.h"
 
 namespace db {
@@ -20,7 +22,7 @@ namespace db {
             explicit FileReader(const File &file) :
                     m_file(file),
                     m_fd{open(file.path.c_str(), O_RDONLY)} {
-//                error("FileReader", m_fd);
+                error("FileReader", m_fd);
             }
 
             FileReader(FileReader &&o) :
@@ -39,12 +41,32 @@ namespace db {
                 }
             }
 
-            template <size_t capacity>
-            int read(db::Buffer<capacity>& buffer);
+        private:
+            void error(const char *func, int ret) const {
+                if (ret == -1) {
+                    int errnum = errno;
+                    string err(func);
+                    err.append("(");
+                    err.append(m_file.path);
+                    err.append("): ");
+                    err.append(strerror(errnum));
+                    throw std::runtime_error(err);
+                }
+            }
+
+        public:
+            template<size_t capacity>
+            void read(db::Buffer<capacity> &buffer);
         };
-        template <size_t capacity>
-        int FileReader::read(db::Buffer<capacity>& buffer){
-            return 0;
+
+        template<size_t capacity>
+        void FileReader::read(db::Buffer<capacity> &buffer) {
+            size_t length(buffer.capacity() - buffer.postion());
+            if (length > size_t(0)) {
+                ssize_t read = ::read(m_fd, buffer.writable_data(), length);
+                error("read", read);
+                buffer.position(buffer.postion() + read);
+            }
         }
     }
 }

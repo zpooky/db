@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <cstring>
 
-extern int errno;
+//extern int errno;
 
 namespace db {
     namespace fs {
@@ -25,13 +25,15 @@ namespace db {
         public:
             explicit FileWriter(const File &file) :
                     m_file(file),
-                    m_fd{::open(file.path.c_str(), O_RDWR| O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP)} {
+                    m_fd{::open(file.path.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP)} {
                 error("FileWriter", m_fd);
             }
 
             FileWriter(const FileWriter &) = delete;
 
-            FileWriter(FileWriter &&o) : m_file{o.m_file}, m_fd{o.m_fd} {
+            FileWriter(FileWriter &&o) :
+                    m_file(o.m_file),
+                    m_fd{o.m_fd} {
                 o.m_fd = -1;
             }
 
@@ -60,7 +62,7 @@ namespace db {
             void write(const Buffer<size> &buf, size_t position) {
                 size_t remaining = buf.capacity();
                 while (remaining > 0) {
-                    ssize_t ret = ::pwrite(m_fd, buf.data(), remaining, position);
+                    ssize_t ret = ::pwrite(m_fd, buf.full_data(), remaining, position);
                     error("write", ret);
                     position = position + ret;
                     remaining = remaining - ret;
@@ -75,16 +77,25 @@ namespace db {
             }
 
             /*
-             * fsync() transfers ("flushes") all modified in-core data of (i.e., modified buffer cache pages for)
-             *     the file referred to by the file descriptor fd to the disk device (or other permanent storage device)
-             *     so that all changed information can be retrieved even after the system crashed or was rebooted.
-             *     This includes writing through or flushing a disk cache if present.
-             *     The call blocks  until  the  device reports that the transfer has completed.
-             *     It also flushes metadata information associated with the file.
+             * fsync()
+             * transfers (flushes) all modified in-core data of (i.e., modified buffer cache pages for)
+             * the file referred to by the file descriptor fd to the disk device (or other permanent storage device)
+             * so that all changed information can be retrieved even after the system crashed or was rebooted.
+             *
+             * - Flushes data
+             * - Flushes metadata information associated with the file. Resize, make file
+             *
+             * This includes writing through or flushing a disk cache if present.
+             * The call blocks  until  the  device reports that the transfer has completed.
              */
             void flush_fd() {
                 auto ret = ::fsync(m_fd);
                 error("flush_fd", ret);
+            }
+
+            void data_flush(){
+                auto ret = ::fdatasync(m_fd);
+                error("data_flush", ret);
             }
 
             /**

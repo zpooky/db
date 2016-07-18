@@ -96,10 +96,12 @@ namespace db {
             //
             std::bitset<lines> res;
             FileReader fr(file);
+            //TODO advice to skip page cache
             size_t current = 0;
             while (current++ < lines) {
                 Buffer<line_size> buffer;
                 fr.read(buffer);
+                buffer.flip();
                 Line_t line{buffer};
                 if (line.id == db::EMPTY_LINE) {
                     res[current] = false;
@@ -118,7 +120,7 @@ namespace db {
 
             //TODO
             template<typename T_Meta>
-            static constexpr V1SegmentParser<T_Meta> parser(unsigned short version) {
+            static constexpr V1SegmentParser<T_Meta> parser(db::TableVersion_t v) {
                 return V1SegmentParser<T_Meta>{};
             }
 

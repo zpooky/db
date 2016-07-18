@@ -26,12 +26,13 @@ namespace db {
             raw_type data;
 
             explicit Line(Table &&table) :
-                    id(1){
+                    id(1) {
+
             }
 
             template<size_t bytes>
             explicit Line(Buffer<bytes> &buf) :
-                    id(db::le::get_uint64(buf)){
+                    id(db::le::get_uint64(buf)) {
 
             }
 
@@ -92,8 +93,8 @@ namespace db {
 
         template<size_t LINE_SIZE, typename hash_algh>
         auto buffer(const Line<LINE_SIZE, hash_algh> &l) {
-            Buffer<Line<LINE_SIZE, hash_algh>::size()> buf{};
-            buf.put(l.id);
+            Buffer<Line<LINE_SIZE, hash_algh>::size()> buf;
+            db::le::put(buf, l.id);
 //            buf.put(l.checksum);
 //            auto state = static_cast<unsigned char>(l.state);
 //            buf.put(state);
@@ -105,11 +106,9 @@ namespace db {
         template<typename T_Table, typename hash_algh>
         auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_algh> {
             db::assert_is_table<T_Table>();
-//            using std::move;
-//            Line<512> line{move(table)};
             std::cout << "sizeof:" << sizeof(T_Table) << "\n";
 //            sizeof(std::remove_const<std::remove_reference<std::decay<decltype(table)>::type>::type>::type) << "\n";
-            Line<sizeof(table), hash_algh> line{std::move(table)};
+            Line<sizeof(table), hash_algh> line{std::forward<T_Table>(table)};
             return line;
         }
 
