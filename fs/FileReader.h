@@ -40,10 +40,10 @@ namespace db {
             }
 
             template <size_t capacity>
-            int read(db::fs::Buffer<capacity>& buffer);
+            int read(db::Buffer<capacity>& buffer);
         };
         template <size_t capacity>
-        int FileReader::read(db::fs::Buffer<capacity>& buffer){
+        int FileReader::read(db::Buffer<capacity>& buffer){
             return 0;
         }
     }

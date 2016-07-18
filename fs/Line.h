@@ -21,8 +21,8 @@ namespace db {
             using raw_type = db::raw<T_bytes>;
         public:
             const db::rid id;
-            T_hash_type checksum;
-            db::RState state;
+//            T_hash_type checksum;
+//            db::RState state;
             raw_type data;
 
             explicit Line(Table &&table) :
@@ -51,7 +51,7 @@ namespace db {
         public:
 
             static constexpr size_t size() {
-                return multipleOf(sizeof(db::rid) + sizeof(T_hash_type) + sizeof(db::RState) + sizeof(raw_type));
+                return multipleOf(sizeof(db::rid) +/* sizeof(T_hash_type) + sizeof(db::RState) + */sizeof(raw_type));
             }
         };
 
@@ -94,9 +94,9 @@ namespace db {
         auto buffer(const Line<LINE_SIZE, hash_algh> &l) {
             Buffer<Line<LINE_SIZE, hash_algh>::size()> buf{};
             buf.put(l.id);
-            buf.put(l.checksum);
-            auto state = static_cast<unsigned char>(l.state);
-            buf.put(state);
+//            buf.put(l.checksum);
+//            auto state = static_cast<unsigned char>(l.state);
+//            buf.put(state);
             buf.put(l.data);
             return buf;
         }

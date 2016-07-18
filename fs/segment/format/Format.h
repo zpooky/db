@@ -86,7 +86,7 @@ namespace db {
         template<typename T_Meta>
         PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const File &file) {
             using db::fs::FileReader;
-            using db::fs::Buffer;
+            using db::Buffer;
             using db::fs::Line;
             using db::fs::Table_size;
             //

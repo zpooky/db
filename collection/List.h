@@ -47,7 +47,6 @@ namespace sp {
     public:
         using element_type = T;
         using iterator = Node *;
-        using const_iterator = const iterator;
 
         List() :
                 m_head(nullptr),
@@ -75,7 +74,7 @@ namespace sp {
             return m_head;
         }
 
-        const_iterator begin() const {
+        iterator begin() const {
             return m_head;
         }
 
@@ -83,7 +82,7 @@ namespace sp {
             return nullptr;
         }
 
-        const_iterator end() const {
+        iterator end() const {
             return nullptr;
         }
 

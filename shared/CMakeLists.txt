@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(SHARED_LIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_subdirectory(test)
 if (TARGET shared_lib)
 
     message("shared_lib is already defined")
