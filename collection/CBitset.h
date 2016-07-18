@@ -153,7 +153,8 @@ namespace sp {
                 for (; idx < T_Size_based_on_bits; ++idx) {
                     Byte_t current = word_for(idx).load();
                     current = current >> wordIdx;
-                    if (Byte_t(current | mask) != mask) {
+
+                    if (current != mask) {
                         return false;
                     }
                     mask = test;
