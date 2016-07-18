@@ -20,25 +20,35 @@ namespace db {
         template<typename t_Meta>
         explicit ReservationSet(const PresentSet<t_Meta> &p)
                 : m_bitset{p.get_bitset()},
-                  m_cnt{m_bitset.find_first(false)} {
+                  m_cnt{/*m_bitset.find_first(false)*/0} {
         }
 
         ReservationSet(const ReservationSet &) = delete;
 
         ReservationSet(ReservationSet &&o) :
                 m_bitset{std::move(o.m_bitset)},
-                m_cnt{o.m_cnt.load()}{
+                m_cnt{o.m_cnt.load()} {
         }
 
         sp::Maybe<Reservation> reserve() {
             size_t reserved = m_bitset.swap_first(m_cnt, false);
-            m_cnt.store(reserved);
+//            m_cnt.store(reserved);
+            m_cnt.store(0);
+            if(reserved != m_bitset.npos){
+                return {reserved};
+            }
             return {};
         }
 
 
         bool has_free() const {
-            return !m_bitset.all(m_cnt, true);
+            bool result = !m_bitset.all(m_cnt.load(), true);
+            if(!result){
+                std::cout<<m_cnt.load()<<std::endl;
+
+                std::cout<<m_bitset<<std::endl;
+            }
+            return result;
         }
     };
 }

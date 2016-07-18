@@ -30,8 +30,8 @@ namespace db {
             }
 
             template<size_t bytes>
-            explicit Line(const Buffer<bytes> &buf) :
-                    id(1){
+            explicit Line(Buffer<bytes> &buf) :
+                    id(db::le::get_uint64(buf)){
 
             }
 

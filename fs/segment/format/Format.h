@@ -89,6 +89,7 @@ namespace db {
             using db::Buffer;
             using db::fs::Line;
             using db::fs::Table_size;
+            using Line_t = Line<Table_size<T_Table>::value(), typename T_Meta::hash_algh>;
             //
             const size_t line_size = Line_size<T_Meta>::value();
             constexpr size_t lines = T_Meta::lines();
@@ -97,9 +98,9 @@ namespace db {
             FileReader fr(file);
             size_t current = 0;
             while (current++ < lines) {
-                Buffer<line_size> buffer({0});
+                Buffer<line_size> buffer;
                 fr.read(buffer);
-                Line<Table_size<T_Table>::value(), typename T_Meta::hash_algh> line{buffer};
+                Line_t line{buffer};
                 if (line.id == db::EMPTY_LINE) {
                     res[current] = false;
                 } else {

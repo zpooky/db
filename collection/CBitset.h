@@ -17,6 +17,8 @@ namespace sp {
 
     template<size_t T_Size, typename Byte_t = uint8_t>
     class CBitset {
+    public:
+        static constexpr size_t npos = T_Size;
     private:
         using Entry_t =atomic<Byte_t>;
         static constexpr size_t bits = sizeof(Byte_t) * 8;

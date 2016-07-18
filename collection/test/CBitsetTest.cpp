@@ -270,6 +270,7 @@ TEST_P(CBitsetTest, test_findbyte_reverse) {
     test_find_reverse<uint8_t>(GetParam());
 }
 
+
 template<typename T>
 void test_all_reverse(bool v) {
     constexpr size_t bits(1024);
@@ -297,6 +298,34 @@ TEST_P(CBitsetTest, test_all_reverseshort_reverse) {
 
 TEST_P(CBitsetTest, test_all_reversebyte_reverse) {
     test_all_reverse<uint8_t>(GetParam());
+}
+
+template<typename T>
+void test_all_prefill(bool v) {
+    constexpr size_t bits(1024);
+    CBitset<bits, T> bb{!v};
+    cout << endl;
+    for (size_t i = 0; i < bits; ++i) {
+        cout << i << endl;
+//        ASSERT_TRUE(bb.all(i, !v));
+        ASSERT_FALSE(bb.all(i, v));
+    }
+}
+
+TEST_P(CBitsetTest, test_all_prefilllong) {
+    test_all_prefill<uint64_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_all_prefillint) {
+    test_all_prefill<uint32_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_all_prefillshort) {
+    test_all_prefill<uint16_t>(GetParam());
+}
+
+TEST_P(CBitsetTest, test_all_prefillbyte) {
+    test_all_prefill<uint8_t>(GetParam());
 }
 
 template<typename T>
@@ -370,10 +399,10 @@ TEST_P(CBitsetTest, test_swap_first_randombyte) {
     test_swap_first_random<uint8_t>(GetParam());
 }
 
-std::string reverse(const std::string &s){
+std::string reverse(const std::string &s) {
     std::string res;
     res.reserve(s.size());
-    for(size_t i=s.size();i-- > 0;){
+    for (size_t i = s.size(); i-- > 0;) {
         res.push_back(s[i]);
     }
     return res;

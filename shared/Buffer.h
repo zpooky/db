@@ -43,7 +43,7 @@ namespace db {
             template<typename In>
             uint8_t to_uint8(In datum, size_t index) {
                 uint8_t shift(index * 8);
-                std::cout << "x >> " << size_t(shift) << "# " << size_t(uint8_t(datum >> shift));
+                //std::cout << "x >> " << size_t(shift) << "# " << size_t(uint8_t(datum >> shift));
 
                 return uint8_t(datum >> shift);
             }
@@ -59,9 +59,9 @@ namespace db {
                 /**
                  * put the most right byte first in the buffer
                  */
-                std::cout << "_put(a + " << index << ", long" << index << "(x); # ";
+                //std::cout << "_put(a + " << index << ", long" << index << "(x); # ";
                 b.put(to_uint8<In>(in, index));
-                std::cout << std::endl;
+                //std::cout << std::endl;
                 if (index != sizeof(In) - 1) {
                     put_req<In, Buff>(index + 1, in, b);
                 }
@@ -74,14 +74,13 @@ namespace db {
                 std::array<uint8_t, bytes> buff;
                 b.get(buff);
                 T res(0);
-                std::cout << "makeLong(";
+                //std::cout << "makeLong(";
                 for (size_t i = 0; i < bytes; ++i) {
-                    std::cout << "\tget(a + " << i << ") << " << (i) << ",# " << size_t(buff[i])<<
-                    std::endl;
+                    //std::cout << "\tget(a + " << i << ") << " << (i) << ",# " << size_t(buff[i])<<std::endl;
                     res = res | (T(buff[i]) << (i * 8));
-                    std::cout << "";
+                    //std::cout << "";
                 }
-                std::cout << ")" << std::endl;
+                //std::cout << ")" << std::endl;
                 return res;
             }
         }

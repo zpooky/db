@@ -24,7 +24,7 @@ namespace db {
     };
 
 //Raw
-    using rid = unsigned long;
+    using rid = uint64_t;
     constexpr rid EMPTY_LINE = 0ul;
     template<size_t size>
     using raw = std::array<unsigned char, size>;
@@ -32,7 +32,7 @@ namespace db {
         RESERVED = 0, PREPARED, ROLLEDBACK, COMMITED
     };
 //Journal
-    using journal_id = unsigned long;
+   using journal_id = uint64_t;
 
     //
 
