@@ -33,7 +33,7 @@ namespace db {
 
         using db::fs::SegmentFile;
         using db::fs::Line_size;
-        using db::fs::FileWriter;
+        using db::FileWriter;
         using db::PresentSet;
 
 
@@ -44,7 +44,7 @@ namespace db {
             const Directory m_root;
         public:
             explicit V1SegmentInit(const Directory &root) :
-                    m_root{root} {
+                    m_root(root) {
                 db::assert_is_table<T_Table>();
             }
 

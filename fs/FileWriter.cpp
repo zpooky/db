@@ -5,7 +5,6 @@
 #include "FileWriter.h"
 
 namespace db {
-    namespace fs {
 
         void FileWriter::error(const char *func, int ret) const {
             if (ret == -1) {
@@ -18,5 +17,4 @@ namespace db {
                 throw std::runtime_error(err);
             }
         }
-    }
 }

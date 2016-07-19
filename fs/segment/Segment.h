@@ -85,7 +85,6 @@ namespace db {
                     typename db::segment::Format::latest<Meta_t> init{m_root};
                     PresentSet<Meta_t> p{};
                     Segment<Meta_t> result{segment_id, init.create(seg_name), std::move(p)};
-//                m_journal.prpare(id);
                     m_journal.commit(id);
                     return result;
                 }

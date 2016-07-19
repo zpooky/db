@@ -11,12 +11,13 @@ namespace sp {
     class Queue {
     public:
         T m_default;
-        explicit Queue(T && p_def) : m_default{std::move(p_def)} {
-
+        explicit Queue(T && p_def) :
+                m_default{std::forward<T>(p_def)} {
         }
 
         Queue(const Queue<T> &) = delete;
-        Queue(Queue<T> && o) : m_default{std::move(o.m_default)}{
+        Queue(Queue<T> && o) :
+                m_default{std::move(o.m_default)}{
 
         }
 

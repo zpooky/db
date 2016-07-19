@@ -45,13 +45,15 @@ namespace db {
         public:
             explicit SegmentFileFactory(segment_id p_index, const Directory &p_root) :
                     m_seg_counter{p_index},
-                    m_root{p_root},
-                    m_journal(p_root.cd(Filename("segment.journal")), m_journal_runnable, 0l) {
-            }
+                    m_root(p_root),
+                    m_journal_runnable(p_root.cd(Filename("segment.journal"))),
+                    m_journal(m_journal_runnable) { }
 
             SegmentFileFactory(SegmentFileFactory<T_Meta> &&o) :
-                    m_seg_counter{0}, m_root{o.m_root},
-                    m_journal(m_root.cd(Filename("segment.journal")), m_journal_runnable, 0l)
+                    m_seg_counter{o.m_seg_counter.load()},
+                    m_root(o.m_root),
+                    m_journal_runnable(std::move(o.m_journal_runnable)),
+                    m_journal(std::move(o.m_journal))
             // m_seg_counter{std::move(o.m_seg_counter)},
             //,
             //        m_journal_runnable{std::move(o.m_journal_thread)},
@@ -164,7 +166,9 @@ namespace db {
                 std::vector<File> segments;
                 std::tie(seg_cnt, segments) = d();
 
-                SegmentFileFactory<T_Meta> sff{seg_cnt + 1, seg_root};
+                seg_cnt = db::segment::id(seg_cnt + db::segment::id(1));
+                SegmentFileFactory<T_Meta> sff{seg_cnt, seg_root};
+
                 return {std::move(sff), segments};
             }
         };
