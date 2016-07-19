@@ -9,6 +9,7 @@
 #include <atomic>
 #include "../../shared/Assertions.h"
 #include "../../shared/vfs.h"
+#include "../../shared/conversions.h"
 #include "Segment.h"
 #include "../../collection/List.h"
 #include "Reservations.h"
@@ -138,13 +139,13 @@ namespace db {
 
                 DD(const DD &) = delete;
 
-                std::tuple<unsigned long, std::vector<File>> operator()() {
+                std::tuple<uint64_t, std::vector<File>> operator()() {
                     std::vector<File> segments = files(m_root);
 
-                    std::vector<unsigned long> num_segments(segments.size());
+                    std::vector<uint64_t> num_segments(segments.size());
                     std::transform(segments.begin(), segments.end(), num_segments.begin(), [](const auto &file) {
-                        auto filename = file.filename();
-                        return atoi(filename.name.c_str());
+                        auto fname = file.filename();
+                        return db::to_uint64(fname.name.c_str());
                     });
 
                     auto max_it = std::max_element(num_segments.begin(), num_segments.end());
@@ -159,7 +160,7 @@ namespace db {
 
                 DD d(seg_root);
 
-                unsigned long seg_cnt;
+                uint64_t seg_cnt;
                 std::vector<File> segments;
                 std::tie(seg_cnt, segments) = d();
 

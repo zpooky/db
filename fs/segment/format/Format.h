@@ -6,6 +6,7 @@
 #define PROJECT_FORMAT_H
 
 #include "../../../shared/vfs.h"
+#include "../../../shared/conversions.h"
 #include "../SegmentFile.h"
 #include "../../FileReader.h"
 #include "../PresentSet.h"
@@ -115,8 +116,9 @@ namespace db {
         }
 
         template<typename T_Meta>
-        db::segment::id V1SegmentParser<T_Meta>::get_id(const File &) {
-            return 0L;
+        db::segment::id V1SegmentParser<T_Meta>::get_id(const File &file) {
+            auto fname = file.filename();
+            return db::to_uint64(fname.name);
         }
 
         class Format {
@@ -125,9 +127,9 @@ namespace db {
             template<typename T_Meta>
             using latest = V1SegmentInit<T_Meta>;
 
-            //TODO
             template<typename T_Meta>
             static constexpr V1SegmentParser<T_Meta> parser(db::segment::version v) {
+                //TODO version support
                 return V1SegmentParser<T_Meta>{};
             }
 
