@@ -9,10 +9,29 @@
 #include <string>
 
 namespace db {
+    template<typename T>
+    T to(const char *);
 
-    std::uint64_t to_uint64(const char *);
+    template<typename T>
+    T to(const std::string &);
 
-    std::uint64_t to_uint64(const std::string &);
+
+    template<>
+    uint64_t to(const char *str) {
+        return std::atol(str);
+    }
+
+    template<>
+    uint64_t to(const std::string &str) {
+        return to<uint64_t>(str.c_str());
+    }
+
+    template<typename T>
+    T to(const char *) = delete;
+
+    template<typename T>
+    T to(const std::string &) = delete;
+
 }
 
 #endif //PROJECT_CONVERSIONS_H

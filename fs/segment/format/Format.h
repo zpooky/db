@@ -118,7 +118,7 @@ namespace db {
         template<typename T_Meta>
         db::segment::id V1SegmentParser<T_Meta>::get_id(const File &file) {
             auto fname = file.filename();
-            return db::to_uint64(fname.name);
+            return db::to<db::segment::id>(fname.name);
         }
 
         class Format {

@@ -139,13 +139,13 @@ namespace db {
 
                 DD(const DD &) = delete;
 
-                std::tuple<uint64_t, std::vector<File>> operator()() {
+                std::tuple<db::segment::id, std::vector<File>> operator()() {
                     std::vector<File> segments = files(m_root);
 
-                    std::vector<uint64_t> num_segments(segments.size());
+                    std::vector<db::segment::id> num_segments(segments.size());
                     std::transform(segments.begin(), segments.end(), num_segments.begin(), [](const auto &file) {
                         auto fname = file.filename();
-                        return db::to_uint64(fname.name.c_str());
+                        return db::to<db::segment::id>(fname.name.c_str());
                     });
 
                     auto max_it = std::max_element(num_segments.begin(), num_segments.end());
@@ -160,7 +160,7 @@ namespace db {
 
                 DD d(seg_root);
 
-                uint64_t seg_cnt;
+                db::segment::id seg_cnt;
                 std::vector<File> segments;
                 std::tie(seg_cnt, segments) = d();
 
