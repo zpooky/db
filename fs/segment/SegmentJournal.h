@@ -98,7 +98,7 @@ namespace db {
                     auto entry = m_queue.pop();
                     if (entry.id != 0l) {
                     } else {
-                        printf("www");
+//                        printf("www");
                     }
                 }
             }

@@ -7,7 +7,7 @@
 #include "../shared/vfs.h"
 #include "../fs/segment/Segments.h"
 #include "../shared/TableMeta.h"
-#include "../shared/hash.h"
+#include "../fs/segment/Context.h"
 
 
 using namespace db::journal;
@@ -20,7 +20,8 @@ int main(int argc, char *args[]) {
     cout << "page size:" << db::vfs::page::size() << endl;
     using hash_algh = crc32;
     using TTT = db::TableMeta<TestTable, hash_algh>;
-    Context<hash_algh> ctx{db::Directory("/tmp")};
+
+    db::Context<hash_algh> ctx{db::Directory("/tmp")};
     Segments<TTT> segments{ctx};
     auto &journal = db::journal::instance<TestTable>();
 

@@ -17,32 +17,10 @@
 #include <vector>
 #include <algorithm>
 #include "format/SegmentFileParser.h"
+#include "Context.h"
 
 namespace db {
     namespace fs {
-        template<typename hash_algh>
-        struct Context {
-            using segment_id = db::segment::id;
-            const db::Directory root;
-
-            SegmentJournalThread<hash_algh> m_journal_runnable;
-            SegmentJournal<hash_algh> m_journal;
-            std::thread m_journal_thread;
-
-            explicit Context(const Directory &p_root) :
-                    root(p_root),
-                    m_journal_runnable(p_root.cd(Filename("segment.journal"))),
-                    m_journal(m_journal_runnable) { }
-
-            ~Context() {
-                m_journal_runnable.interrupt();
-                if (m_journal_thread.joinable()) {
-                    m_journal_thread.join();
-                }
-            }
-
-        };
-
         template<typename T_Meta>
         class SegmentFileFactory {
         private:
