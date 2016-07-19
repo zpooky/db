@@ -14,6 +14,7 @@ namespace sp {
     private:
         const bool m_present;
         T m_data;
+
     public:
         explicit Maybe(const T &p_data) :
                 m_present{true},
@@ -23,16 +24,19 @@ namespace sp {
         explicit Maybe(T &&p_data) :
                 m_present(true),
                 m_data{std::forward<T>(p_data)} {
-
         }
+
 
         explicit Maybe() :
                 m_present{false},
-                m_data{1l} {//TODO
-
+                m_data{} {
         }
 
         bool is_present() const {
+            return m_present;
+        }
+
+        operator bool() const {
             return m_present;
         }
 

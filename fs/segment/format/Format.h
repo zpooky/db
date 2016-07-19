@@ -61,6 +61,8 @@ namespace db {
             }
 
             PresentSet<T_Meta> parse(const File &);
+
+            db::segment::id get_id(const File &);
         };
 
         template<typename T_Meta>
@@ -112,6 +114,11 @@ namespace db {
             return PresentSet<T_Meta>{res};
         }
 
+        template<typename T_Meta>
+        db::segment::id V1SegmentParser<T_Meta>::get_id(const File &) {
+            return 0L;
+        }
+
         class Format {
         private:
         public:
@@ -120,7 +127,7 @@ namespace db {
 
             //TODO
             template<typename T_Meta>
-            static constexpr V1SegmentParser<T_Meta> parser(db::TableVersion_t v) {
+            static constexpr V1SegmentParser<T_Meta> parser(db::segment::version v) {
                 return V1SegmentParser<T_Meta>{};
             }
 

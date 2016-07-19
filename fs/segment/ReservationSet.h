@@ -30,14 +30,14 @@ namespace db {
                 m_cnt{o.m_cnt.load()} {
         }
 
-        sp::Maybe<Reservation> reserve() {
+        sp::Maybe<db::reservation::id> reserve() {
+            using Return_t = sp::Maybe<db::reservation::id>;
             size_t reserved = m_bitset.swap_first(m_cnt, true);
             m_cnt.store(reserved);
             if (reserved != m_bitset.npos) {
-                Reservation r{reserved};
-                return sp::Maybe<Reservation>{r};
+                return Return_t{reserved};
             }
-            return sp::Maybe<Reservation>{};
+            return Return_t{};
         }
 
 

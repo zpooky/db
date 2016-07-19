@@ -46,7 +46,13 @@ namespace db {
 
         template<typename T_Meta>
         sp::Maybe<Reservation> Reservations<T_Meta>::reserve() {
-            return m_reservations.reserve();
+            auto optResId = m_reservations.reserve();
+            if (optResId) {
+                auto segment_id = m_segment.get_id();
+                Reservation r{optResId.get(), segment_id};
+                return sp::Maybe<Reservation>{r};
+            }
+            return sp::Maybe<Reservation>{};
         }
 
         template<typename T_Meta>

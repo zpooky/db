@@ -9,16 +9,21 @@
 #include <array>
 #include <string>
 #include <utility>
+#include "../config/Configuration.h"
 
 namespace db {
-    using segment_id = size_t;
 
 //    template <typename Table_t>
     struct Reservation {
         const size_t position;
-        const segment_id segment;
+        const db::segment::id segment;
 
-        explicit Reservation(size_t p_position, segment_id p_segment) :
+        explicit Reservation() :
+                Reservation(0, 0) {
+            //TODO fix this
+        }
+
+        explicit Reservation(size_t p_position, db::segment::id p_segment) :
                 position{p_position},
                 segment{p_segment} {
         }
@@ -28,7 +33,6 @@ namespace db {
 //        static size_t size() const noexcept = 0;
     };
 
-    using TableVersion_t = uint16_t;
 //Raw
     using rid = uint64_t;
     constexpr rid EMPTY_LINE = 0ul;

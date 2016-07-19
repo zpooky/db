@@ -20,23 +20,23 @@ namespace db {
 
         namespace internal {
 
-            enum class State : unsigned short {
+            enum class State : uint16_t {
                 START, PREPARED, COMMIT, INTERNAL
             };
 
             using name_type = db::table::name::type;
-            using index_type = db::segment::index_type;
+            using segment_id = db::segment::id;
 
             template<typename hash_algh>
             struct SegmentLine {
                 const typename hash_algh::type hash;
                 const journal_id id;
                 const name_type table;
-                const index_type idx;
+                const segment_id idx;
                 const State state;
             public:
                 SegmentLine(typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table,
-                            index_type p_index, State p_state)
+                            segment_id p_index, State p_state)
                         : hash{p_hash},
                           id{p_id},
                           table{p_table},
@@ -50,7 +50,7 @@ namespace db {
             SegmentLine<hash_algh> empty_segment_line() {
                 typename hash_algh::type h{0};
                 name_type name{0};
-                index_type i{0};
+                segment_id i{0};
                 State s = State::INTERNAL;
                 return {h, 0, name, i, s};
             }
@@ -101,13 +101,13 @@ namespace db {
 
         template<typename hash_algh>
         internal::SegmentLine<hash_algh> segment_line(journal_id p_id, const db::table::name::type &p_table,
-                                                      db::segment::index_type p_index, internal::State p_state) {
+                                                      db::segment::id segment_id, internal::State p_state) {
             hash_algh h;
             h.update(p_id);
             h.update(p_table);
-            h.update(p_index);
-            h.update(static_cast<unsigned short>(p_state));
-            return {h.digest(), p_id, p_table, p_index, p_state};
+            h.update(segment_id);
+            h.update(static_cast<uint16_t>(p_state));
+            return {h.digest(), p_id, p_table, segment_id, p_state};
         }
 
 
@@ -127,29 +127,29 @@ namespace db {
             atomic<journal_id> m_counter;
         public:
             explicit SegmentJournal(const File &journal, SLConsumer<hash_algh> &consumer, journal_id start = 0) :
-                    m_journal{journal},
-                    m_consumer{consumer},
+                    m_journal(journal),
+                    m_consumer(consumer),
                     m_counter{start} {
 //                db::assert_is_meta<T_Meta>();
             }
 
         private:
             using name_type = db::table::name::type;
-            using index_type = db::segment::index_type;
+            using segment_id = db::segment::id;
 
             SegmentLine<hash_algh> line(journal_id id, State state) const {
                 name_type name{0};
-                index_type idx = 0;
+                segment_id idx = 0;
                 return segment_line<hash_algh>(id, name, idx, state);
             }
 
-            SegmentLine<hash_algh> line(journal_id id, const name_type &name, index_type idx) const {
+            SegmentLine<hash_algh> line(journal_id id, const name_type &name, segment_id idx) const {
                 return segment_line<hash_algh>(id, name, idx, db::fs::internal::State::START);
             }
 
         public:
 
-            journal_id start(const name_type &name, index_type idx) {
+            journal_id start(const name_type &name, segment_id idx) {
                 auto id = ++m_counter;
                 m_consumer.add(line(id, name, idx));
                 return id;

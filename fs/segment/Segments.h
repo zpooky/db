@@ -20,11 +20,11 @@
 namespace db {
     namespace fs {
         struct Context {
-            using index_type = db::segment::index_type;
+            using segment_id = db::segment::id;
             const db::Directory root;
-            const index_type start;
+            const segment_id start;
 
-            explicit Context(const Directory &p_root, index_type p_start) :
+            explicit Context(const Directory &p_root, segment_id p_start) :
                     root(p_root),
                     start{p_start} { }
 
@@ -33,16 +33,16 @@ namespace db {
         template<typename T_Meta>
         class SegmentFileFactory {
         private:
-            using index_type = db::segment::index_type;
+            using segment_id = db::segment::id;
             using hash_algh = typename T_Meta::hash_algh;
-            std::atomic<index_type> m_seg_counter;
+            std::atomic<segment_id> m_seg_counter;
             const Directory m_root;
             // --
             SegmentJournalThread<hash_algh> m_journal_runnable;
             SegmentJournal<T_Meta> m_journal;
             std::thread m_journal_thread;
         public:
-            explicit SegmentFileFactory(index_type p_index, const Directory &p_root) :
+            explicit SegmentFileFactory(segment_id p_index, const Directory &p_root) :
                     m_seg_counter{p_index},
                     m_root{p_root},
                     m_journal(p_root.cd(Filename("segment.journal")), m_journal_runnable, 0l) {
@@ -79,7 +79,7 @@ namespace db {
         class ColSegments {
         private:
             using T_Table = typename T_Meta::Table;
-            using index_type = db::segment::index_type;
+            using segment_id = db::segment::id;
             // --
             SegmentFileFactory<T_Meta> m_factory;
             sp::List<Reservations<T_Meta>> m_vector;
@@ -176,13 +176,13 @@ namespace db {
             ColSegments<T_Meta> m_segments;
         public:
             explicit Segments(const Context &ctx) :
-                    m_root{db::vfs::mkdir(ctx.root.cdx(T_Table::table_name()))},
+                    m_root(db::vfs::mkdir(ctx.root.cdx(T_Table::table_name()))),
                     m_segments{ColSegments<T_Meta>::apply(m_root)} {
 //                db::assert_is_context<T_Table>();
             }
 
             Segments(Segments<T_Meta> &&o) :
-                    m_root{o.m_root},
+                    m_root(o.m_root),
                     m_segments{std::move(o.m_segments)} {
 
             }

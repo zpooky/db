@@ -15,22 +15,26 @@ namespace db {
             using type = std::array<char, length>;
         }
     }
+    namespace reservation {
+        using id = uint64_t;
+    }
     namespace segment {
-        using index_type = unsigned long;
+        using version =uint16_t;
+        using id = uint64_t;
     }
     template<typename T_table>
     struct Segment_name {
         Segment_name() {
         }
 
-        static std::string name(segment::index_type idx) {
+        static std::string name(segment::id id) {
             char buf[64];
 //            char buf[table::name::length + 1 + 32];
 //            auto table_name = T_table::table_name();
 //            string name{table_name.begin(), table_name.end()};
 //            sprintf(buf, "%s-%ld", name.c_str(), idx);
 
-            ::sprintf(buf, "%ld", idx);
+            ::sprintf(buf, "%ld", id);
             return std::string{buf};
         }
     };

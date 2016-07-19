@@ -13,6 +13,10 @@ else ()
     link_directories(${BOOST_LIBRARY_DIR})
     find_package(Boost COMPONENTS filesystem REQUIRED)
     #
+    add_subdirectory(../config config_lib)
+    include_directories(../config)
+    link_directories(${CONFIG_LIB_INCLUDE_DIR})
+    #
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 

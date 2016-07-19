@@ -20,13 +20,14 @@ namespace db {
 
             Segment<T_Meta> parse() {
                 // TODO parse version
-                unsigned short version = 1u;
-                auto parser = db::segment::Format::parser<T_Meta>(version);
+                db::segment::version v = 1u;
+                auto parser = db::segment::Format::parser<T_Meta>(v);
                 // TODO make Line_size dynamic(based o:n version)
                 // TODO calculate no of lines and have a linked bitset list if there are more lines present in file than in lines() constexpr-
                 // should work with present set and reservation set
                 SegmentFile sf{m_seg_file, Line_size<T_Meta>::value(), T_Meta::lines()};
-                return Segment<T_Meta>{std::move(sf), parser.parse(m_seg_file)};
+                db::segment::id segment_id = parser.get_id(m_seg_file);
+                return Segment<T_Meta>{segment_id, std::move(sf), parser.parse(m_seg_file)};
             }
         };
     }
