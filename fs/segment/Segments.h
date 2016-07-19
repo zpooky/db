@@ -20,14 +20,26 @@
 
 namespace db {
     namespace fs {
+        template<typename hash_algh>
         struct Context {
             using segment_id = db::segment::id;
             const db::Directory root;
-            const segment_id start;
 
-            explicit Context(const Directory &p_root, segment_id p_start) :
+            SegmentJournalThread<hash_algh> m_journal_runnable;
+            SegmentJournal<hash_algh> m_journal;
+            std::thread m_journal_thread;
+
+            explicit Context(const Directory &p_root) :
                     root(p_root),
-                    start{p_start} { }
+                    m_journal_runnable(p_root.cd(Filename("segment.journal"))),
+                    m_journal(m_journal_runnable) { }
+
+            ~Context() {
+                m_journal_runnable.interrupt();
+                if (m_journal_thread.joinable()) {
+                    m_journal_thread.join();
+                }
+            }
 
         };
 
@@ -39,21 +51,17 @@ namespace db {
             std::atomic<segment_id> m_seg_counter;
             const Directory m_root;
             // --
-            SegmentJournalThread<hash_algh> m_journal_runnable;
-            SegmentJournal<T_Meta> m_journal;
-            std::thread m_journal_thread;
+            SegmentJournal<hash_algh> &m_journal;
         public:
-            explicit SegmentFileFactory(segment_id p_index, const Directory &p_root) :
+            explicit SegmentFileFactory(Context<hash_algh> &ctx, segment_id p_index, const Directory &p_root) :
                     m_seg_counter{p_index},
                     m_root(p_root),
-                    m_journal_runnable(p_root.cd(Filename("segment.journal"))),
-                    m_journal(m_journal_runnable) { }
+                    m_journal(ctx.m_journal) { }
 
             SegmentFileFactory(SegmentFileFactory<T_Meta> &&o) :
                     m_seg_counter{o.m_seg_counter.load()},
                     m_root(o.m_root),
-                    m_journal_runnable(std::move(o.m_journal_runnable)),
-                    m_journal(std::move(o.m_journal))
+                    m_journal(o.m_journal)
             // m_seg_counter{std::move(o.m_seg_counter)},
             //,
             //        m_journal_runnable{std::move(o.m_journal_thread)},
@@ -64,10 +72,6 @@ namespace db {
             }
 
             ~SegmentFileFactory() {
-                m_journal_runnable.interrupt();
-                if (m_journal_thread.joinable()) {
-                    m_journal_thread.join();
-                }
             }
 
             Segment<T_Meta> operator()() {
@@ -82,13 +86,14 @@ namespace db {
         class ColSegments {
         private:
             using T_Table = typename T_Meta::Table;
+            using hash_algh = typename T_Meta::hash_algh;
             using segment_id = db::segment::id;
             // --
             SegmentFileFactory<T_Meta> m_factory;
             sp::List<Reservations<T_Meta>> m_vector;
 
         public:
-            ColSegments(SegmentFileFactory<T_Meta> &&factory, const std::vector<File> &p_segments) :
+            explicit ColSegments(SegmentFileFactory<T_Meta> &&factory, const std::vector<File> &p_segments) :
                     m_factory{std::move(factory)} {
                 for (const auto &file : p_segments) {
                     SegmentFileParser<T_Meta> parser(file);
@@ -157,7 +162,7 @@ namespace db {
                 }
             };
 
-            static ColSegments apply(const Directory &p_root) {
+            static ColSegments<T_Meta> apply(Context<hash_algh> &ctx, const Directory &p_root) {
                 auto seg_root = db::vfs::mkdir(p_root.cd("segment"));
 
                 DD d(seg_root);
@@ -167,9 +172,9 @@ namespace db {
                 std::tie(seg_cnt, segments) = d();
 
                 seg_cnt = db::segment::id(seg_cnt + db::segment::id(1));
-                SegmentFileFactory<T_Meta> sff{seg_cnt, seg_root};
+                SegmentFileFactory<T_Meta> sff{ctx, seg_cnt, seg_root};
 
-                return {std::move(sff), segments};
+                return ColSegments<T_Meta>{std::move(sff), segments};
             }
         };
 
@@ -177,12 +182,13 @@ namespace db {
         class Segments {
         private:
             using T_Table = typename T_Meta::Table;
+            using hash_algh = typename T_Meta::hash_algh;
             const db::Directory m_root;
             ColSegments<T_Meta> m_segments;
         public:
-            explicit Segments(const Context &ctx) :
+            explicit Segments(Context<hash_algh> &ctx) :
                     m_root(db::vfs::mkdir(ctx.root.cdx(T_Table::table_name()))),
-                    m_segments{ColSegments<T_Meta>::apply(m_root)} {
+                    m_segments{ColSegments<T_Meta>::apply(ctx, m_root)} {
 //                db::assert_is_context<T_Table>();
             }
 

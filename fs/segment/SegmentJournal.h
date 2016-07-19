@@ -122,11 +122,9 @@ namespace db {
     template<typename hash_algh>
     using Consumer_t = internal::Consumer<SegmentLine<hash_algh>>;
 
-    template<typename T_Meta>
+    template<typename hash_algh>
     class SegmentJournal {
     private:
-        using hash_algh = typename T_Meta::hash_algh;
-        using T_Table = typename T_Meta::Table;
         using State = internal::State;
         Consumer_t<hash_algh> &m_consumer;
         atomic<journal_id> m_counter;
@@ -142,6 +140,8 @@ namespace db {
                 m_counter(o.m_counter.load()) {
 
         }
+
+        SegmentJournal(const SegmentJournal &) = delete;
 
     private:
         using name_type = db::table::name::type;

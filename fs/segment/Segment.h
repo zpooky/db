@@ -66,10 +66,11 @@ namespace db {
             class SegmentFileInitJournal {
             private:
                 using Table_t = typename Meta_t::Table;
+                using hash_algh = typename Meta_t::hash_algh;
                 const Directory &m_root;
-                SegmentJournal<Meta_t> &m_journal;
+                SegmentJournal<hash_algh> &m_journal;
             public:
-                explicit SegmentFileInitJournal(const Directory &root, SegmentJournal<Meta_t> &journal) :
+                explicit SegmentFileInitJournal(const Directory &root, SegmentJournal<hash_algh> &journal) :
                         m_root(root),
                         m_journal{journal} {
 //                    db::assert_is_table<Table_t>();

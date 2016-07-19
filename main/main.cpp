@@ -18,8 +18,9 @@ using namespace sp::hash;
 int main(int argc, char *args[]) {
     cout << "sector size:" << db::vfs::sector::size("") << endl;
     cout << "page size:" << db::vfs::page::size() << endl;
-    using TTT = db::TableMeta<TestTable, crc<4> >;
-    Context ctx{db::Directory("/tmp"), 0l};
+    using hash_algh = crc32;
+    using TTT = db::TableMeta<TestTable, hash_algh>;
+    Context<hash_algh> ctx{db::Directory("/tmp")};
     Segments<TTT> segments{ctx};
     auto &journal = db::journal::instance<TestTable>();
 
