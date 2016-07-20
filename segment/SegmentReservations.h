@@ -5,7 +5,7 @@
 #ifndef FS_RESERVATION_H
 #define FS_RESERVATION_H
 
-#include "../../shared/fs.h"
+#include "../shared/fs.h"
 #include "Segment.h"
 
 namespace db {

@@ -5,15 +5,15 @@
 #ifndef PROJECT_SEGMENTJOURNAL_H
 #define PROJECT_SEGMENTJOURNAL_H
 
-#include "../../shared/entities.h"
-#include "../../shared/fs.h"
-#include "../../shared/hash.h"
+#include "../shared/entities.h"
+#include "../shared/fs.h"
+#include "../shared/hash.h"
 #include <atomic>
-#include "../../collection/MPSCQueue.h"
-#include "../../config/Configuration.h"
+#include "../collection/MPSCQueue.h"
+#include "../config/Configuration.h"
 #include <utility>
 #include <thread>
-#include "../FileWriter.h"
+#include "../fs/FileWriter.h"
 #include "Segment.h"
 
 namespace db {

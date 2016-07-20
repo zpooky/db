@@ -8,7 +8,6 @@ if (TARGET fs_lib)
 
 else ()
     #
-    find_package (Threads)
     # dependencies
     add_subdirectory(../shared shared_lib)
     include_directories(../shared)
@@ -25,10 +24,10 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Line.cpp FileWriter.cpp segment/SegmentReservations.h segment/Segment.cpp segment/Segment.h segment/Reservations.h segment/Segments.h segment/SegmentJournal.h LineWriter.cpp LineWriter.h segment/format/Format.cpp segment/format/Format.h segment/SegmentFile.h segment/PresentSet.cpp segment/PresentSet.h segment/ReservationSet.cpp segment/ReservationSet.h segment/format/SegmentFileParser.cpp segment/format/SegmentFileParser.h FileReader.cpp FileReader.h segment/Context.h)
+    set(SOURCE_FILES Line.cpp FileWriter.cpp FileReader.cpp LineWriter.cpp)
 
     add_library(fs_lib STATIC ${SOURCE_FILES})
     set_target_properties(fs_lib PROPERTIES LINKER_LANGUAGE CXX)
     target_link_libraries(fs_lib shared_lib)
-    target_link_libraries(fs_lib Threads::Threads)
+    target_link_libraries(fs_lib config_lib)
 endif ()

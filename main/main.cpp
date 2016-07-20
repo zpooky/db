@@ -1,13 +1,13 @@
 #include <iostream>
 
 #include "../journal/Journal.h"
-#include "../fs/segment/Segment.h"
-#include "../fs/segment/SegmentReservations.h"
+#include "../segment/Segment.h"
+#include "../segment/SegmentReservations.h"
 #include "TestTable.h"
 #include "../shared/vfs.h"
-#include "../fs/segment/Segments.h"
+#include "../segment/Segments.h"
 #include "../shared/TableMeta.h"
-#include "../fs/segment/Context.h"
+#include "../segment/Context.h"
 
 
 using namespace db::journal;

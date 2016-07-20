@@ -6,8 +6,8 @@
 #define PROJECT_PRESENTSET_H
 
 #include <bitset>
-#include "../../collection/CBitset.h"
-#include "../Line.h"
+#include "../collection/CBitset.h"
+#include "../fs/Line.h"
 
 namespace db {
 

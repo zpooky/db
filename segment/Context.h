@@ -5,8 +5,8 @@
 #ifndef PROJECT_CONTEXT_H
 #define PROJECT_CONTEXT_H
 
-#include "../../shared/entities.h"
-#include "../../config/Configuration.h"
+#include "../shared/entities.h"
+#include "../config/Configuration.h"
 
 namespace db {
     template<typename hash_algh>

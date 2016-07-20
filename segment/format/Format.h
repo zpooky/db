@@ -5,12 +5,12 @@
 #ifndef PROJECT_FORMAT_H
 #define PROJECT_FORMAT_H
 
-#include "../../../shared/vfs.h"
-#include "../../../shared/conversions.h"
+#include "../../shared/vfs.h"
+#include "../../shared/conversions.h"
 #include "../SegmentFile.h"
-#include "../../FileReader.h"
+#include "../../fs/FileReader.h"
 #include "../PresentSet.h"
-#include "../../Line.h"
+#include "../../fs/Line.h"
 /*
  * Header:
  * size in bytes:

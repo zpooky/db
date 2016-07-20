@@ -5,6 +5,10 @@ project(db)
 add_subdirectory(../journal journal_lib)
 include_directories(journal)
 link_directories(${JOURNAL_LIB_INCLUDE_DIR})
+#segment
+add_subdirectory(../segment segment_lib)
+include_directories(segment)
+link_directories(${SEGMENT_LIB_INCLUDE_DIR})
 #config
 add_subdirectory(../config config_lib)
 include_directories(config)
@@ -17,7 +21,7 @@ link_directories(${FS_LIB_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-set(SOURCE_FILES main.cpp TestTable.h TableFacade.cpp TableFacade.h)
+set(SOURCE_FILES main.cpp TestTable.h)
 add_executable(db ${SOURCE_FILES})
 target_link_libraries(db journal_lib)
 target_link_libraries(db config_lib)

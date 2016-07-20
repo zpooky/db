@@ -5,13 +5,13 @@
 #ifndef PROJECT_SEGMENTS_H
 #define PROJECT_SEGMENTS_H
 
-#include "../../config/Configuration.h"
+#include "../config/Configuration.h"
 #include <atomic>
-#include "../../shared/Assertions.h"
-#include "../../shared/vfs.h"
-#include "../../shared/conversions.h"
+#include "../shared/Assertions.h"
+#include "../shared/vfs.h"
+#include "../shared/conversions.h"
 #include "Segment.h"
-#include "../../collection/List.h"
+#include "../collection/List.h"
 #include "Reservations.h"
 #include <functional>
 #include <vector>

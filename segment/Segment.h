@@ -5,10 +5,10 @@
 #ifndef FS_SEGMENT_H
 #define FS_SEGMENT_H
 
-#include "../../shared/entities.h"
-#include "../../shared/Assertions.h"
-#include "../../config/Configuration.h"
-#include "../FileWriter.h"
+#include "../shared/entities.h"
+#include "../shared/Assertions.h"
+#include "../config/Configuration.h"
+#include "../fs/FileWriter.h"
 #include "SegmentJournal.h"
 #include "format/Format.h"
 #include "SegmentFile.h"

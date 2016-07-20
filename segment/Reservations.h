@@ -5,12 +5,12 @@
 #ifndef PROJECT_RESERVATIONS_H
 #define PROJECT_RESERVATIONS_H
 
-#include "../../shared/entities.h"
-#include "../../shared/fs.h"
+#include "../shared/entities.h"
+#include "../shared/fs.h"
 #include "Segment.h"
 #include <utility>
 #include "ReservationSet.h"
-#include "../../shared/Maybe.h"
+#include "../shared/Maybe.h"
 
 namespace db {
     namespace fs {

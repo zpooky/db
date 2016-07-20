@@ -8,7 +8,7 @@
 #include <bitset>
 #include <utility>
 #include "PresentSet.h"
-#include "../../shared/Maybe.h"
+#include "../shared/Maybe.h"
 
 namespace db {
     template<size_t T_Size>
