@@ -83,8 +83,10 @@ namespace db {
                 Segment<Meta_t> create(db::segment::id segment_id) {
                     auto id = m_journal.start(Table_t::table_name(), segment_id);
                     Filename seg_name{db::Segment_name<Table_t>::name(segment_id)};
+
                     typename db::segment::Format::latest<Meta_t> init{m_root};
                     PresentSet<Meta_t> p{};
+
                     Segment<Meta_t> result{segment_id, init.create(seg_name), std::move(p)};
                     m_journal.commit(id);
                     return result;

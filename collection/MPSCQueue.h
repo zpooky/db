@@ -7,17 +7,20 @@
 
 namespace sp {
 
+
     template<typename T>
-    class Queue {
+    class MPSCQueue {
     public:
         T m_default;
-        explicit Queue(T && p_def) :
+
+        explicit MPSCQueue(T &&p_def) :
                 m_default{std::forward<T>(p_def)} {
         }
 
-        Queue(const Queue<T> &) = delete;
-        Queue(Queue<T> && o) :
-                m_default{std::move(o.m_default)}{
+        MPSCQueue(const MPSCQueue<T> &) = delete;
+
+        MPSCQueue(MPSCQueue<T> &&o) :
+                m_default{std::move(o.m_default)} {
 
         }
 
@@ -27,11 +30,11 @@ namespace sp {
     };
 
     template<typename T>
-    void Queue<T>::push_front(T &&o) {
+    void MPSCQueue<T>::push_front(T &&o) {
     }
 
     template<typename T>
-    T Queue<T>::pop() {
+    T MPSCQueue<T>::pop() {
         return m_default;
     }
 

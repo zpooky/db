@@ -9,7 +9,7 @@
 #include "../../shared/fs.h"
 #include "../../shared/hash.h"
 #include <atomic>
-#include "../../collection/Queue.h"
+#include "../../collection/MPSCQueue.h"
 #include "../../config/Configuration.h"
 #include <utility>
 #include <thread>
@@ -66,7 +66,7 @@ namespace db {
         private:
             using SegLine = SegmentLine<hash_algh>;
             const File m_file;
-            sp::Queue<SegLine> m_queue;
+            sp::MPSCQueue<SegLine> m_queue;
             std::atomic<bool> m_interrupted;
         public:
             explicit SegmentJournalThread(const File &seg_file) :
