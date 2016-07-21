@@ -106,13 +106,11 @@ namespace db {
     private:
         using Arr = array<uint8_t, t_capacity>;
         Arr m_data;
-        size_t m_position;
-        size_t m_size;
+        size_t m_position{0};
+        size_t m_size{0};
     public:
         explicit Buffer(Arr &&data) :
-                m_data(std::move(data)),
-                m_position{0},
-                m_size{0} {
+                m_data(std::move(data)) {
         }
 
         Buffer() : Buffer(Arr{0}) {
@@ -155,20 +153,20 @@ namespace db {
         }
 
         void clear() {
-            flip();
+            m_position = size_t(0);
             m_size = size_t(0);
         }
 
         void put(uint8_t datum) {
-            if (postion() >= size()) {
-                throw std::runtime_error("put position() >= size()");
+            if (postion() >= capacity()) {
+                throw std::runtime_error("put position() >= capacity()");
             }
             i_put(datum);
         }
 
         void put(const uint8_t *datum, size_t length) {
-            if (postion() + length >= size()) {
-                throw std::runtime_error("put position()+length >= size()");
+            if (postion() + length >= capacity()) {
+                throw std::runtime_error("put position() + length >= capacity()");
             }
             auto begin = &datum[0];
             auto end = begin + length;
@@ -193,16 +191,16 @@ namespace db {
 //        }
 
         uint8_t get() {
-            if (postion() >= size()) {
-                throw std::runtime_error("get position() >= size()");
+            if (postion() > size()) {
+                throw std::runtime_error("get position() > size()");
             }
             return m_data[m_position++];
         }
 
         template<size_t bytes>
         void get(std::array<uint8_t, bytes> &buff) {
-            if (postion() + bytes >= size()) {
-                throw std::runtime_error("get position() + bytes >= size()");
+            if ((postion() + bytes) > size()) {
+                throw std::runtime_error("get position() + bytes > size()");
             }
             i_get(buff);
         }
