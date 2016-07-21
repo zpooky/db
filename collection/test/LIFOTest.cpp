@@ -6,6 +6,7 @@
 #include "../LIFO.h"
 #include <unordered_set>
 #include <future>
+#include <Barrier.h>
 
 class LIFOTest : public ::testing::TestWithParam<size_t> {
 
@@ -51,26 +52,25 @@ TEST_P(LIFOTest, paralell_push) {
     const size_t threads = GetParam();
     const size_t items = max * threads;
 
-    using Vec_t = std::unordered_set<size_t>;
-    using Future_t = std::future<Vec_t>;
+    using Future_t = std::future<size_t>;
 
 
     LIFO<size_t> list;
     std::vector<Future_t> v;
 //    std::atomic<size_t> cnt(0);
+    sp::Barrier barrier(threads);
     for (size_t i = 0; i < threads; ++i) {
         /**
          * setup threds
          */
-        std::packaged_task<Vec_t()> task([max, i, &list]() {
+        std::packaged_task<size_t()> task([max, i, &barrier, &list]() {
+            barrier.await();
             size_t cnt = i * max;
             const size_t maxs = max + cnt;
-            Vec_t result;
-            while (cnt++ < maxs) {
-                result.insert(cnt);
-                list.push_front(cnt);
+            while (cnt < maxs) {
+                list.push_front(cnt++);
             }
-            return result;
+            return size_t(0);
         });
         v.push_back(task.get_future());
         std::thread t(std::move(task));
@@ -83,11 +83,18 @@ TEST_P(LIFOTest, paralell_push) {
 
     std::unordered_set<size_t> drain(items);
     const size_t max_size_t = std::numeric_limits<size_t>::max();
+
+    //Drain and test number of elements in LIFO
     for (size_t i = 0; i < items; ++i) {
         size_t v = list.pop(max_size_t);
         ASSERT_NE(max_size_t, v);
         ASSERT_TRUE(drain.insert(v).second);
     }
     ASSERT_EQ(max_size_t, list.pop(max_size_t));
+
+    //Test that all elements are present in LIFO
+    for (size_t i = 0; i < items; ++i) {
+        ASSERT_NE(drain.end(), drain.find(i));
+    }
 
 }
