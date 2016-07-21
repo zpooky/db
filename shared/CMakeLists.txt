@@ -9,7 +9,7 @@ if (TARGET shared_lib)
 
 else ()
     # boost
-    include_directories(${BOOST_INCLUDEDIR}) #include the headers
+    include_directories(${BOOST_INCLUDE_DIR}) #include the headers
     link_directories(${BOOST_LIBRARY_DIR})
     find_package(Boost COMPONENTS filesystem REQUIRED)
     #
