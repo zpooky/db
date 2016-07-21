@@ -39,14 +39,7 @@ namespace db {
             SegmentFileFactory(SegmentFileFactory<T_Meta> &&o) :
                     m_seg_counter{o.m_seg_counter.load()},
                     m_root(o.m_root),
-                    m_journal(o.m_journal)
-            // m_seg_counter{std::move(o.m_seg_counter)},
-            //,
-            //        m_journal_runnable{std::move(o.m_journal_thread)},
-            //       m_journal{std::move(o.m_journal)},
-            //      m_journal_thread{std::move(o.m_journal_thread)}
-            {
-                //TODO
+                    m_journal(o.m_journal) {
             }
 
             ~SegmentFileFactory() {
