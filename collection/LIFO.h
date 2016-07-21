@@ -52,13 +52,22 @@ public:
     template<typename D>
     T pop(D &&def) {
 
-        Entry *current = nullptr;
+        Entry *current = m_poll.load();
         do {
-            current = m_poll.load();//redundant load just required for continue and initial value
             if (!current) {
+                /**
+                 * if push head is empty
+                 * empty:
+                 *  the list is empty and return the supplied default
+                 * non empty:
+                 *  retry by loading from poll head.
+                 *  this is a edge case when a concurrent push is accuring into an empty LIFO.
+                 *  initioally the push head is set then the poll head. the pop is performing inbetween those two events.
+                 */
                 if (!m_push.load()) {
-                    return std::forward<T>(def);//??
+                    return def;
                 } else {
+                    current = m_poll.load();
                     continue;
                 }
             }
