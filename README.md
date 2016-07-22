@@ -8,10 +8,11 @@ install by
 `git submodule update --init`
 
 Boost is required to be installed seperatly
-1. download latest version from http://www.boost.org/
-2. uncompress with `tar -xzvf`
-3. compile boost executing boostrap.sh and following the instructions 
-4. in the root CMakeLists.txt configure BOOST_ROOT to your boost directory
+
+1.  download latest version from [boost.org](Http://www.boost.org/)
+2.  uncompress with `tar -xzvf`
+3.  compile boost executing boostrap.sh and following the instructions 
+4.  in the root CMakeLists.txt configure `BOOST_ROOT` to your boost directory
 
 Compiled with
 ------------
