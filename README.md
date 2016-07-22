@@ -4,15 +4,15 @@ External dependencies
 * boost filesystem
 
 googletest is provided as a git submoudle
-install by
+install by initating the git submodule
 `git submodule update --init`
 
 Boost is required to be installed seperatly
 
-1.  download latest version from [boost.org](Http://www.boost.org/)
-2.  uncompress with `tar -xzvf`
-3.  compile boost executing boostrap.sh and following the instructions 
-4.  in the root CMakeLists.txt configure `BOOST_ROOT` to your boost directory
+1. Download latest version from [boost.org](Http://www.boost.org/)
+2. Uncompress with `tar -xzvf`
+3. Compile boost executing boostrap.sh and following the instructions
+4. In the root CMakeLists.txt configure `BOOST_ROOT` to your boost directory
 
 Compiled with
 ------------
