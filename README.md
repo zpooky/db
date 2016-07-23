@@ -5,6 +5,7 @@ External dependencies
 
 googletest is provided as a git submoudle.
 install by initiating the git submodule.
+
 `git submodule update --init`
 
 Boost is required to be installed seperatly
