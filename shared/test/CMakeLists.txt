@@ -9,7 +9,6 @@ if (TARGET shared_lib_test)
 else ()
     # GTest
 #    add_subdirectory(googletest/googletest)
-    enable_testing()
     include_directories(${gtest_SOURCE_DIR}/include)
     #
     include_directories(${COLLECTION_LIB_INCLUDE_DIR})

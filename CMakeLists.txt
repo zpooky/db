@@ -6,4 +6,6 @@ set(BOOST_ROOT /local/tools/boost_1_61_0)
 set(BOOST_INCLUDE_DIR ${BOOST_ROOT}) # headers
 set(BOOST_LIBRARY_DIR ${BOOST_ROOT}/stage/lib)# linked library(so)
 
+enable_testing()
+
 add_subdirectory(main)
