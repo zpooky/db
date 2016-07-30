@@ -22,15 +22,13 @@ namespace db {
             }
         };
 
-        template<typename t_Table>
         class Journal {
         private:
-            Journal(const Journal<t_Table> &o) = delete;
+            Journal(const Journal &o) = delete;
 
         public:
 
             Journal() {
-                assert_is_table<t_Table>();
             }
 
             journal_id begin();
@@ -40,31 +38,25 @@ namespace db {
             void commit(journal_id);
         };
 
-        template<typename t_Table>
-        Journal<t_Table> &instance();
+        Journal &instance();
 
-        template<typename t_Table>
-        Journal<t_Table> &instance() {
-            db::assert_is_table<t_Table>();
-            static Journal<t_Table> inst{};
+        Journal &instance() {
+            static Journal inst{};
             return inst;
         }
 
 
-        template<typename t_Table>
-        journal_id Journal<t_Table>::begin() {
+        journal_id Journal::begin() {
             return 1l;
         }
 
 
-        template<typename t_Table>
-        void Journal<t_Table>::prepare(journal_id id, const db::Reservation &r) {
+        void Journal::prepare(journal_id id, const db::Reservation &r) {
 
         }
 
 
-        template<typename t_Table>
-        void Journal<t_Table>::commit(journal_id id) {
+        void Journal::commit(journal_id id) {
 
         }
     }

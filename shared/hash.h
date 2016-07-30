@@ -83,13 +83,21 @@ namespace sp {
                 return res;
             }
 
-            void update(unsigned int) {
+
+            void update(uint8_t) {
             }
 
-            void update(unsigned short) {
+            void update(uint16_t) {
             }
 
-            void update(unsigned long) {
+            void update(uint32_t) {
+            }
+
+            void update(uint64_t) {
+            }
+
+            template<size_t length>
+            void update(std::array<uint8_t, length>) {
             }
 
             template<size_t length>

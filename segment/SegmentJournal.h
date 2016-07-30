@@ -36,7 +36,7 @@ namespace db {
             const segment_id idx;
             const State state;
         public:
-            SegmentLine(typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table,
+            SegmentLine(const typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table,
                         segment_id p_index, State p_state)
                     : hash{p_hash},
                       id{p_id},

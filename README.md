@@ -23,6 +23,12 @@ cmake ..
 make
 ./main/db`
 
+
+Test
+----
+In the build directory `ctest -v`
+
+
 Compiled with
 ------------
 g++ 5.3.1

@@ -23,7 +23,7 @@ int main(int argc, char *args[]) {
 
     db::Context<hash_algh> ctx{db::Directory("/tmp")};
     Segments<TTT> segments{ctx};
-    auto &journal = db::journal::instance<TestTable>();
+    auto &journal = db::journal::instance();
 
     {
         TestTable table;

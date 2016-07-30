@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 set(COLLECTION_LIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_subdirectory(test)
 if (TARGET collection_lib)
 
     message("collection_lib is already defined")
@@ -23,3 +22,5 @@ else ()
     #
     target_link_libraries(collection_lib shared_lib)
 endif ()
+
+add_subdirectory(test)

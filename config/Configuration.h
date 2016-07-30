@@ -34,7 +34,7 @@ namespace db {
 //            string name{table_name.begin(), table_name.end()};
 //            sprintf(buf, "%s-%ld", name.c_str(), idx);
 
-            ::sprintf(buf, "%ld", id);
+            ::sprintf(buf, "%lu", id);
             return std::string{buf};
         }
     };
