@@ -30,17 +30,18 @@ namespace db {
 
         template<typename hash_algh>
         struct SegmentLine {
-            const typename hash_algh::type hash;
+            using hash_type = typename hash_algh::type;
+            const hash_type hash;
             const journal_id id;
             const name_type table;
             const segment_id idx;
             const State state;
         public:
-            SegmentLine(const typename hash_algh::type p_hash, journal_id p_id, const name_type &p_table,
+            SegmentLine(const hash_type &p_hash, journal_id p_id, const name_type &p_table,
                         segment_id p_index, State p_state)
                     : hash{p_hash},
                       id{p_id},
-                      table(p_table),
+                      table{p_table},
                       idx{p_index},
                       state{p_state} {
             }
