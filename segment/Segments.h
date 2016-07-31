@@ -117,17 +117,19 @@ namespace db {
 
                 DD(const DD &) = delete;
 
-                std::tuple<db::segment::id, std::vector<File>> operator()() {
+                using segment_id =db::segment::id;
+
+                std::tuple<segment_id, std::vector<File>> operator()() {
                     std::vector<File> segments = files(m_root);
 
-                    std::vector<db::segment::id> num_segments(segments.size());
+                    std::vector<segment_id> num_segments(segments.size());
                     std::transform(segments.begin(), segments.end(), num_segments.begin(), [](const auto &file) {
                         auto fname = file.filename();
-                        return db::to<db::segment::id>(fname.name.c_str());
+                        return db::to<segment_id>(fname.name.c_str());
                     });
 
                     auto max_it = std::max_element(num_segments.begin(), num_segments.end());
-                    auto max = max_it != num_segments.end() ? *max_it : 1l;
+                    auto max = max_it != num_segments.end() ? *max_it : segment_id(0);
 
                     return std::make_tuple(max, segments);
                 }
