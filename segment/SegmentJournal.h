@@ -19,7 +19,7 @@
 namespace db {
     using std::atomic;
 
-    namespace internal {
+    namespace {
 
         enum class State : uint8_t {
             START, COMMIT, INTERNAL
@@ -30,7 +30,9 @@ namespace db {
 
         template<typename hash_algh>
         struct SegmentLine {
+        private:
             using hash_type = typename hash_algh::type;
+        public:
             const hash_type hash;
             const journal_id id;
             const name_type table;
@@ -72,7 +74,7 @@ namespace db {
         public:
             explicit SegmentJournalThread(const File &seg_file) :
                     m_file(seg_file),
-                    m_queue{db::internal::empty_segment_line<hash_algh>()},
+                    m_queue{empty_segment_line<hash_algh>()},
                     m_interrupted{false} {
 
             }
@@ -107,26 +109,23 @@ namespace db {
     }
 
     template<typename hash_algh>
-    internal::SegmentLine<hash_algh> segment_line(journal_id p_id, const db::table::name::type &p_table,
-                                                  db::segment::id segment_id, internal::State p_state) {
+    SegmentLine<hash_algh> segment_line(journal_id p_id, const name_type &p_table,
+                                        segment_id seg_id, State p_state) {
         hash_algh h;
         h.update(p_id);
         h.update(p_table);
-        h.update(segment_id);
+        h.update(seg_id);
         h.update(static_cast<uint16_t>(p_state));
-        return {h.digest(), p_id, p_table, segment_id, p_state};
+        return {h.digest(), p_id, p_table, seg_id, p_state};
     }
 
 
-    using internal::SegmentJournalThread;
-    using internal::SegmentLine;
     template<typename hash_algh>
-    using Consumer_t = internal::Consumer<SegmentLine<hash_algh>>;
+    using Consumer_t = Consumer<SegmentLine<hash_algh>>;
 
     template<typename hash_algh>
     class SegmentJournal {
     private:
-        using State = internal::State;
         Consumer_t<hash_algh> &m_consumer;
         atomic<journal_id> m_counter;
     public:
@@ -145,8 +144,6 @@ namespace db {
         SegmentJournal(const SegmentJournal &) = delete;
 
     private:
-        using name_type = db::table::name::type;
-        using segment_id = db::segment::id;
 
         SegmentLine<hash_algh> line(journal_id id, State state) const {
             name_type name{0};
@@ -155,7 +152,7 @@ namespace db {
         }
 
         SegmentLine<hash_algh> line(journal_id id, const name_type &name, segment_id idx) const {
-            return segment_line<hash_algh>(id, name, idx, db::internal::State::START);
+            return segment_line<hash_algh>(id, name, idx, State::START);
         }
 
     public:
@@ -178,4 +175,4 @@ namespace db {
 
 }
 
-#endif //PROJECT_SEGMENTJOURNAL_H
+#endif //PROJECT_SEGMENTJOURNAH
