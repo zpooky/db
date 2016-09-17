@@ -9,7 +9,7 @@
 #include "../shared/fs.h"
 #include "../shared/hash.h"
 #include <atomic>
-#include "../collection/MPSCQueue.h"
+#include "../collection/Queue.h"
 #include "../config/Configuration.h"
 #include <utility>
 #include <thread>
@@ -69,7 +69,7 @@ namespace db {
         private:
             using SegLine = SegmentLine<hash_algh>;
             const File m_file;
-            sp::MPSCQueue<SegLine> m_queue;
+            sp::Queue<SegLine> m_queue;
             std::atomic<bool> m_interrupted;
         public:
             explicit SegmentJournalThread(const File &seg_file) :
@@ -88,7 +88,7 @@ namespace db {
             SegmentJournalThread(const SegmentJournalThread &) = delete;
 
             void add(SegLine &&data) {
-                m_queue.push_front(std::move(data));
+                m_queue.enqueue(std::move(data));
             }
 
             void interrupt() {
@@ -98,7 +98,7 @@ namespace db {
             void operator()() {
                 db::FileWriter fw(m_file);
                 while (!m_interrupted) {
-                    auto entry = m_queue.pop();
+                    auto entry = m_queue.dequeue();
                     if (entry.id != 0l) {
                     } else {
 //                        printf("www");

@@ -14,7 +14,7 @@ namespace db {
     template<size_t T_Size>
     class ReservationSet {
     private:
-        sp::CBitset<T_Size> m_bitset;
+        sp::Bitset<T_Size> m_bitset;
         std::atomic<size_t> m_cnt;
     public:
         template<typename t_Meta>

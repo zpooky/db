@@ -16,7 +16,7 @@ namespace sp {
     using std::atomic;
 
     template<size_t T_Size, typename Byte_t = uint8_t>
-    class CBitset {
+    class Bitset {
     public:
         static constexpr size_t npos = T_Size;
     private:
@@ -29,6 +29,11 @@ namespace sp {
         static_assert(std::is_integral<Byte_t>::value, "Backing structure is required to be a integral");
         static_assert(T_Size % 8 == 0, "Size should be evenly divisable with 8");
 
+        /**
+         * |word|word|...|
+         * ^         ^
+         * |low bit  |high bit
+         */
         struct Entry {
         private:
 
@@ -104,6 +109,11 @@ namespace sp {
             }
 
         public:
+            /**
+             * sets or unsets a bit at specified index
+             * returns true if the specified bit has to be altered
+             * returns false if no change was required
+             */
             bool set(size_t bitIdx, bool b) {
                 size_t byteIdx = byte_index(bitIdx);
                 Entry_t &e = word_for(byteIdx);
@@ -115,16 +125,21 @@ namespace sp {
                 Byte_t word;
                 do {
                     if (b) {
+                        // bitwise or
                         word = word_before | mask;
                     } else {
+                        // bitwise xor
                         word = word_before ^ mask;
                     }
-                    //since we don't need to update if they are the same
+                    // since we don't need to update if they are the same
                     if (word == word_before) {
                         // check that *word_before* has not allready been set
-                        //if we did not change anything
+                        // if we did not change anything
                         return false;
                     }
+                    /**
+                     * if the compare exchange fails the word_before will be updated with the current value
+                     */
                 } while (!e.compare_exchange_strong(word_before, word));
                 return true;
             }
@@ -144,15 +159,28 @@ namespace sp {
                 return Byte_t(word & mask) != Byte_t(0);
             }
 
+            Byte_t mask_right(Byte_t idx) const {
+                const Byte_t b = ~Byte_t(0);
+                const Byte_t res = b >> idx;
+                return res;
+            }
+
+            /* 11111111_11111111|65535
+             * 11111111_11111110|65534
+             * 01111111_11111111|32767
+             * 10000000_00000000|32768
+             * 00000000_00000001|1
+             */
             bool all(size_t bitIdx, Byte_t test) const {
                 size_t idx = byte_index(bitIdx);
                 Byte_t wordIdx = word_index(bitIdx);
 
-                Byte_t mask = test >> wordIdx;
+                Byte_t mask = test & mask_right(wordIdx);
 
                 for (; idx < T_Size_based_on_bits; ++idx) {
                     Byte_t current = word_for(idx).load();
-                    current = current >> wordIdx;
+
+                    current = current  & mask_right(wordIdx);
 
                     if (current != mask) {
                         return false;
@@ -233,35 +261,35 @@ namespace sp {
 
         Entry *m_entry;
     private:
-        explicit CBitset(Entry *e) :
+        explicit Bitset(Entry *e) :
                 m_entry{e} {
         }
 
     public:
-        CBitset() :
-                CBitset{new Entry} {
+        Bitset() :
+                Bitset{new Entry} {
         }
 
-        explicit CBitset(const std::bitset<T_Size> &init) :
-                CBitset{new Entry(init)} {
+        explicit Bitset(const std::bitset<T_Size> &init) :
+                Bitset{new Entry(init)} {
         }
 
         /**
         *  @brief init the bitset with
         *  @param  b  the value to fill with
         */
-        explicit CBitset(bool v)
-                : CBitset(new Entry(v)) {
+        explicit Bitset(bool v)
+                : Bitset(new Entry(v)) {
         }
 
-        CBitset(const CBitset &) = delete;
+        Bitset(const Bitset &) = delete;
 
-        CBitset(CBitset &&o) :
-                CBitset{o.m_entry} {
+        Bitset(Bitset &&o) :
+                Bitset{o.m_entry} {
             o.m_entry = nullptr;
         }
 
-        ~CBitset() {
+        ~Bitset() {
             if (m_entry != nullptr) {
                 delete m_entry;
                 m_entry = nullptr;
@@ -291,6 +319,10 @@ namespace sp {
             return test(bitIdx);
         }
 
+        /**
+         * for all starting with $bitIndex will be tested
+         * against $test if all satisfies return true or else false
+         */
         bool all(size_t bitIdx, bool test) const {
             return m_entry->all(bitIdx, test ? ~Byte_t(0) : Byte_t(0));
         }
@@ -333,7 +365,7 @@ namespace sp {
     };
 
     template<size_t size, typename Type>
-    std::ostream &operator<<(std::ostream &os, const CBitset<size, Type> &b) {
+    std::ostream &operator<<(std::ostream &os, const Bitset<size, Type> &b) {
         for (size_t i = b.size(); i-- > 0;) {
             if (b[i]) {
                 os << '1';

@@ -90,7 +90,7 @@ namespace sp {
         Node *push_front_i(T &&v) {
             auto p = new Node(std::move(v));
             p->next = m_head;
-            while (!m_head.compare_exchange_weak(p->next, p)) { }
+            while (!m_head.compare_exchange_weak(p->next, p));
             m_cnt++;
             return p;
         }
