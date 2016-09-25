@@ -91,7 +91,7 @@ namespace sp {
             m_push.compare_exchange_strong(current, current->previous.load());
 
             T result(std::move(pinned->data));
-            delete pinned;
+//            delete pinned;
 
             return result;
         }

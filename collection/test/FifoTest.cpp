@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "../Fifo.h"
+#include "../MpScFifo.h"
 #include <unordered_set>
 #include <future>
 #include <Barrier.h>
@@ -18,21 +18,21 @@ using namespace sp;
 
 TEST_F (FifoTest, test) {
 
-    Fifo<size_t> l;
+    MpScFifo<size_t> l;
     ASSERT_EQ(0ul, l.pop(0ul));
 
-    l.push_front(1lu);
+    l.push_back(1lu);
     ASSERT_EQ(1ul, l.pop(0ul));
     ASSERT_EQ(0ul, l.pop(0ul));
 
-    l.push_front(20lu);
+    l.push_back(20lu);
     ASSERT_EQ(20ul, l.pop(0ul));
     ASSERT_EQ(0ul, l.pop(0ul));
 
-    l.push_front(1lu);
-    l.push_front(20lu);
+    l.push_back(1lu);
+    l.push_back(20lu);
     size_t ssss(30);
-    l.push_front(ssss);
+    l.push_back(ssss);
 
     ASSERT_EQ(1lu, l.pop(0ul));
     ASSERT_EQ(20lu, l.pop(0ul));
@@ -51,7 +51,7 @@ auto join(T &futures) -> std::vector<decltype(futures.front().get())> {
 
 std::vector<std::future<size_t>> unnamed(const size_t max,
                                          const size_t threads,
-                                         Fifo<size_t> &list,
+                                         MpScFifo<size_t> &list,
                                          Barrier &barrier) {
     std::atomic_thread_fence(std::memory_order::memory_order_release);
     std::vector<std::future<size_t>> v;
@@ -62,10 +62,11 @@ std::vector<std::future<size_t>> unnamed(const size_t max,
         std::packaged_task<size_t()> task([max, i, &barrier, &list]() {
             std::atomic_thread_fence(std::memory_order::memory_order_acquire);
             barrier.await();
+            std::cout<<"start\n";
             size_t cnt = i * max;
             const size_t maxs = max + cnt;
             while (cnt < maxs) {
-                list.push_front(cnt++);
+                list.push_back(cnt++);
             }
             return size_t(0);
         });
@@ -84,7 +85,7 @@ TEST_P(FifoTest, paralell_push) {
     using Future_t = std::future<size_t>;
 
 
-    Fifo<size_t> list;
+    MpScFifo<size_t> list;
     sp::Barrier barrier(threads);
 
     std::vector<Future_t> v = unnamed(max, threads, list, barrier);
@@ -92,6 +93,7 @@ TEST_P(FifoTest, paralell_push) {
      * collect data
      */
     join(v);
+    std::cout<<"join-"<<std::endl;
 
     std::unordered_set<size_t> drain(items);
     const size_t max_size_t = std::numeric_limits<size_t>::max();
@@ -111,7 +113,7 @@ TEST_P(FifoTest, paralell_push) {
 
 }
 
-TEST_P(FifoTest, paralell_push_and_pop) {
+TEST_P(FifoTest, paralell_push_concurrent_pop) {
     const size_t max = 100000;
     const size_t threads = GetParam();
     const size_t items = max * threads;
@@ -119,7 +121,7 @@ TEST_P(FifoTest, paralell_push_and_pop) {
     using Future_t = std::future<size_t>;
 
 
-    Fifo<size_t> list;
+    MpScFifo<size_t> list;
     sp::Barrier barrier(threads + 1);
 
     auto futures = unnamed(max, threads, list, barrier);
