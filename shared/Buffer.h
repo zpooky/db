@@ -43,7 +43,7 @@ namespace db {
             template<typename In>
             uint8_t to_uint8(In datum, size_t index) {
                 uint8_t shift(index * 8);
-                //std::cout << "x >> " << size_t(shift) << "# " << size_t(uint8_t(datum >> shift));
+                //std::cout << "x >> " << size_t(shift) << "# " << size_t(uint8_t(datum >> bits));
 
                 return uint8_t(datum >> shift);
             }

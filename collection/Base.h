@@ -7,74 +7,66 @@
 
 #include <stddef.h>
 #include <array>
+#include <vector>
 
 namespace sp {
-    template<size_t T_bits>
-    class Base {
-    private:
-        static constexpr size_t size = sizeof(uint8_t) * 8;
-        const std::array<uint8_t, T_bits> m_pool;
-        const uint8_t m_pad;
-    private:
+    namespace {
+        /* bits required to represent T_Radix
+         */
 
-    public:
-        static_assert(T_bits % 8 == 0, "");
-        static_assert(T_bits > 0, "");
-        static_assert(T_bits <= size_t(64), "");
-
-        constexpr Base(std::array<uint8_t, T_bits> &&pool, uint8_t pad) :
-                m_pool(pool), m_pad{pad} {
+        template<size_t T_Radix>
+        constexpr size_t xxbits(size_t ret) {
+//                return In & 1 ? xxbits<size_t(In >> 1)>(ret + 1) : ret;
+            if (T_Radix == 16) {
+                return 4;
+            } else if (T_Radix == 64) {
+                return 6;
+            } else if (T_Radix == 32) {
+                return 5;
+            }
+            throw std::runtime_error("bits");
         }
 
-        template<size_t T_In>
-        std::string encode(const std::array<uint8_t, T_In> &in) const {
-            return encode(in.begin(), in.end());
+        template<size_t T_Radix>
+        constexpr uint64_t xmask() {
+            return T_Radix - 1;
         }
 
-        std::string encode(const std::string &in) const {
-            auto begin = in.c_str();
-            auto end = &begin[in.length()];
-            return encode(begin, end);
-        }
-
-        struct Entry {
+        template<size_t T_Radix>
+        struct Encoder {
         private:
+            static constexpr size_t size = sizeof(uint8_t) * 8;
             uint64_t left;
             size_t bits;
-            const std::array<uint8_t, T_bits> &m_pool;
+            const std::array<uint8_t, T_Radix> &m_pool;
+
+            constexpr size_t xbits() {
+                return xxbits<T_Radix>(1);
+            }
 
             constexpr uint64_t mask() const {
-                return T_bits - 1;
+                return xmask<T_Radix>();
             }
 
-            constexpr uint8_t xbits() const {
-                if (T_bits == 16) {
-                    return 4;
-                } else if (T_bits == 64) {
-                    return 6;
-                } else if (T_bits == 32) {
-                    return 5;
-                }
-                throw std::runtime_error("bits");
-            }
 
         public:
-            Entry(uint64_t p_left, size_t p_bits, const std::array<uint8_t, T_bits> &pool) :
+            constexpr Encoder(uint64_t p_left, size_t p_bits, const std::array<uint8_t, T_Radix> &pool) :
                     left(p_left), bits(p_bits), m_pool(pool) {
             }
 
-            Entry &operator=(Entry e) {
+            Encoder<T_Radix> &operator=(Encoder<T_Radix> e) {
                 std::swap(left, e.left);
                 std::swap(bits, e.bits);
                 return *this;
             }
 
-            Entry add(uint8_t data) {
+            Encoder<T_Radix> add(uint8_t data) {
                 uint64_t c(uint64_t(left << size) | data);
                 return {c, bits + size, m_pool};
             }
 
-            Entry word(std::string &res) {
+            template<typename Result>
+            Encoder<T_Radix> encode(Result &res) {
                 if (bits < xbits()) {
                     throw std::runtime_error("bah");
                 }
@@ -92,7 +84,8 @@ namespace sp {
                 return bits >= xbits();
             }
 
-            Entry last_padding(char pad, std::string &res) {
+            template<typename Result>
+            Encoder<T_Radix> encode_padding(char pad, Result &res) {
                 if (bits != 0) {
                     //TODO assert bits <=
                     const auto msk = mask();
@@ -113,7 +106,6 @@ namespace sp {
                 return *this;
             }
 
-        private:
             size_t padding(size_t bits, size_t radix) {
                 size_t pad(bits);
                 size_t result(0);
@@ -125,18 +117,144 @@ namespace sp {
             }
         };
 
-        template<typename Char_t>
-        std::string encode(const Char_t *begin, const Char_t *end) const {
+        template<size_t T_Radix>
+        struct Decoder {
+        private:
+            static constexpr size_t size = sizeof(uint8_t) * 8;
+            uint64_t left;
+            size_t bits;
+            const std::array<uint8_t, T_Radix> &m_pool;
+            const uint8_t m_pad;
+
+            constexpr size_t xbits() {
+                return xxbits<T_Radix>(1);
+            }
+
+            size_t convert(uint8_t in) const {
+                size_t i(0);
+                for (auto cur : m_pool) {
+                    if (in == cur) {
+                        return i;
+                    }
+                    i = i + 1;
+                }
+                throw std::runtime_error("convert");
+            }
+
+        public:
+            constexpr Decoder(uint64_t p_left, size_t p_bits, const std::array<uint8_t, T_Radix> &pool, uint8_t pad) :
+                    left(p_left), bits(p_bits), m_pool(pool), m_pad(pad) {
+            }
+
+            void add(uint8_t in) {
+                if (in != m_pad) {
+                    auto data = convert(in);
+                    auto bb = xbits();
+                    left = uint64_t(left << bb) | uint64_t(data);
+                    bits = bits + bb;
+                }
+            }
+
+
+        private:
+            uint8_t get() {
+                bits = bits - size;
+                return uint8_t(uint64_t(left >> bits) & 0xFF);
+            }
+
+            constexpr size_t cnt() {
+                return bits / size;
+            }
+
+        public:
+            template<typename Inserter>
+            void decode(Inserter &insert) {
+                for (size_t i(0); i < cnt(); ++i) {
+                    insert = get();
+                }
+            }
+
+            template<typename Inserter>
+            void decode_last(Inserter &insert) {
+                if (bits > 0) {
+//                    decode(insert);
+                }
+            }
+
+        public:
+            bool fitting() {
+                return bits >= size;
+            }
+        };
+    }
+    template<size_t T_Radix>
+    class Base {
+    private:
+        const std::array<uint8_t, T_Radix> m_pool;
+        const uint8_t m_pad;
+    private:
+
+    public:
+        static_assert(T_Radix % 8 == 0, "");
+        static_assert(T_Radix > 0, "");
+        static_assert(T_Radix <= size_t(64), "");
+
+        constexpr Base(std::array<uint8_t, T_Radix> &&pool, uint8_t pad) :
+                m_pool(pool), m_pad{pad} {
+        }
+
+        template<size_t T_In>
+        std::string encode(const std::array<uint8_t, T_In> &in) const {
             std::string res;
-            Entry left(0, 0, m_pool);
+            return encode(in.begin(), in.end(), res);
+        }
+
+        std::string encode(const std::string &in) const {
+            auto begin = in.c_str();
+            auto end = &begin[in.length()];
+            std::string res;
+            return encode(begin, end, res);
+        }
+
+        template<typename Result>
+        Result decode(const std::string &in) const {
+            Result v/*(in.length())*/;
+            decode(in, std::back_inserter(v));
+            return v;
+        }
+
+        template<typename Inserter>
+        void decode(const std::string &in, Inserter insert) const {
+            auto begin = in.c_str();
+            auto end = &begin[in.length()];
+            return decode(begin, end, insert);
+        }
+
+    private:
+
+        template<typename Char_t, typename Result>
+        Result &encode(const Char_t *begin, const Char_t *end, Result &res) const {
+            Encoder<T_Radix> left(0, 0, m_pool);
             for (; begin != end; ++begin) {
                 left = left.add(*begin);
                 while (left.fitting()) {
-                    left = left.word(res);
+                    left = left.encode(res);
                 }
             }
-            left.last_padding(m_pad, res);
+            left.encode_padding(m_pad, res);
             return res;
+        }
+
+        template<typename Char_t, typename Inserter>
+        void decode(const Char_t *begin, const Char_t *end, Inserter &insert) const {
+            Decoder<T_Radix> left(0, 0, m_pool, m_pad);
+            for (; begin != end; ++begin) {
+                left.add(*begin);
+                while (left.fitting()) {
+                    left.decode(insert);
+                }
+                left.decode_last(insert);
+            }
         }
     };
 
