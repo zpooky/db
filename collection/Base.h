@@ -13,10 +13,9 @@ namespace sp {
     namespace {
         /* bits required to represent T_Radix
          */
-
         template<size_t T_Radix>
-        constexpr size_t xxbits(size_t ret) {
-//                return In & 1 ? xxbits<size_t(In >> 1)>(ret + 1) : ret;
+        constexpr size_t xxbits(/*size_t ret = 1*/) {
+//            return (T_Radix & 1) & 1 ? xxbits<size_t(T_Radix >> 1)>(ret + 1) : ret;
             if (T_Radix == 16) {
                 return 4;
             } else if (T_Radix == 64) {
@@ -41,7 +40,7 @@ namespace sp {
             const std::array<uint8_t, T_Radix> &m_pool;
 
             constexpr size_t xbits() {
-                return xxbits<T_Radix>(1);
+                return xxbits<T_Radix>();
             }
 
             constexpr uint64_t mask() const {
@@ -127,7 +126,7 @@ namespace sp {
             const uint8_t m_pad;
 
             constexpr size_t xbits() {
-                return xxbits<T_Radix>(1);
+                return xxbits<T_Radix>();
             }
 
             size_t convert(uint8_t in) const {
@@ -158,7 +157,7 @@ namespace sp {
 
         private:
             uint8_t get() {
-                bits = bits - size;
+                bits = std::max(int32_t(bits - size), int32_t(0));
                 return uint8_t(uint64_t(left >> bits) & 0xFF);
             }
 
@@ -176,9 +175,9 @@ namespace sp {
 
             template<typename Inserter>
             void decode_last(Inserter &insert) {
-                if (bits > 0) {
-//                    decode(insert);
-                }
+//                while (bits > 0) {
+//                    insert = get();
+//                }
             }
 
         public:
