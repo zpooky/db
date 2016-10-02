@@ -58,6 +58,8 @@ namespace sp {
 
         MpScFifo(const MpScFifo &) = delete;
 
+        MpScFifo &operator=(const MpScFifo &) = delete;
+
         ~MpScFifo() {
         }
 
@@ -72,14 +74,14 @@ namespace sp {
             auto current = new Entry(std::forward<T>(data));
             begin:
             auto head = m_push.load();
-            if(head == m_reserved){
+            if (head == m_reserved) {
                 Entry *resrved = m_reserved;
                 if (!m_push.compare_exchange_strong(resrved, current)) {
                     goto begin;
                 }
                 m_poll.compare_exchange_strong(resrved, current);
-            } else
-            if (head) {
+            } else if (head) {
+                //TODO probably race
                 Entry *nil = nullptr;
                 if (!head->prev.compare_exchange_strong(nil, current)) {
                     goto begin;
@@ -113,21 +115,33 @@ namespace sp {
 
     public:
         /**
-         *
+         * this is only allowed to be executed be a single thread
          */
         template<typename D>
         T pop(D &&def) {
             begin:
             //TODO: a failed cas will reread current
             auto current = m_poll.load();
+            // check if there is something in the queue
             if (current) {
                 auto prev = current->prev.load();
+                /** check if current has no parent
+                 *  if so current is the head for m_push.
+                 */
                 if (!prev) {
+                    /** we push a placeholder as the m_push head
+                     *  so we can safely reclaim current allocated memory
+                     */
                     bool ret = m_push.compare_exchange_strong(current, m_reserved);
-                    if(!ret){
+                    if (!ret) {
+                        /** if the cas fails m_push is under contention
+                         *  and we should just retry since current is likely
+                         *  not the m_push head anymore.
+                         */
                         goto begin;
                     }
                 }
+
                 bool res = m_poll.compare_exchange_strong(current, prev);
                 if (!res) {
                     goto begin;

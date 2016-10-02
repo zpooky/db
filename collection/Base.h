@@ -130,6 +130,7 @@ namespace sp {
             }
 
             size_t convert(uint8_t in) const {
+                //TODO improve
                 size_t i(0);
                 for (auto cur : m_pool) {
                     if (in == cur) {
@@ -175,6 +176,7 @@ namespace sp {
 
             template<typename Inserter>
             void decode_last(Inserter &insert) {
+                //TODO ????
 //                while (bits > 0) {
 //                    insert = get();
 //                }

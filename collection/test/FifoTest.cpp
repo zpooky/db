@@ -25,8 +25,8 @@ TEST_F (FifoTest, test) {
     ASSERT_EQ(1ul, l.pop(0ul));
     ASSERT_EQ(0ul, l.pop(0ul));
 
-    l.push_back(20lu);
-    ASSERT_EQ(20ul, l.pop(0ul));
+    l.push_back(size_t(20));
+    ASSERT_EQ(size_t(20), l.pop(size_t(0)));
     ASSERT_EQ(0ul, l.pop(0ul));
 
     l.push_back(1lu);

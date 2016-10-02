@@ -17,7 +17,7 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES ListTest.cpp BitsetTest.cpp QueueTest.cpp FifoTest.cpp BaseTest.cpp)
+    set(SOURCE_FILES ListTest.cpp BitsetTest.cpp QueueTest.cpp FifoTest.cpp BaseTest.cpp BinaryTree.cpp ForwardTest.cpp)
     ##############
     # Unit Tests
     ##############
