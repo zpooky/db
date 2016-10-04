@@ -106,7 +106,21 @@ namespace sp {
 
         MpScFifo &operator=(const MpScFifo &) = delete;
 
+        MpScFifo(const MpScFifo &&) = delete;
+
+        MpScFifo &operator=(const MpScFifo &&) = delete;
+
         ~MpScFifo() {
+            start:
+            auto current = m_poll.load();
+            if (!m_poll.compare_exchange_strong(current, nullptr)) {
+                goto start;
+            }
+            while (current) {
+                auto previous = current->previous().load();
+                delete current;
+                current = previous;
+            }
         }
 
         /**
