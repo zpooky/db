@@ -16,20 +16,24 @@ using namespace std;
 using namespace sp::hash;
 
 int main(int argc, char *args[]) {
+    //TODO autoconf where this information are fetched(page and sector size)
     cout << "sector size:" << db::vfs::sector::size("") << endl;
     cout << "page size:" << db::vfs::page::size() << endl;
     using hash_algh = crc32;
     using TTT = db::TableMeta<TestTable, hash_algh>;
 
-    db::Context<hash_algh> ctx{db::Directory("/tmp")};
-    Segments<TTT> segments{ctx};
+
+    db::Directory root("/tmp/db");
+    db::vfs::mkdir(root);
+    db::Context<hash_algh> ctx{root};
+    auto segments = make_unique<Segments<TTT>>(ctx);
     auto &journal = db::journal::instance();
 
     {
         TestTable table;
 
         auto jid = journal.begin();
-        auto reserv = segments.reserve();
+        auto reserv = segments->reserve();
 //        auto line = to_line(move(table));
 //        segment.write(reserv, line);
         journal.prepare(jid, reserv);

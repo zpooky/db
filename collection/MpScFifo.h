@@ -9,21 +9,25 @@
 #include <stdexcept>
 #include <type_traits>
 #include <algorithm>
+#include "ConcurrentPointer.h"
 
 namespace sp {
-
+/**
+ * TODO not working - leaks all memory
+ * TODO missing deletes
+ */
     template<typename T>
     class MpScFifo {
     private:
         struct Entry;
-        using Entry_t = std::atomic<Entry *>;
+        using ptr = Entry *;
+//        using ptr = ConcurrentPointer<Entry>;
+        using Entry_t = std::atomic<ptr>;
 
         struct Entry {
             virtual std::string to_string() = 0;
 
             virtual Entry_t &previous() = 0;
-
-            virtual std::string name() = 0;
 
             virtual ~Entry() {
             }
@@ -46,10 +50,6 @@ namespace sp {
                 return s;
             }
 
-            std::string name() {
-                return "NoEntry";
-            }
-
             Entry_t &previous() {
                 return prev;
             }
@@ -69,10 +69,6 @@ namespace sp {
 
             Entry_t &previous() {
                 return prev;
-            }
-
-            std::string name() {
-                return "IEntry";
             }
 
             std::string to_string() {
@@ -135,7 +131,7 @@ namespace sp {
             begin:
             auto head = m_push.load();
             if (head) {
-                Entry *nil = nullptr;
+                ptr nil = nullptr;
                 /* Expect previous to be null otherwise contention and reload head
                  */
                 if (!head->previous().compare_exchange_strong(nil, current)) {
@@ -177,7 +173,7 @@ namespace sp {
 //                    throw std::runtime_error{"res false"};
                 }
             } else {
-                Entry *nil = nullptr;
+                ptr nil = nullptr;
                 if (!m_push.compare_exchange_strong(nil, current)) {
                     goto begin;
                 }

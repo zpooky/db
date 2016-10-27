@@ -5,6 +5,7 @@
 #ifndef PROJECT_CONTEXT_H
 #define PROJECT_CONTEXT_H
 
+#include <thread>
 #include "../shared/entities.h"
 #include "../config/Configuration.h"
 
@@ -14,8 +15,8 @@ namespace db {
         using segment_id = db::segment::id;
         const db::Directory root;
 
-        SegmentJournalThread <hash_algh> m_runnable;
-        SegmentJournal <hash_algh> m_journal;
+        SegmentJournalThread<hash_algh> m_runnable;
+        SegmentJournal<hash_algh> m_journal;
         std::thread m_thread;
 
         explicit Context(const Directory &p_root) :

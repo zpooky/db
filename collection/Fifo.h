@@ -9,7 +9,9 @@
 #include <type_traits>
 
 namespace sp {
-
+/**
+ * TODO not working
+ */
     template<typename T>
     class Fifo {
     private:
@@ -40,7 +42,7 @@ namespace sp {
         template<typename D>
         void push_front(D &&data) {
             static_assert(std::is_same<typename std::remove_reference<D>::type,
-                                  typename std::remove_reference<T>::type>::value, "Is required to be of same type");
+                    typename std::remove_reference<T>::type>::value, "Is required to be of same type");
             auto current = new Entry(std::forward<T>(data));
             auto next = m_push.load();
 
@@ -68,7 +70,8 @@ namespace sp {
         T pop(D &&def) {
             Entry *current = m_poll.load();
             do {
-                redo: if (current == nullptr) {
+                redo:
+                if (current == nullptr) {
                     /**
                      * if push head is empty
                      * empty:

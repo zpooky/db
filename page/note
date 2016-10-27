@@ -1,0 +1,3 @@
+Transient - transactional but only in memory
+Fs - transactional persisted to disk
+§

@@ -28,7 +28,7 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES SegmentReservations.h Segment.cpp Reservations.h Segments.h SegmentJournal.h format/Format.cpp format/Format.h SegmentFile.h PresentSet.cpp PresentSet.h ReservationSet.cpp ReservationSet.h format/SegmentFileParser.cpp format/SegmentFileParser.h Context.h)
+    set(SOURCE_FILES SegmentReservations.h Segment.cpp Reservations.h Segments.h SegmentJournal.h format/Format.cpp format/Format.h io/SegmentFile.h PresentSet.h ReservationSet.cpp ReservationSet.h format/SegmentFileParser.cpp format/SegmentFileParser.h Context.h io/JournalPageBufferedFileWriter.h test/ReservationSetTest.cpp)
 
     add_library(segment_lib STATIC ${SOURCE_FILES})
     set_target_properties(segment_lib PROPERTIES LINKER_LANGUAGE CXX)
@@ -37,3 +37,5 @@ else ()
     target_link_libraries(segment_lib fs_lib)
     target_link_libraries(segment_lib Threads::Threads)
 endif ()
+
+#add_subdirectory(test)

@@ -15,7 +15,7 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Journal.cpp)
+    set(SOURCE_FILES Journal.h)
 
     add_library(journal_lib STATIC ${SOURCE_FILES})
     set_target_properties(journal_lib PROPERTIES LINKER_LANGUAGE CXX)

@@ -12,7 +12,7 @@ class FifoTest : public ::testing::TestWithParam<size_t> {
 
 };
 
-INSTANTIATE_TEST_CASE_P(Threads, FifoTest, ::testing::Range(size_t(1), size_t(150)));
+INSTANTIATE_TEST_CASE_P(Threads, FifoTest, ::testing::Range(size_t(1), size_t(15)));
 
 using namespace sp;
 

@@ -74,8 +74,8 @@ namespace db {
         public:
             explicit SegmentJournalThread(const File &seg_file) :
                     m_file(seg_file),
-                    m_queue{empty_segment_line<hash_algh>()},
-                    m_interrupted{false} {
+                    m_queue(/*empty_segment_line<hash_algh>()*/),
+                    m_interrupted(false) {
 
             }
 
@@ -98,11 +98,7 @@ namespace db {
             void operator()() {
                 db::FileWriter fw(m_file);
                 while (!m_interrupted) {
-                    auto entry = m_queue.dequeue();
-                    if (entry.id != 0l) {
-                    } else {
-//                        printf("www");
-                    }
+                    auto entries = m_queue.drain();
                 }
             }
         };
@@ -115,7 +111,7 @@ namespace db {
         h.update(p_id);
         h.update(p_table);
         h.update(seg_id);
-        h.update(static_cast<uint16_t>(p_state));
+        h.update(static_cast<std::underlying_type<State>::type>(p_state));
         return {h.digest(), p_id, p_table, seg_id, p_state};
     }
 

@@ -150,6 +150,6 @@ namespace db {
     }
 
     std::vector<File> files(const Directory&);
-};
+}
 
 #endif //SHARED_ENTITIES_H

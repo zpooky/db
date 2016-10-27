@@ -28,9 +28,10 @@ namespace db {
         template<typename t_Table>
         class SegmentReservations {
         private:
-            const Segment<t_Table> m_segment;
+            const Segment <t_Table> m_segment;
         public:
-            explicit SegmentReservations(const Segment<t_Table> &s) : m_segment{s} {
+            explicit SegmentReservations(const Segment <t_Table> &s) :
+                    m_segment(s) {
                 db::assert_is_table<t_Table>();
             }
 
