@@ -11,7 +11,6 @@
 #include "../fs/FileWriter.h"
 #include "SegmentJournal.h"
 #include "format/Format.h"
-#include "SegmentFile.h"
 #include "PresentSet.h"
 
 

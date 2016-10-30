@@ -8,7 +8,7 @@
 
 #include <cstddef>
 #include <utility>
-#include "../fs/FileWriter.h"
+#include "../../fs/FileWriter.h"
 
 namespace db {
     namespace fs {
