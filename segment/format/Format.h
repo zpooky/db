@@ -108,6 +108,7 @@ namespace db {
             //
             std::bitset<lines> res;
             FileReader fr(file);
+            //TODO parse header
             //TODO advice to skip page cache
             size_t current(0);
             while (current < lines) {

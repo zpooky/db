@@ -24,7 +24,7 @@ namespace db {
 
         class Journal {
         private:
-            Journal(const Journal &o) = delete;
+            Journal(const Journal &) = delete;
 
         public:
 
@@ -52,7 +52,6 @@ namespace db {
 
 
         void Journal::prepare(journal_id id, const db::Reservation &r) {
-
         }
 
 
