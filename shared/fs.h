@@ -42,11 +42,13 @@ namespace db {
         RESERVED = 0, PREPARED, ROLLEDBACK, COMMITED
     };
 //Journal
-    using journal_id = uint64_t;
 
     //
 
 }
+namespace journal {
 
+    using journal_id = uint64_t;
+}
 
 #endif //DB_FS_H

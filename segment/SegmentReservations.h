@@ -9,44 +9,51 @@
 #include "Segment.h"
 
 namespace db {
-    namespace fs {
-        /**
-         * Thread safe
-         * individual segment "Line reservation manager"
-         *
-         * Segment
-         * |======.---------.
-         * |Sector|   Line   |<---| Reserve
-         * |      |----------|<---|
-         * |      |   Line   |<---|
-         * |======|----------|
-         * |Sector|   Line   |
-         * |      |----------|
-         * |      |   Line   |
-         * |======|----------|
-         */
-        template<typename t_Table>
-        class SegmentReservations {
-        private:
-            const Segment <t_Table> m_segment;
-        public:
-            explicit SegmentReservations(const Segment <t_Table> &s) :
-                    m_segment(s) {
-                db::assert_is_table<t_Table>();
-            }
+namespace fs {
+/**
+ * # Segment
+ * |======.---------.
+ * |Page  |   Line   |<---| Reserve
+ * |      |----------|    |
+ * |      |   Line   |<---|
+ * |======|----------|    |
+ * |Page  |   Line   |    |
+ * |      |----------|    |
+ * |      |   Line   |    |
+ * |======|----------|    |
+ *
+ *
+ * Frontend for single segment reservations.
+ * Thread safe
+ */
+template <typename t_Table>
+class SegmentReservations {
+private:
+  const Segment<t_Table> m_segment;
 
-            Reservation reserve();
+public:
+  explicit SegmentReservations(const Segment<t_Table> &s) : m_segment(s) {
+    db::assert_is_table<t_Table>();
+  }
 
-            size_t free_count() {
-                return 0;
-            }
-        };
+  /* Reserve a single line.
+   * May fail with returning a not valid reservation.
+   * Reservation validty can be checked with Reservation.is_valid()
+   */
+  Reservation reserve();
 
-        template<typename t_Table>
-        Reservation SegmentReservations<t_Table>::reserve() {
-            return {1l};
-        }
-    }
+  /* Number of unreserved lines
+   */
+  size_t free_count() const {
+    return size_t(0);
+  }
+};
+
+template <typename t_Table>
+Reservation SegmentReservations<t_Table>::reserve() {
+  return Reservation{};
+}
+}
 }
 
-#endif //PROJECT_RESERVATION_H
+#endif // PROJECT_RESERVATION_H
