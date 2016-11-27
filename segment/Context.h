@@ -6,13 +6,13 @@
 #define PROJECT_CONTEXT_H
 
 #include <thread>
-#include "../journal/SegmentJournal.h"
+#include "../journal/Journals.h"
 #include "../journal/JournalThread.h"
 #include "../shared/entities.h"
 #include "../config/Configuration.h"
 
 namespace db {
-    /* # Provides Table shared subsytems.
+    /* Provides table-shared subsytems
      * - Segment file journal.
      *
      */
@@ -22,12 +22,12 @@ namespace db {
         const db::Directory root;
 
         journal::JournalThread<hash_algh> m_runnable;
-        journal::SegmentJournal<hash_algh> m_journal;
+        journal::Journals<hash_algh> m_journal;
         std::thread m_thread;
 
         explicit Context(const Directory &p_root) :
                 root(p_root),
-                m_runnable(p_root.cd(Filename("segment.journal"))),
+                m_runnable(p_root.cd(DirectoryName("journal"))),
                 m_journal(m_runnable)
 //                ,m_thread(std::move(m_runnable))
         { }

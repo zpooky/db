@@ -52,6 +52,10 @@ namespace db {
             return Filename{path.substr()};
         }
 
+        const char* c_str() const {
+          return path.c_str();
+        }
+
 //        operator string() const {
 //            return path;
 //        }

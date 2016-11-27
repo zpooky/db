@@ -23,6 +23,8 @@ namespace db {
 namespace fs {
 
 /**
+ * Transactional segment file factory
+ * - 
  */
 template <typename T_Meta>
 class SegmentFileFactory {
@@ -32,7 +34,7 @@ private:
   std::atomic<segment_id> m_seg_counter;
   const Directory m_root;
   // --
-  journal::SegmentJournal<hash_algh> &m_journal;
+  journal::Journals<hash_algh> &m_journal;
 
 public:
   explicit SegmentFileFactory(Context<hash_algh> &ctx, segment_id p_index,
@@ -44,6 +46,7 @@ public:
       : m_seg_counter{o.m_seg_counter.load()}, m_root(o.m_root),
         m_journal(o.m_journal) {
   }
+  SegmentFileFactory(const SegmentFileFactory&) = delete;
 
   ~SegmentFileFactory() {
   }
@@ -55,6 +58,10 @@ public:
   }
 };
 /**
+ * Internal collection of segments
+ * - contains and owns a list of existing segments
+ * - will create new segments if there is no
+ *   free lines available.
  */
 template <typename T_Meta>
 class ColSegments {
@@ -135,7 +142,7 @@ public:
 
   static ColSegments<T_Meta> apply(Context<hash_algh> &ctx,
                                    const Directory &p_root) {
-    auto seg_root = db::vfs::mkdir(p_root.cd("segment"));
+    auto seg_root = vfs::mkdir(p_root.cd("segment"));
 
     DD d(seg_root);
 
@@ -149,7 +156,10 @@ public:
     return ColSegments<T_Meta>{std::move(sff), segments};
   }
 };
-
+/* Frontend for table segments
+ * - used for aquiring a reservation
+ *   behind the scenes creates new segments
+ */
 template <typename T_Meta>
 class Segments {
 private:
@@ -160,7 +170,7 @@ private:
 
 public:
   explicit Segments(Context<hash_algh> &ctx)
-      : m_root(db::vfs::mkdir(ctx.root.cdx(T_Table::table_name()))),
+      : m_root(vfs::mkdir(ctx.root.cdx(T_Table::table_name()))),
         m_segments{ColSegments<T_Meta>::apply(ctx, m_root)} {
     //                db::assert_is_context<T_Table>();
   }

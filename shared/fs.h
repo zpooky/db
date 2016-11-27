@@ -27,6 +27,9 @@ namespace db {
                 position{p_position},
                 segment{p_segment} {
         }
+        bool is_valid() const {
+          return position != size_t(0) || segment != db::segment::id(0);
+        }
     };
 
     class Table {

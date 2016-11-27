@@ -10,7 +10,7 @@
 #include "../shared/Assertions.h"
 #include "../shared/entities.h"
 #include "PresentSet.h"
-#include "../journal/SegmentJournal.h"
+#include "../journal/Journals.h"
 #include "format/Format.h"
 
 namespace db {
@@ -21,6 +21,7 @@ class Segment {
 private:
   const db::segment::id m_id;
   using hash_algh = typename Meta_t::hash_algh;
+  using T_Table = typename Meta_t::Table;
   SegmentFile m_file;
   PresentSet<Meta_t> m_lines;
   // State
@@ -43,16 +44,15 @@ public:
     return m_id;
   }
 
-  template <size_t SIZE>
-  bool write(const Reservation &r, const Line<SIZE, hash_algh> &line) {
+  bool write(const Reservation &r, const T_Table &line) {
     return true;
   }
 
-  const PresentSet<Meta_t> &present_set();
+  const PresentSet<Meta_t> &present_set() const;
 };
 
 template <typename Meta_t>
-const PresentSet<Meta_t> &Segment<Meta_t>::present_set() {
+const PresentSet<Meta_t> &Segment<Meta_t>::present_set() const {
   return m_lines;
 }
 
@@ -63,11 +63,11 @@ private:
   using Table_t = typename Meta_t::Table;
   using hash_algh = typename Meta_t::hash_algh;
   const Directory &m_root;
-  journal::SegmentJournal<hash_algh> &m_journal;
+  journal::Journals<hash_algh> &m_journal;
 
 public:
   explicit SegmentFileInitJournal(const Directory &root,
-                                  journal::SegmentJournal<hash_algh> &journal)
+                                  journal::Journals<hash_algh> &journal)
       : m_root(root), m_journal{journal} {
     //                    db::assert_is_table<Table_t>();
   }

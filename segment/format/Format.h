@@ -64,7 +64,7 @@ namespace db {
             File file = m_root.cd(filename);
             FileWriter stream{file};
             //
-            std::array<char, db::vfs::page::default_size> buf{0};
+            std::array<char, vfs::page::default_size> buf{0};
             do {
                 size_t counter = std::min<size_t>(buf.size(), target);
                 target = target - counter;

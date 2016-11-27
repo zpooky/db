@@ -44,11 +44,13 @@ namespace sp {
                     m_data() {
             }
 
-            explicit Entry(const std::bitset<T_Size> &init) {
+            explicit Entry(const std::bitset<T_Size> &init) :
+                Entry() {
                 transfer(init);
             }
 
-            explicit Entry(bool v) {
+            explicit Entry(bool v) : 
+                Entry(){
                 init_with(v ? ~Byte_t(0) : Byte_t(0));
             }
 

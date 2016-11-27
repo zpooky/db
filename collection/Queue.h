@@ -48,7 +48,7 @@ namespace sp {
             static_assert(std::is_same<typename std::remove_reference<Q>::type,
                     typename std::remove_reference<T>::type>::value, "Is required to be of same type");
             m_fifo.push_front(std::forward<T>(o));
-            if (m_sleeping.load() != 0u) {
+            if (m_sleeping.load() != uint32_t(0)) {
                 std::unique_lock<std::mutex> lck(m_mutex);
                 m_condition.notify_one();
             }
@@ -64,7 +64,7 @@ namespace sp {
     T Queue<T>::dequeue() {
         auto val = nullptr;
         if (val != nullptr) {
-            m_sleeping.fetch_add(1);
+            m_sleeping.fetch_add(uint32_t(1));
             do {
                 std::unique_lock<std::mutex> lck(m_mutex);
                 m_condition.wait(lck);

@@ -22,22 +22,22 @@ template <typename hash_algh>
 using Consumer_t = Consumer<JournalLine<hash_algh>>;
 
 template <typename hash_algh>
-class SegmentJournal {
+class Journals {
 private:
   Consumer_t<hash_algh> &m_consumer;
   atomic<journal_id> m_counter;
 
 public:
-  explicit SegmentJournal(Consumer_t<hash_algh> &consumer, journal_id start = 0)
+  explicit Journals(Consumer_t<hash_algh> &consumer, journal_id start = 0)
       : m_consumer(consumer), m_counter{start} {
     //                db::assert_is_meta<T_Meta>();
   }
 
-  SegmentJournal(SegmentJournal &&o)
+  Journals(Journals &&o)
       : m_consumer(o.m_consumer), m_counter(o.m_counter.load()) {
   }
 
-  SegmentJournal(const SegmentJournal &) = delete;
+  Journals(const Journals &) = delete;
 
 private:
   JournalLine<hash_algh> line(journal_id id, State state) const {

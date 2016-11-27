@@ -5,8 +5,8 @@
 #ifndef PROJECT_VFS_H
 #define PROJECT_VFS_H
 
-#include <stddef.h>
 #include "../shared/entities.h"
+#include <stddef.h>
 
 //#ifndef BLKGETSIZE
 //#define BLKGETSIZE _IO(0x12,96)                   /* return device size */
@@ -15,35 +15,41 @@
 //#ifndef BLKPBSZGET
 //#define BLKSSZGET  _IO(0x12,123)/* get block device sector size */
 //#endif
+/*
+ * to obtain `sudo fdisk -l`
+ * `sudo fdisk -l /dev/sda`
+ * `cat /sys/block/sda/queue/hw_sector_size`
+ */
+namespace vfs {
+/**
+ * the harddrive sector size is the minimum amount of data the hdd can
+ * read/write in a single go.
+ */
+namespace sector {
+namespace logical {
+/**
+ * bytes
+ */
+static const size_t default_size = (512);
 
-namespace db {
-    namespace vfs {
-        /**
-         * the harddrive sector size is the minimum amount of data the hdd can read/write in a single go.
-         */
-        namespace sector {
-            /**
-             * bytes
-             */
-            static const size_t default_size = 512;
+size_t size(const char *s);
+}
+namespace physical {}
+}
+/**
+ * the page size is the minimum unit of data the OS kernel can read/write
+ */
+namespace page {
+/**
+ * bytes
+ */
+static const size_t default_size = (4 * 1024);
 
-            size_t size(const char *s);
-        }
-        /**
-         * the page size is the minimum unit of data the OS kernel can read/write
-         */
-        namespace page {
-            /**
-             * bytes
-             */
-            static const size_t default_size = 4 * 1024;
-
-            size_t size();
-        }
-
-        //
-        const db::Directory& mkdir(const Directory &d);
-    }
+long size();
 }
 
-#endif //PROJECT_VFS_H
+//
+const db::Directory &mkdir(const db::Directory &d);
+}
+
+#endif // PROJECT_VFS_H

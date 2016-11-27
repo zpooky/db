@@ -9,7 +9,7 @@
 #include "../shared/fs.h"
 
 namespace journal {
-enum class Type : unsigned char {
+enum class Type : uint8_t{
   START = 0,
   UPDATE = 1,
   COMMIT = 2,

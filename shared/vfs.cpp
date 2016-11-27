@@ -14,7 +14,7 @@
 #include <stdexcept>
 
 
-size_t db::vfs::sector::size(const char *s) {
+size_t vfs::sector::logical::size(const char *s) {
 
     int fd = ::open("/dev/sda", O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
@@ -39,8 +39,9 @@ size_t db::vfs::sector::size(const char *s) {
     return logicalsectsize;
 }
 
-size_t db::vfs::page::size() {
-    int result = ::getpagesize();
+long vfs::page::size() {
+    // int result = ::getpagesize();
+    long result = sysconf(_SC_PAGESIZE);
     if (result < 0) {
         return default_size;
     }
@@ -48,7 +49,7 @@ size_t db::vfs::page::size() {
 }
 
 
-const db::Directory& db::vfs::mkdir(const db::Directory &d) {
+const db::Directory& vfs::mkdir(const db::Directory &d) {
     const auto &path = d.path;
     printf("mkdir(%s) ", path.c_str());
     int status = ::mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);

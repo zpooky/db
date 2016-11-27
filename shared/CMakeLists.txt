@@ -26,4 +26,4 @@ else ()
     target_link_libraries(shared_lib ${Boost_LIBRARIES})
 endif ()
 
-add_subdirectory(test)
+#add_subdirectory(test)
