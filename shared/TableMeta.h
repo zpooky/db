@@ -9,7 +9,7 @@
 #include <type_traits>
 
 namespace db {
-
+//TODO remove HASH algh use the context one instead
 template <typename T_Table, typename T_Hash_Algh>
 struct TableMeta {
 public:

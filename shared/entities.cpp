@@ -33,4 +33,7 @@ namespace db {
         }
         return res;
     }
+
+    Directory Directory::parent() const {
+    }
 }

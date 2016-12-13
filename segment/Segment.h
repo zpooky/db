@@ -44,7 +44,7 @@ public:
     return m_id;
   }
 
-  bool write(const Reservation &r, const T_Table &line) {
+  bool write(const Reservation<T_Table> &r, const T_Table &line) {
     return true;
   }
 

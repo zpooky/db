@@ -9,7 +9,7 @@
 #include "../shared/fs.h"
 
 namespace journal {
-enum class Type : uint8_t{
+enum class Type : uint8_t {
   START = 0,
   UPDATE = 1,
   COMMIT = 2,
@@ -19,7 +19,6 @@ enum class Type : uint8_t{
 
 template <journal::Type TYPE>
 struct Entry {
-
   Type get_type() const {
     return TYPE;
   }
@@ -34,8 +33,9 @@ public:
   }
 
   journal_id begin();
-
-  void prepare(journal_id, const db::Reservation &);
+  
+  template<typename t_Table>
+  void prepare(journal_id, const db::Reservation<t_Table> &);
 
   void commit(journal_id);
 };
@@ -51,10 +51,11 @@ journal_id Journal::begin() {
   return 1l;
 }
 
-void Journal::prepare(journal_id id, const db::Reservation &r) {
+template<typename t_Table>
+void Journal::prepare(journal_id id, const db::Reservation<t_Table> &) {
 }
 
-void Journal::commit(journal_id id) {
+void Journal::commit(journal_id ) {
 }
 }
 

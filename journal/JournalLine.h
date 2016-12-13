@@ -7,7 +7,17 @@
 
 namespace journal {
 
-enum class State : uint8_t { START, COMMIT, INTERNAL };
+enum class State : uint8_t { 
+/*
+ */
+  BEGIN, 
+/*
+ */
+  COMMIT, 
+/*
+ */
+  INTERNAL 
+  };
 
 using name_type = db::table::name::type;
 using segment_id = db::segment::id;
@@ -18,10 +28,21 @@ private:
   using hash_type = typename hash_algh::type;
 
 public:
+  /* A hash of the JournalLine itself
+   */
   const hash_type hash;
+  /* Id to group related journal entries.
+   * journalId<->transactionId
+   */
   const journal_id id;
+  /* Table name to represent what table
+   */
   const name_type table;
+  /* Segment id to represent which segment file
+   */
   const segment_id idx;
+  /*
+   */
   const State state;
 
 public:

@@ -46,13 +46,9 @@ private:
     return segment_line<hash_algh>(id, name, idx, state);
   }
 
-  JournalLine<hash_algh> line(journal_id id, const name_type &name,
-                              segment_id idx) const {
-    return segment_line<hash_algh>(id, name, idx, State::START);
-  }
 
 public:
-  journal_id start(const name_type &name, segment_id idx) {
+  journal_id begin(const name_type &name, segment_id idx) {
     auto id = ++m_counter;
     m_consumer.add(line(id, name, idx));
     return id;
@@ -61,6 +57,9 @@ public:
   //            void prepare(journal_id id) {
   //                m_consumer.add(line(id, State::PREPARED));
   //            }
+  // 
+  void rollback() {
+  }
 
   void commit(journal_id id) {
     m_consumer.add(line(id, State::COMMIT));

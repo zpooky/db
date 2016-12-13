@@ -12,6 +12,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>/*close,..*/
 #include <stdexcept>
+#include <cassert>
 
 
 size_t vfs::sector::logical::size(const char *s) {
@@ -58,4 +59,12 @@ const db::Directory& vfs::mkdir(const db::Directory &d) {
     }
     printf("\n");
     return d;
+}
+void vfs::sync(const db::Directory &d) {
+  int fd = ::open(d.c_str(), O_RDONLY | O_DIRECTORY);
+  assert(fd != 0);
+  if(fd) {
+    ::fsync(fd);
+  }
+  ::close(fd);
 }

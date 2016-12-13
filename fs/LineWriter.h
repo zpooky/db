@@ -18,8 +18,8 @@ namespace db {
                     : m_fileWriter{file} {
             }
 
-            template<size_t size, typename T_hash_type>
-            void write(const Reservation &r, const Line<size, T_hash_type> &l) {
+            template<typename t_table, size_t size, typename T_hash_type>
+            void write(const Reservation<t_table> &r, const Line<size, T_hash_type> &l) {
                 auto buf = buffer(l);
                 m_fileWriter.write(buf, r.position);
             }

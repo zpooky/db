@@ -5,53 +5,44 @@
 #ifndef DB_FS_H
 #define DB_FS_H
 
-#include <stddef.h>
+#include "../config/Configuration.h"
 #include <array>
+#include <stddef.h>
 #include <string>
 #include <utility>
-#include "../config/Configuration.h"
 
 namespace db {
 
-//    template <typename Table_t>
-    struct Reservation {
-        const size_t position;
-        const db::segment::id segment;
+template <typename Table_t>
+struct Reservation {
+  const size_t position;
+  const db::segment::id segment;
 
-        explicit Reservation() :
-                Reservation(0, 0) {
-            //TODO fix this
-        }
+  explicit Reservation() : Reservation(0, 0) {
+    // TODO fix this
+  }
 
-        explicit Reservation(size_t p_position, db::segment::id p_segment) :
-                position{p_position},
-                segment{p_segment} {
-        }
-        bool is_valid() const {
-          return position != size_t(0) || segment != db::segment::id(0);
-        }
-    };
+  explicit Reservation(size_t p_position, db::segment::id p_segment)
+      : position{p_position}, segment{p_segment} {
+  }
+  bool is_valid() const {
+    return position != size_t(0) || segment != db::segment::id(0);
+  }
+};
 
-    class Table {
-//        static size_t size() const noexcept = 0;
-    };
+class Table {
+  //        static size_t size() const noexcept = 0;
+};
 
-//Raw
-    using rid = uint64_t;
-    constexpr rid EMPTY_LINE = 0ul;
-    template<size_t size>
-    using raw = std::array<uint8_t, size>;
-    enum class RState : uint8_t {
-        RESERVED = 0, PREPARED, ROLLEDBACK, COMMITED
-    };
-//Journal
-
-    //
-
+// Raw
+using rid = uint64_t;
+constexpr rid EMPTY_LINE = 0ul;
+template <size_t size>
+using raw = std::array<uint8_t, size>;
 }
 namespace journal {
 
-    using journal_id = uint64_t;
+using journal_id = uint64_t;
 }
 
-#endif //DB_FS_H
+#endif // DB_FS_H

@@ -89,6 +89,10 @@ namespace db {
 //        boost::filesystem::path to_path() const {
 //            return {path};
 //        }
+//        
+      const char *c_str() const {
+        return path.c_str();
+      }
 
     private:
 //        template<typename Col>
@@ -125,6 +129,8 @@ namespace db {
         File cd(const Filename &filename) const;
 
         Directory cd(const DirectoryName &name) const;
+
+        Directory parent() const;
     };
 
     template<typename Col>

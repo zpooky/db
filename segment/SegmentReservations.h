@@ -40,7 +40,7 @@ public:
    * May fail with returning a not valid reservation.
    * Reservation validty can be checked with Reservation.is_valid()
    */
-  Reservation reserve();
+  Reservation<t_Table> reserve();
 
   /* Number of unreserved lines
    */
@@ -50,8 +50,8 @@ public:
 };
 
 template <typename t_Table>
-Reservation SegmentReservations<t_Table>::reserve() {
-  return Reservation{};
+Reservation<t_Table> SegmentReservations<t_Table>::reserve() {
+  return Reservation<t_Table>{};
 }
 }
 }

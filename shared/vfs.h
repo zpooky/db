@@ -50,6 +50,7 @@ long size();
 
 //
 const db::Directory &mkdir(const db::Directory &d);
+void sync(const db::Directory &d);
 }
 
 #endif // PROJECT_VFS_H

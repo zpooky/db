@@ -24,11 +24,12 @@ namespace fs {
 
 /**
  * Transactional segment file factory
- * - 
+ * -
  */
 template <typename T_Meta>
 class SegmentFileFactory {
 private:
+  using T_Table = typename T_Meta::Table;
   using segment_id = db::segment::id;
   using hash_algh = typename T_Meta::hash_algh;
   std::atomic<segment_id> m_seg_counter;
@@ -46,7 +47,7 @@ public:
       : m_seg_counter{o.m_seg_counter.load()}, m_root(o.m_root),
         m_journal(o.m_journal) {
   }
-  SegmentFileFactory(const SegmentFileFactory&) = delete;
+  SegmentFileFactory(const SegmentFileFactory &) = delete;
 
   ~SegmentFileFactory() {
   }
@@ -91,7 +92,7 @@ public:
   ~ColSegments() {
   }
 
-  Reservation reserve() {
+  Reservation<T_Table> reserve() {
     while (true) {
       auto &reservations = free();
       auto maybe_res = reservations.reserve();
@@ -163,12 +164,13 @@ public:
 template <typename T_Meta>
 class Segments {
 private:
-  using T_Table = typename T_Meta::Table;
   using hash_algh = typename T_Meta::hash_algh;
   const db::Directory m_root;
   ColSegments<T_Meta> m_segments;
 
 public:
+  using T_Table = typename T_Meta::Table;
+
   explicit Segments(Context<hash_algh> &ctx)
       : m_root(vfs::mkdir(ctx.root.cdx(T_Table::table_name()))),
         m_segments{ColSegments<T_Meta>::apply(ctx, m_root)} {
@@ -181,15 +183,12 @@ public:
 
   Segments(const Segments<T_Meta> &) = delete;
 
-  Reservation reserve();
+  Reservation<T_Table> reserve() {
+    return m_segments.reserve();
+  }
 
 private:
 };
-
-template <typename T_Meta>
-Reservation Segments<T_Meta>::reserve() {
-  return m_segments.reserve();
-}
 }
 }
 #endif // PROJECT_SEGMENTS_H
