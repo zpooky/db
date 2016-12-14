@@ -5,39 +5,34 @@
 #ifndef PROJECT_SEGMENTFILE_H
 #define PROJECT_SEGMENTFILE_H
 
-
 #include <cstddef>
 #include <utility>
-#include "../../fs/FileWriter.h"
+#include "../../shared/entities.h"
 
 namespace db {
-    namespace fs {
-        class SegmentFile {
-        private:
-            FileWriter m_file;
-            const size_t m_line_size;
-            const size_t m_number;
-        public:
+namespace fs {
+class SegmentFile {
+private:
+  File m_file;
+  const size_t m_line_size;
+  const size_t m_number;
 
-            SegmentFile(const File &file, size_t line_size, size_t number) :
-                    m_file{file},
-                    m_line_size{line_size},
-                    m_number{number} {
-            }
+public:
+  SegmentFile(const File &file, size_t line_size, size_t number)
+      : m_file{file}, m_line_size{line_size}, m_number{number} {
+  }
 
-            SegmentFile(const SegmentFile &) = delete;
+  SegmentFile(const SegmentFile &) = delete;
 
-            SegmentFile(SegmentFile &&o) :
-                    m_file{std::move(o.m_file)},
-                    m_line_size{o.m_line_size},
-                    m_number{o.m_number} {
+  SegmentFile(SegmentFile &&o)
+      : m_file{std::move(o.m_file)}, m_line_size{o.m_line_size},
+        m_number{o.m_number} {
+  }
 
-            }
-
-            const File &file() const {
-                return m_file.file();
-            }
-        };
-    }
+  const File &file() const {
+    return m_file;
+  }
+};
 }
-#endif //PROJECT_SEGMENTFILE_H
+}
+#endif // PROJECT_SEGMENTFILE_H

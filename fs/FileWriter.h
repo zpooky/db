@@ -174,7 +174,9 @@ public:
       : AlignedBuffer(alignment, alignment) {
   }
   explicit AlignedBuffer(size_t alignment, size_t bytes)
-      : m_capacity(sizeof(uint8_t) * bytes) {
+      : m_capacity(size_t(sizeof(uint8_t)) * bytes) {
+    assert(alignment > 0);
+    assert(bytes > 0);
     assert(bytes <= alignment);
     assert(alignment % bytes == 0);
     /* Alloc dubble the size to ensure alignment fits

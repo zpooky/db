@@ -94,8 +94,8 @@ public:
 
   Reservation<T_Table> reserve() {
     while (true) {
-      auto &reservations = free();
-      auto maybe_res = reservations.reserve();
+      auto &reservation = free_page();
+      auto maybe_res = reservation.reserve();
       if (maybe_res.is_present()) {
         return maybe_res.get();
       }
@@ -103,7 +103,7 @@ public:
   }
 
 private:
-  Reservations<T_Meta> &free() {
+  Reservations<T_Meta> &free_page() {
     auto p = [](const Reservations<T_Meta> &r) -> bool { return r.has_free(); };
 
     auto f = [&]() { return Reservations<T_Meta>{this->m_factory()}; };

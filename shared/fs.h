@@ -15,15 +15,15 @@ namespace db {
 
 template <typename Table_t>
 struct Reservation {
-  const size_t position;
   const db::segment::id segment;
+  const size_t position;
 
   explicit Reservation() : Reservation(0, 0) {
     // TODO fix this
   }
 
-  explicit Reservation(size_t p_position, db::segment::id p_segment)
-      : position{p_position}, segment{p_segment} {
+  explicit Reservation(db::segment::id p_id, size_t p_position)
+      :  segment{p_id}, position{p_position} {
   }
   bool is_valid() const {
     return position != size_t(0) || segment != db::segment::id(0);
