@@ -18,19 +18,19 @@ namespace fs {
 template <typename T_Meta>
 class Reservations {
 private:
-  Segment<T_Meta> m_segment;
+  using T_Table = typename T_Meta::Table;
+
+private:
+  const db::segment::id segment_id;
   db::ReservationSet<T_Meta::lines()> m_reservations;
 
 public:
-  using T_Table = typename T_Meta::Table;
-
-  explicit Reservations(Segment<T_Meta> &&seg)
-      : m_segment{std::move(seg)}, m_reservations{m_segment.present_set()} {
+  explicit Reservations(db::segment::id id, const PresentSet<T_Meta> &p)
+      : segment_id{id}, m_reservations{p} {
   }
 
   Reservations(Reservations<T_Meta> &&o)
-      : m_segment{std::move(o.m_segment)},
-        m_reservations{std::move(o.m_reservations)} {
+      : segment_id{o.segment_id}, m_reservations{std::move(o.m_reservations)} {
     //                db::assert_is_meta<T_Meta>();
   }
 
@@ -39,7 +39,6 @@ public:
   sp::Maybe<Reservation<T_Table>> reserve() {
     auto optResId = m_reservations.reserve();
     if (optResId) {
-      auto segment_id = m_segment.get_id();
       Reservation<T_Table> r{optResId.get(), segment_id};
       return sp::Maybe<Reservation<T_Table>>{r};
     }

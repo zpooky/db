@@ -72,15 +72,16 @@ private:
   using segment_id = db::segment::id;
   // --
   SegmentFileFactory<T_Meta> m_factory;
-  sp::List<Reservations<T_Meta>> m_vector;
+  sp::List<Segment<T_Meta>> m_vector;
 
 public:
   explicit ColSegments(SegmentFileFactory<T_Meta> &&factory,
                        const std::vector<File> &p_segments)
       : m_factory{std::move(factory)} {
+    // TODO make better
     for (const auto &file : p_segments) {
       SegmentFileParser<T_Meta> parser(file);
-      m_vector.push_front(Reservations<T_Meta>{parser.parse()});
+      m_vector.push_front(parser.parse());
     }
     //                db::assert_is_context<T_Meta>();
   }

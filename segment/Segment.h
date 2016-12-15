@@ -5,12 +5,12 @@
 #ifndef FS_SEGMENT_H
 #define FS_SEGMENT_H
 
-#include "../config/Configuration.h"
 #include "../fs/FileWriter.h"
+#include "../journal/Journals.h"
 #include "../shared/Assertions.h"
 #include "../shared/entities.h"
 #include "PresentSet.h"
-#include "../journal/Journals.h"
+#include "Reservations.h"
 #include "format/Format.h"
 
 namespace db {
@@ -19,36 +19,33 @@ namespace fs {
 template <typename Meta_t>
 class Segment {
 private:
-  const db::segment::id m_id;
   using hash_algh = typename Meta_t::hash_algh;
   using T_Table = typename Meta_t::Table;
+
+private:
   SegmentFile m_file;
   PresentSet<Meta_t> m_lines;
+  Reservations<Meta_t> m_reservations;
   // State
 public:
-  explicit Segment(db::segment::id id, SegmentFile &&file,
-                   PresentSet<Meta_t> &&lines)
-      : m_id{id}, m_file{std::move(file)}, m_lines{std::move(lines)} {
+  explicit Segment(SegmentFile &&file, PresentSet<Meta_t> &&lines)
+      : m_file{std::move(file)}, m_lines{std::move(lines)},
+        m_reservations{m_file.id(), m_lines} {
     //                db::assert_is_meta<Meta_t>();
   }
 
   Segment(Segment<Meta_t> &&o)
-      : m_id{o.m_id}, m_file{std::move(o.m_file)},
-        m_lines{std::move(o.m_lines)} {
+      : m_file{std::move(o.m_file)}, m_lines{std::move(o.m_lines)},
+        m_reservations{std::move(o.m_reservations)} {
     //                db::assert_is_meta<Meta_t>();
   }
 
   Segment(const Segment &) = delete;
 
-  auto get_id() const -> decltype(m_id) {
-    return m_id;
-  }
-
-  bool write(const Reservation<T_Table> &r, const T_Table &line) {
-    return true;
-  }
-
   const PresentSet<Meta_t> &present_set() const;
+  const SegmentFile &file() const {
+    return m_file;
+  }
 };
 
 template <typename Meta_t>
