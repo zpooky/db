@@ -43,7 +43,7 @@ private:
   void error(const char *func, int ret) const {
     if (ret == -1) {
       int errnum = errno;
-      string err(func);
+      std::string err(func);
       err.append("(");
       err.append(m_file.path);
       err.append("): ");

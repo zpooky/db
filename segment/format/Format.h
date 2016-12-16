@@ -72,6 +72,7 @@ SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
     stream.init_write(buf, counter);
   } while (target > 0);
   stream.flush();
+  vfs::sync(Directory{file.parent()});
   return SegmentFile{file, line_size, lines};
 }
 

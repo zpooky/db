@@ -5,161 +5,164 @@
 #ifndef SHARED_ENTITIES_H
 #define SHARED_ENTITIES_H
 
+#include <array>
 #include <string>
 #include <utility>
-#include <array>
 #include <vector>
+#include <cassert>
 
 //#include <boost/filesystem.hpp>
 
 namespace db {
 
 //    using boost::filesystem::path;
-    using std::string;
 
-    struct Filename {
-        const string name;
+struct Filename {
+  const std::string name;
 
-        explicit Filename(string &&p_name) : name{p_name} {
+  explicit Filename(std::string &&p_name) : name{p_name} {
+  }
 
-        }
+  //        operator string() const {
+  //            return name;
+  //        }
+};
+struct File {
+private:
+public:
+  const std::string path;
 
-//        operator string() const {
-//            return name;
-//        }
-    };
+  explicit File(const std::string &p_path) : path{p_path} {
+  }
+  explicit File(std::string &&p_path) : path{std::move(p_path)} {
+  }
+  //        explicit File(const boost::filesystem::path &p) : path{p.string()}{
+  //
+  //        }
 
-    struct File {
-    private:
-    public:
-        const string path;
+  Filename filename() const {
+    auto index = path.rfind('/');
+    if (index != std::string::npos) {
+      auto file = path.substr(index);
+      return Filename{std::move(file)};
+    }
+    return Filename{path.substr()};
+  }
 
-        explicit File(const string &p_path) : path{p_path} {
-        }
-        explicit File(string &&p_path) : path{std::move(p_path)} {
-        }
-//        explicit File(const boost::filesystem::path &p) : path{p.string()}{
-//
-//        }
+  const char *c_str() const {
+    return path.c_str();
+  }
 
+  std::string parent() const {
+    auto index = path.rfind('/');
+    if (index != std::string::npos) {
+      return path.substr(0, index);
+    }
+    assert(0);
+  }
 
-        Filename filename() const {
-            auto index = path.rfind('/');
-            if (index != string::npos) {
-                auto file = path.substr(index);
-                return Filename{std::move(file)};
-            }
-            return Filename{path.substr()};
-        }
+  //        operator string() const {
+  //            return path;
+  //        }
+};
 
-        const char* c_str() const {
-          return path.c_str();
-        }
+struct DirectoryName {
+private:
+public:
+  const std::string name;
 
-//        operator string() const {
-//            return path;
-//        }
-    };
+  explicit DirectoryName(std::string &&p_name) : name{p_name} {
+  }
 
+  //        operator string() const {
+  //            return name;
+  //        }
+};
 
-    struct DirectoryName {
-    private:
-    public:
-        const string name;
+struct Directory {
+private:
+public:
+  const std::string path;
 
-        explicit DirectoryName(string &&p_name) : name{p_name} {
-        }
+  //        explicit Directory(const Directory &o) : path{o.path} {
+  //        }
 
-//        operator string() const {
-//            return name;
-//        }
-    };
+  explicit Directory(std::string &&p_path) : path{p_path} {
+  }
 
-    struct Directory {
-    private:
-    public:
-        const string path;
+  //        boost::filesystem::path to_path() const {
+  //            return {path};
+  //        }
+  //
+  const char *c_str() const {
+    return path.c_str();
+  }
 
-//        explicit Directory(const Directory &o) : path{o.path} {
-//        }
+private:
+  //        template<typename Col>
+  //        std::string concat(const std::string &p_path, const Col &d);
 
-        explicit Directory(string &&p_path) : path{p_path} {
-        }
-
-//        boost::filesystem::path to_path() const {
-//            return {path};
-//        }
-//        
-      const char *c_str() const {
-        return path.c_str();
-      }
-
-    private:
-//        template<typename Col>
-//        string concat(const string &p_path, const Col &d);
-
-        template<typename Col>
-        string concat(const string &p_path, const Col &d) const {
-            string copy = p_path;
-//            printf("'%s'\n", copy.c_str());
-            if (copy.at(copy.length() - 1) != '/') {
-                copy.append("/");
-//                printf(":%s:\n", bah.c_str());
-            }
-
-            string xcc{d.begin(), d.end()};
-
-//            printf("|%s|\n", xcc.c_str());
-            copy.append(xcc.c_str());
-//            printf("_%s_\n", copy.c_str());
-            return copy;
-        }
-
-    public:
-
-        template<typename Col>
-        Directory cdx(Col &&d) const;
-
-        template<size_t t_size, typename t_type>
-        Directory cdx(std::array<t_type, t_size> &&d) const;
-
-        template<size_t N>
-        Directory cd(const char (&d)[N]) const;
-
-        File cd(const Filename &filename) const;
-
-        Directory cd(const DirectoryName &name) const;
-
-        Directory parent() const;
-    };
-
-    template<typename Col>
-    Directory Directory::cdx(Col &&d) const {
-        return Directory{concat(path, d)};
+  template <typename Col>
+  std::string concat(const std::string &p_path, const Col &d) const {
+    std::string copy = p_path;
+    //            printf("'%s'\n", copy.c_str());
+    if (copy.at(copy.length() - 1) != '/') {
+      copy.append("/");
+      //                printf(":%s:\n", bah.c_str());
     }
 
-    template<size_t t_size, typename t_type>
-    Directory Directory::cdx(std::array<t_type, t_size> &&d) const {
-        t_type a[t_size + 1];
-        auto it = d.begin();
-        auto ait = &a[0];
-        while (it != d.end() && *it) {
-            *ait = *it;
-            ++it;
-            ++ait;
-        }
-        *ait = 0;
+    std::string xcc{d.begin(), d.end()};
 
-        string str{a};
-        return Directory{concat(path, str)};
-    }
+    //            printf("|%s|\n", xcc.c_str());
+    copy.append(xcc.c_str());
+    //            printf("_%s_\n", copy.c_str());
+    return copy;
+  }
 
-    template<size_t N>
-    Directory Directory::cd(const char (&d)[N]) const {
-        return cdx(string{d, N});
-    }
+public:
+  template <typename Col>
+  Directory cdx(Col &&d) const;
 
-    std::vector<File> files(const Directory&);
+  template <size_t t_size, typename t_type>
+  Directory cdx(std::array<t_type, t_size> &&d) const;
+
+  template <size_t N>
+  Directory cd(const char (&d)[N]) const;
+
+  File cd(const Filename &filename) const;
+
+  Directory cd(const DirectoryName &name) const;
+
+  Directory parent() const;
+};
+
+template <typename Col>
+Directory Directory::cdx(Col &&d) const {
+  return Directory{concat(path, d)};
 }
 
-#endif //SHARED_ENTITIES_H
+template <size_t t_size, typename t_type>
+Directory Directory::cdx(std::array<t_type, t_size> &&d) const {
+  t_type a[t_size + 1];
+  auto it = d.begin();
+  auto ait = &a[0];
+  while (it != d.end() && *it) {
+    *ait = *it;
+    ++it;
+    ++ait;
+  }
+  *ait = 0;
+
+  std::string str{a};
+  return Directory{concat(path, str)};
+}
+
+template <size_t N>
+Directory Directory::cd(const char (&d)[N]) const {
+  return cdx(std::string{d, N});
+}
+
+std::vector<File> files(const Directory &);
+}
+
+#endif // SHARED_ENTITIES_H
