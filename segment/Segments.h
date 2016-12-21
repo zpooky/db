@@ -31,14 +31,14 @@ class SegmentFileFactory {
 private:
   using T_Table = typename T_Meta::Table;
   using segment_id = db::segment::id;
-  using hash_algh = typename T_Meta::hash_algh;
+  using hash_t = typename T_Meta::hash_algh;
   std::atomic<segment_id> m_seg_counter;
   const Directory m_root;
   // --
-  journal::Journals<hash_algh> &m_journal;
+  journal::Journals<hash_t> &m_journal;
 
 public:
-  explicit SegmentFileFactory(Context<hash_algh> &ctx, segment_id p_index,
+  explicit SegmentFileFactory(Context<hash_t> &ctx, segment_id p_index,
                               const Directory &p_root)
       : m_seg_counter{p_index}, m_root(p_root), m_journal(ctx.journal()) {
   }
@@ -68,7 +68,7 @@ template <typename T_Meta>
 class ColSegments {
 private:
   using T_Table = typename T_Meta::Table;
-  using hash_algh = typename T_Meta::hash_algh;
+  using hash_t = typename T_Meta::hash_algh;
   using segment_id = db::segment::id;
   // --
   SegmentFileFactory<T_Meta> m_factory;
@@ -145,7 +145,7 @@ public:
     }
   };
 
-  static ColSegments<T_Meta> apply(Context<hash_algh> &ctx,
+  static ColSegments<T_Meta> apply(Context<hash_t> &ctx,
                                    const Directory &p_root) {
     auto seg_root = vfs::mkdir(p_root.cd("segment"));
 
@@ -168,14 +168,14 @@ public:
 template <typename T_Meta>
 class Segments {
 private:
-  using hash_algh = typename T_Meta::hash_algh;
+  using hash_t = typename T_Meta::hash_algh;
   const db::Directory m_root;
   ColSegments<T_Meta> m_segments;
 
 public:
   using T_Table = typename T_Meta::Table;
 
-  explicit Segments(Context<hash_algh> &ctx)
+  explicit Segments(Context<hash_t> &ctx)
       : m_root(vfs::mkdir(ctx.root().cdx(T_Table::table_name()))),
         m_segments{ColSegments<T_Meta>::apply(ctx, m_root)} {
     //                db::assert_is_context<T_Table>();

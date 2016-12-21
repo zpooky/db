@@ -37,13 +37,13 @@ public:
   /* A hash of the JournalLine itself
    */
   const hash_type hash;
+  /* Table name to represent what table
+   */
+  const name_type table;
   /* Id to group related journal entries.
    * journalId<->transactionId
    */
   const journal::id id;
-  /* Table name to represent what table
-   */
-  const name_type table;
   // #<{(| Segment id to represent which segment file
   //  |)}>#
   // const segment_id idx;
@@ -85,6 +85,7 @@ JournalLine<hash_t> xbegin(journal::id jid,
 template <typename hash_t>
 JournalLine<hash_t> create() {
 }
+
 template <typename hash_t>
 JournalLine<hash_t> commitx(journal::id jid,
                           const db::table::name::type &table) {
