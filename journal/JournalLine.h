@@ -6,7 +6,7 @@
 
 namespace journal {
 
-enum class State : uint8_t {
+enum class Type : uint8_t {
   /* Start the journal transaction
    */
   BEGIN,
@@ -49,37 +49,37 @@ public:
   // const segment_id idx;
   /*
    */
-  const State state;
+  const Type type;
 
 public:
   JournalLine(const hash_type &p_hash, journal::id p_id,
-              const name_type &p_table, State p_state)
-      : hash{p_hash}, id{p_id}, table{p_table}, state{p_state} {
+              const name_type &p_table, Type p_type)
+      : hash{p_hash}, id{p_id}, table{p_table}, type{p_type} {
   }
 };
 
 template <typename hash_t>
 JournalLine<hash_t> segment_line(journal::id p_id,
                                  const db::table::name::type &p_table,
-                                 State p_state) {
+                                 Type p_type) {
   hash_t h;
   h.update(p_id);
   h.update(p_table);
-  h.update(static_cast<std::underlying_type<State>::type>(p_state));
-  return {h.digest(), p_id, p_table, p_state};
+  h.update(static_cast<std::underlying_type<Type>::type>(p_type));
+  return {h.digest(), p_id, p_table, p_type};
 }
 
 template <typename hash_t>
 JournalLine<hash_t> empty_segment_line() {
   using name_type = db::table::name::type;
   name_type name{0};
-  return segment_line<hash_t>(journal::NO_ID, name, State::INTERNAL);
+  return segment_line<hash_t>(journal::NO_ID, name, Type::INTERNAL);
 }
 
 template <typename hash_t>
 JournalLine<hash_t> xbegin(journal::id jid,
                            const db::table::name::type &table) {
-  return segment_line<hash_t>(jid, table, State::BEGIN);
+  return segment_line<hash_t>(jid, table, Type::BEGIN);
 }
 
 template <typename hash_t>
@@ -88,7 +88,7 @@ JournalLine<hash_t> create() {
 template <typename hash_t>
 JournalLine<hash_t> commitx(journal::id jid,
                           const db::table::name::type &table) {
-  return segment_line<hash_t>(jid, table, State::COMMIT);
+  return segment_line<hash_t>(jid, table, Type::COMMIT);
 }
 }
 #endif

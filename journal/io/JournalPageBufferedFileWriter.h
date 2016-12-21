@@ -81,7 +81,7 @@ public:
 
     for (auto &event : events) {
       // m_buffer.write(event);
-      if (event.state == State::COMMIT) {
+      if (event.state == journal::Type::COMMIT) {
         require_flush = true;
       }
 
