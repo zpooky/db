@@ -5,7 +5,7 @@
 #ifndef PROJECT_TESTTABLE_H
 #define PROJECT_TESTTABLE_H
 
-#include "../shared/fs.h"
+#include "../shared/shared.h"
 #include <array>
 
 struct TestTable : public db::Table {
@@ -19,7 +19,6 @@ struct TestTable : public db::Table {
     }
 
 private:
-    using name_type = db::table::name::type;
 
 //    template<class T, std::size_t N, std::size_t... I>
 //    constexpr std::array<std::remove_cv_t<T>, N> to_array_impl(T (&a)[N], std::index_sequence<I...>) {
@@ -32,7 +31,7 @@ private:
 //    }
 
 public:
-    constexpr static name_type table_name() {
+    constexpr static db::table::name::type table_name() {
 //        return to_array("test_table");
         return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e', 0};
     }

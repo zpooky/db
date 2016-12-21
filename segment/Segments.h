@@ -6,7 +6,7 @@
 #define PROJECT_SEGMENTS_H
 
 #include "../collection/List.h"
-#include "../config/Configuration.h"
+#include "../shared/shared.h"
 #include "../shared/Assertions.h"
 #include "../shared/conversions.h"
 #include "../shared/vfs.h"
@@ -40,7 +40,7 @@ private:
 public:
   explicit SegmentFileFactory(Context<hash_algh> &ctx, segment_id p_index,
                               const Directory &p_root)
-      : m_seg_counter{p_index}, m_root(p_root), m_journal(ctx.m_journal) {
+      : m_seg_counter{p_index}, m_root(p_root), m_journal(ctx.journal()) {
   }
 
   SegmentFileFactory(SegmentFileFactory<T_Meta> &&o)
@@ -105,11 +105,14 @@ public:
 
 private:
   Reservations<T_Meta> &free_page() {
-    auto p = [](const Reservations<T_Meta> &r) -> bool { return r.has_free(); };
+    auto p = [](const Segment<T_Meta> &s) -> bool {
+      auto &r = s.reservations();
+      return r.has_free();
+    };
 
-    auto f = [&]() { return Reservations<T_Meta>{this->m_factory()}; };
-
-    return m_vector.find(p, f);
+    auto f = [&]() { return this->m_factory(); };
+    auto& seg = m_vector.find(p, f);
+    return seg.reservations();
   }
 
 public:
@@ -173,7 +176,7 @@ public:
   using T_Table = typename T_Meta::Table;
 
   explicit Segments(Context<hash_algh> &ctx)
-      : m_root(vfs::mkdir(ctx.root.cdx(T_Table::table_name()))),
+      : m_root(vfs::mkdir(ctx.root().cdx(T_Table::table_name()))),
         m_segments{ColSegments<T_Meta>::apply(ctx, m_root)} {
     //                db::assert_is_context<T_Table>();
   }

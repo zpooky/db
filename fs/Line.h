@@ -7,7 +7,7 @@
 
 #include "../shared/Assertions.h"
 #include "../shared/Buffer.h"
-#include "../shared/fs.h"
+#include "../shared/shared.h"
 #include <iostream>
 #include <stddef.h>
 #include <type_traits>
@@ -15,15 +15,15 @@
 
 namespace db {
 namespace fs {
-template <size_t T_bytes, typename T_hash_type>
+template <size_t T_bytes, typename hash_t>
 struct Line {
 private:
-  using raw_type = db::raw<T_bytes>;
+  using raw_type_t = db::raw::type<T_bytes>;
 
 public:
-  const db::rid id;
+  const db::raw::id id;
   //            T_hash_type checksum;
-  raw_type data;
+  raw_type_t data;
 
   explicit Line(Table &&table) : id(1) {
   }
@@ -48,8 +48,8 @@ private:
 public:
   static constexpr size_t size() {
     return multipleOf(
-        sizeof(db::rid) +
-        /* sizeof(T_hash_type) */ sizeof(raw_type));
+        sizeof(db::raw::id) +
+        /* sizeof(T_hash_type) */ sizeof(raw_type_t));
   }
 };
 

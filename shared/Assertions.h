@@ -5,8 +5,7 @@
 #ifndef PROJECT_ASSERTIONS_H
 #define PROJECT_ASSERTIONS_H
 
-#include "../config/Configuration.h"
-#include "fs.h"
+#include "../shared/shared.h"
 #include <type_traits>
 
 namespace db {

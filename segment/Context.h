@@ -5,7 +5,7 @@
 #ifndef PROJECT_CONTEXT_H
 #define PROJECT_CONTEXT_H
 
-#include "../config/Configuration.h"
+#include "../shared/shared.h"
 #include "../journal/JournalThread.h"
 #include "../journal/Journals.h"
 #include "../shared/entities.h"
@@ -16,20 +16,22 @@ namespace db {
  * - Segment file journal.
  *
  */
-template <typename hash_algh>
-struct Context {
-  using segment_id = db::segment::id;
-  const db::Directory root;
+template <typename hash_t>
+class Context {
+private:
+  const db::Directory m_root;
+private:
 
-  journal::JournalThread<hash_algh> m_runnable;
-  journal::Journals<hash_algh> m_journal;
+  journal::JournalThread<hash_t> m_runnable;
+  journal::Journals<hash_t> m_journal;
   std::thread m_thread;
 
+public:
   explicit Context(const Directory &p_root)
-      : root(p_root), m_runnable(p_root.cd(DirectoryName("journal"))),
+      : m_root(p_root), m_runnable(p_root.cd(DirectoryName("journal"))),
         m_journal(m_runnable)
-        // , m_thread(std::move(m_runnable)) 
-        {
+  // , m_thread(std::move(m_runnable))
+  {
   }
 
   Context(const Context &&) = delete;
@@ -41,6 +43,14 @@ struct Context {
     if (m_thread.joinable()) {
       m_thread.join();
     }
+  }
+
+public:
+  const db::Directory root() const {
+    return m_root;
+  }
+  journal::Journals<hash_t> &journal() {
+    return m_journal;
   }
 };
 }

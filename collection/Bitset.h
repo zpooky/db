@@ -287,8 +287,8 @@ namespace sp {
         Bitset(const Bitset &) = delete;
 
         Bitset(Bitset &&o) :
-                Bitset{o.m_entry} {
-            o.m_entry = nullptr;
+                Bitset{nullptr} {
+            std::swap(m_entry, o.m_entry);
         }
 
         ~Bitset() {

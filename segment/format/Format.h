@@ -44,19 +44,21 @@ using db::PresentSet;
 template <typename T_Meta>
 class V1SegmentInit {
 private:
-  using T_Table = typename T_Meta::Table;
+  using Table_t = typename T_Meta::Table;
   const Directory m_root;
 
 public:
   explicit V1SegmentInit(const Directory &root) : m_root(root) {
-    db::assert_is_table<T_Table>();
+    db::assert_is_table<Table_t>();
   }
 
-  SegmentFile create(const Filename &);
+  SegmentFile create(db::segment::id);
 };
 
 template <typename T_Meta>
-SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
+SegmentFile V1SegmentInit<T_Meta>::create(db::segment::id segment_id) {
+  Filename filename{db::Segment_name<Table_t>::name(segment_id)};
+
   using capacity = unsigned long long;
   constexpr size_t line_size = Line_size<T_Meta>::value();
   constexpr size_t lines = T_Meta::lines();
@@ -64,7 +66,7 @@ SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
   //
   File file = m_root.cd(filename);
   FileWriter stream{file};
-  //
+  // TODO use heap buffer instead
   std::array<char, vfs::page::default_size> buf{0};
   do {
     size_t counter = std::min<size_t>(buf.size(), target);
@@ -73,7 +75,7 @@ SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
   } while (target > 0);
   stream.flush();
   vfs::sync(Directory{file.parent()});
-  return SegmentFile{file, line_size, lines};
+  return SegmentFile{segment_id, file, line_size, lines};
 }
 
 /* Used to parse a segment file acccording to the v1 format.
@@ -81,11 +83,11 @@ SegmentFile V1SegmentInit<T_Meta>::create(const Filename &filename) {
 template <typename T_Meta>
 class V1SegmentParser {
 private:
-  using T_Table = typename T_Meta::Table;
+  using Table_t = typename T_Meta::Table;
 
 public:
   V1SegmentParser() {
-    db::assert_is_table<T_Table>();
+    db::assert_is_table<Table_t>();
   }
 
   PresentSet<T_Meta> parse(const File &);
@@ -97,10 +99,10 @@ template <typename T_Meta>
 PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const File &file) {
   using db::fs::Line;
   using db::fs::Table_size;
-  using Line_t = Line<Table_size<T_Table>::value(), typename T_Meta::hash_algh>;
+  using Line_t = Line<Table_size<Table_t>::value(), typename T_Meta::hash_algh>;
   using db::fs::FileReader;
   using db::Buffer;
-  auto present = [](const Line_t &line) { return line.id != db::EMPTY_LINE; };
+  auto present = [](const Line_t &line) { return line.id != db::raw::EMPTY_LINE; };
   //
   const size_t line_size = Line_size<T_Meta>::value();
   constexpr size_t lines = T_Meta::lines();
@@ -138,7 +140,7 @@ public:
   /* Get parser based on segment version
    */
   template <typename T_Meta>
-  static constexpr V1SegmentParser<T_Meta> parser(db::segment::version v) {
+  static constexpr V1SegmentParser<T_Meta> parser(db::segment::version) {
     // TODO version support
     return V1SegmentParser<T_Meta>{};
   }

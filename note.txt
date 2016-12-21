@@ -22,3 +22,9 @@ table/
         2.part
         ...
 
+
+
+page should know about how the storage
+is setup.
+- File backed
+- Memory(transient)

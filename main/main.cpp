@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "../fs/Line.h"
-#include "../journal/Journal.h"
+#include "../journal/Journals.h"
 #include "../segment/Context.h"
 #include "../segment/Segment.h"
 #include "../segment/SegmentReservations.h"
@@ -15,77 +15,77 @@ using namespace db::fs;
 using namespace std;
 using namespace sp::hash;
 
-using version_t = uint64_t;
-using xid_t = uint64_t;
-
 namespace db {
-  using transaction_id = size_t;
 struct Transaction {
-  const transaction_id tid;
-  const journal_id jid;
-  Transaction(journal_id id) :tid(0), jid(id) {
+  const db::transaction::id tid;
+  const journal::id jid;
+  Transaction(journal::id id) : tid(0), jid(id) {
   }
 };
+template <typename hash_t>
 class Tx {
 private:
-  Journal &m_jorunal;
+  Journals<hash_t> &m_jorunal;
 
 public:
-  explicit Tx(Journal &j) : m_jorunal(j) {
+  explicit Tx(Context<hash_t>& ctx) : m_jorunal(ctx.journal()) {
   }
+  template <typename Table_t>
   Transaction begin() {
-    auto id = m_jorunal.begin();
+    auto id = m_jorunal.begin<Table_t>();
     return {id};
   }
 };
 }
 
-template <typename t_halgh, typename T_Meta>
+template <typename hash_t, typename Meta_t>
 class Store {
 private:
-  using Table = typename T_Meta::Table;
-  db::Context<t_halgh> &m_ctx;
-  unique_ptr<Segments<T_Meta>> m_segments;
+  using Table = typename Meta_t::Table;
+  db::Context<hash_t> &m_ctx;
+  std::unique_ptr<Segments<Meta_t>> m_segments;
 
 public:
-  explicit Store(db::Context<t_halgh> &ctx)
-      : m_ctx(ctx), m_segments(make_unique<Segments<T_Meta>>(m_ctx)) {
+  explicit Store(db::Context<hash_t> &ctx)
+      : m_ctx(ctx), m_segments(make_unique<Segments<Meta_t>>(m_ctx)) {
   }
 
-  xid_t create(const db::Transaction &, const Table &) {
+  db::transaction::xid_t create(const db::Transaction &, const Table &) {
+    m_segments->reserve();
     return 0;
   }
 
-  Table read(const db::Transaction &, xid_t);
-  Table read(const db::Transaction &, xid_t, version_t);
+  Table read(const db::Transaction &, db::raw::id);
+  Table read(const db::Transaction &, db::raw::id, db::raw::version_t);
 
-  version_t update(const db::Transaction &, xid_t, const Table &);
-  version_t update(const db::Transaction &, xid_t, version_t, const Table &);
+  db::raw::version_t update(const db::Transaction &, const Table &);
+  // db::raw::version_t update(const db::Transaction &,
+  // db::transaction::version_t, const Table &);
 
-  void del(const db::Transaction &, xid_t);
-  void del(const db::Transaction &, xid_t, version_t);
+  void del(const db::Transaction &, db::transaction::xid_t);
+  // void del(const db::Transaction &, db::transaction::xid_t,
+  // db::raw::version_t);
 };
 
 int main(int, char *[]) {
   cout << "sector size:" << vfs::sector::logical::size("") << endl;
   cout << "page size:" << vfs::page::size() << endl;
-  using hash_algh = crc32;
-  using TTT = db::TableMeta<TestTable, hash_algh>;
+  using hash_t = crc32;
+  using TTT = db::TableMeta<TestTable, hash_t>;
 
   db::Directory root("/tmp/db");
   vfs::mkdir(root);
-  db::Context<hash_algh> ctx{root};
-  Store<hash_algh, TTT> store{ctx};
-  auto &journal = journal::instance();
-  db::Tx tx{journal};
+  db::Context<hash_t> ctx{root};
+  Store<hash_t, TTT> store{ctx};
+  db::Tx<hash_t> tx{ctx};
   {
-    auto t = tx.begin();
+    auto t = tx.begin<TestTable>();
     TestTable entry;
     store.create(t, entry);
 
     // auto jid = journal.begin();
     // auto reserv = segments->reserve();
-    // // auto line = to_line<TestTable,hash_algh>(move(table));
+    // // auto line = to_line<TestTable,hash_t>(move(table));
     // // segment.write(reserv, table);
     // journal.prepare(jid, reserv);
     // journal.commit(jid);

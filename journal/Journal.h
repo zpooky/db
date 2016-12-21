@@ -9,54 +9,39 @@
 #include "../shared/fs.h"
 
 namespace journal {
-enum class Type : uint8_t {
-  START = 0,
-  UPDATE = 1,
-  COMMIT = 2,
-  ABORT = 3,
-  CHECKPOINT = 4
-};
-
-template <journal::Type TYPE>
-struct Entry {
-  Type get_type() const {
-    return TYPE;
-  }
-};
-
-class Journal {
-private:
-  Journal(const Journal &) = delete;
-
-public:
-  Journal() {
-  }
-
-  journal_id begin();
-  
-  template<typename t_Table>
-  void prepare(journal_id, const db::Reservation<t_Table> &);
-
-  void commit(journal_id);
-};
-
-Journal &instance();
-
-Journal &instance() {
-  static Journal inst{};
-  return inst;
-}
-
-journal_id Journal::begin() {
-  return 1l;
-}
-
-template<typename t_Table>
-void Journal::prepare(journal_id id, const db::Reservation<t_Table> &) {
-}
-
-void Journal::commit(journal_id ) {
-}
+// class Journal {
+// private:
+//   Journal(const Journal &) = delete;
+//
+// public:
+//   Journal() {
+//   }
+//
+//   journal::id begin();
+//
+//   template <typename t_Table>
+//   void prepare(journal::id, const db::Reservation<t_Table> &);
+//
+//   void commit(journal::id);
+// };
+//
+// Journal &instance();
+//
+// Journal &instance() {
+//   static Journal inst{};
+//   return inst;
+// }
+//
+// journal::id Journal::begin() {
+//   return 1l;
+// }
+//
+// template <typename t_Table>
+// void Journal::prepare(journal::id id, const db::Reservation<t_Table> &) {
+// }
+//
+// void Journal::commit(journal::id) {
+// }
 }
 
 #endif // DB_JOURNAL_H

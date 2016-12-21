@@ -7,7 +7,7 @@
 
 #include "../shared/Maybe.h"
 #include "../shared/entities.h"
-#include "../shared/fs.h"
+#include "../shared/shared.h"
 #include "ReservationSet.h"
 #include "Segment.h"
 #include <utility>
@@ -25,13 +25,13 @@ private:
   db::ReservationSet<T_Meta::lines()> m_reservations;
 
 public:
+    //                db::assert_is_meta<T_Meta>();
   explicit Reservations(db::segment::id id, const PresentSet<T_Meta> &p)
       : segment_id{id}, m_reservations{p} {
   }
 
   Reservations(Reservations<T_Meta> &&o)
       : segment_id{o.segment_id}, m_reservations{std::move(o.m_reservations)} {
-    //                db::assert_is_meta<T_Meta>();
   }
 
   Reservations(const Reservations &) = delete;

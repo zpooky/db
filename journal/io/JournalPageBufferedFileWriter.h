@@ -118,7 +118,7 @@ private:
     // TODO implement real
     auto cmp = [](JLine f, JLine s) { return false; };
     std::sort(begin(events), end(events), cmp);
-    return std::vector<journal_id>{};
+    return std::vector<journal::id>{};
   }
 };
 }

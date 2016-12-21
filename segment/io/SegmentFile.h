@@ -6,7 +6,7 @@
 #define PROJECT_SEGMENTFILE_H
 
 #include "../../shared/entities.h"
-#include "../../config/Configuration.h"
+#include "../../shared/shared.h"
 #include <cstddef>
 #include <utility>
 
