@@ -55,11 +55,12 @@ public:
     // m_consumer.add(create());
   }
 
-  void rollback() {
-  }
+  // void rollback() {
+  // }
 
+  template <typename Table_t>
   void commit(journal::id id) {
-    // m_consumer.add(commit());
+    m_consumer.add(commitx<hash_t>(id, Table_t::table_name()));
   }
 };
 }

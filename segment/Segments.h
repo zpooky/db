@@ -191,7 +191,6 @@ public:
     return m_segments.reserve();
   }
 
-private:
 };
 }
 }

@@ -101,7 +101,7 @@ public:
     PresentSet<Meta_t> p{};
 
     Segment<Meta_t> result{init.create(sid), std::move(p)};
-    m_journal.commit(jid);
+    m_journal.template commit<Table_t>(jid);
     return result;
   }
 };
