@@ -5,7 +5,8 @@
 #ifndef PROJECT_PAGEBUFFEREDFILEWRITER_H
 #define PROJECT_PAGEBUFFEREDFILEWRITER_H
 
-#include "../../fs/FileWriter.h"
+#include "../../fs/DirectFileWriter.h"
+#include "../../fs/AlignedBuffer.h"
 #include "../JournalFileProvider.h"
 #include "../JournalLine.h"
 #include "JournalFile.h"

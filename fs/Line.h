@@ -8,6 +8,7 @@
 #include "../shared/Assertions.h"
 #include "../shared/Buffer.h"
 #include "../shared/shared.h"
+#include "../segment/Context.h"
 #include <iostream>
 #include <stddef.h>
 #include <type_traits>
@@ -29,7 +30,7 @@ public:
   }
 
   template <size_t bytes>
-  explicit Line(Buffer<bytes> &buf) : id(db::le::get_uint64(buf)) {
+  explicit Line(Buffer<bytes> &buf) : id(Context<hash_t>::endianess::get_uint64(buf)) {
   }
 
   static constexpr size_t bytes() {
@@ -70,7 +71,7 @@ template <typename T_Meta>
 struct Line_size {
 private:
   using T_Table = typename T_Meta::Table;
-  using hash_algh = typename T_Meta::hash_algh;
+  using hash_t = typename T_Meta::hash_algh;
 
 public:
   Line_size() {
@@ -78,20 +79,20 @@ public:
   }
 
   static constexpr size_t value() {
-    return Line<Table_size<T_Table>::value(), hash_algh>::size();
+    return Line<Table_size<T_Table>::value(), hash_t>::size();
   }
 };
 
-template <size_t LINE_SIZE, typename hash_algh>
-auto buffer(const Line<LINE_SIZE, hash_algh> &);
+template <size_t LINE_SIZE, typename hash_t>
+auto buffer(const Line<LINE_SIZE, hash_t> &);
 
-template <typename T_Table, typename hash_algh>
-auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_algh>;
+template <typename T_Table, typename hash_t>
+auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_t>;
 
-template <size_t LINE_SIZE, typename hash_algh>
-auto buffer(const Line<LINE_SIZE, hash_algh> &l) {
-  Buffer<Line<LINE_SIZE, hash_algh>::size()> buf;
-  db::le::put(buf, l.id);
+template <size_t LINE_SIZE, typename hash_t>
+auto buffer(const Line<LINE_SIZE, hash_t> &l) {
+  Buffer<Line<LINE_SIZE, hash_t>::size()> buf;
+  Context<hash_t>::endianess::put(buf, l.id);
   //            buf.put(l.checksum);
   //            auto state = static_cast<unsigned char>(l.state);
   //            buf.put(state);
@@ -99,13 +100,13 @@ auto buffer(const Line<LINE_SIZE, hash_algh> &l) {
   return buf;
 }
 
-template <typename T_Table, typename hash_algh>
-auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_algh> {
+template <typename T_Table, typename hash_t>
+auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_t> {
   db::assert_is_table<T_Table>();
   std::cout << "sizeof:" << sizeof(T_Table) << "\n";
   //            sizeof(std::remove_const<std::remove_reference<std::decay<decltype(table)>::type>::type>::type)
   //            << "\n";
-  Line<sizeof(table), hash_algh> line{std::forward<T_Table>(table)};
+  Line<sizeof(table), hash_t> line{std::forward<T_Table>(table)};
   return line;
 }
 }

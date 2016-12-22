@@ -6,6 +6,7 @@
 #define PROJECT_CONTEXT_H
 
 #include "../shared/shared.h"
+#include "../shared/LittleEndian.h"
 #include "../journal/JournalThread.h"
 #include "../journal/Journals.h"
 #include "../shared/entities.h"
@@ -46,6 +47,7 @@ public:
   }
 
 public:
+  using endianess = db::LittleEndian;
   const db::Directory root() const {
     return m_root;
   }

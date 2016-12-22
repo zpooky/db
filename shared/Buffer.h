@@ -6,29 +6,11 @@
 #define PROJECT_BUFFER_H
 
 #include <array>
-#include <glob.h>
-#include <iostream>
+// #include <glob.h>
+// #include <iostream>
 
 namespace db {
-using std::array;
 
-template <size_t>
-class Buffer;
-namespace be {
-// namespace internal {
-
-//            template<typename In, typename Buff>
-//            void put_req(size_t index, In in, Buff &b) {
-//                /**
-//                 * put the most left byte first in the buffer
-//                 */
-//                b.put(to_uint8<In>(in, index));
-//                if (index != 0) {
-//                    put_req<In, Buff>(index - 1, in, b);
-//                }
-//            }
-// }
-}
 /**
  * Little Endian
  *
@@ -36,67 +18,6 @@ namespace be {
  * ^ least significant                                  most significant ^
  * >------------------------------->
  */
-namespace le {
-namespace internal {
-template <typename In>
-uint8_t to_uint8(In datum, size_t index) {
-  uint8_t shift(index * 8);
-  // std::cout << "x >> " << size_t(shift) << "# " << size_t(uint8_t(datum >>
-  // bits));
-
-  return uint8_t(datum >> shift);
-}
-
-template <size_t, typename Buff, typename In>
-void put_req(size_t, In, Buff &);
-
-template <typename T, typename Buff>
-T get(Buff &);
-
-template <typename In, typename Buff>
-void put_req(size_t index, In in, Buff &b) {
-  /**
-   * put the most right byte first in the buffer
-   */
-  // std::cout << "_put(a + " << index << ", long" << index << "(x); # ";
-  b.put(to_uint8<In>(in, index));
-  // std::cout << std::endl;
-  if (index != sizeof(In) - 1) {
-    put_req<In, Buff>(index + 1, in, b);
-  }
-}
-
-template <typename T, typename Buff>
-T get(Buff &b) {
-  constexpr size_t bytes(sizeof(T) / sizeof(uint8_t));
-  std::array<uint8_t, bytes> buff;
-  b.get(buff);
-  T res(0);
-  // std::cout << "makeLong(";
-  for (size_t i = 0; i < bytes; ++i) {
-    // std::cout << "\tget(a + " << i << ") << " << (i) << ",# " <<
-    // size_t(buff[i])<<std::endl;
-    res = res | (T(buff[i]) << (i * 8));
-    // std::cout << "";
-  }
-  // std::cout << ")" << std::endl;
-  return res;
-}
-}
-
-template <typename Buff>
-void put(Buff &, uint64_t);
-
-template <typename Buff>
-void put(Buff &b, uint64_t datum) {
-  internal::put_req<uint64_t, Buff>(0, datum, b);
-}
-
-template <typename Buff>
-uint64_t get_uint64(Buff &b) {
-  return internal::get<uint64_t, Buff>(b);
-}
-}
 class BaseBuffer {
 protected:
   size_t m_position{0};
@@ -115,7 +36,7 @@ public:
 template <size_t t_capacity>
 class Buffer : public BaseBuffer {
 private:
-  using Arr = array<uint8_t, t_capacity>;
+  using Arr = std::array<uint8_t, t_capacity>;
   Arr m_data;
 
 public:
@@ -185,7 +106,7 @@ public:
   }
 
   template <size_t size>
-  void put(const array<uint8_t, size> &datum) {
+  void put(const std::array<uint8_t, size> &datum) {
     put(&datum.front(), size);
   }
 
