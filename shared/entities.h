@@ -46,7 +46,7 @@ public:
       auto file = path.substr(index);
       return Filename{std::move(file)};
     }
-    return Filename{path.substr()};
+   return Filename{std::string(path)};
   }
 
   const char *c_str() const {

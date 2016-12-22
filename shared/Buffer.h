@@ -15,7 +15,7 @@ using std::array;
 template <size_t>
 class Buffer;
 namespace be {
-namespace internal {
+// namespace internal {
 
 //            template<typename In, typename Buff>
 //            void put_req(size_t index, In in, Buff &b) {
@@ -27,7 +27,7 @@ namespace internal {
 //                    put_req<In, Buff>(index - 1, in, b);
 //                }
 //            }
-}
+// }
 }
 /**
  * Little Endian
@@ -97,13 +97,26 @@ uint64_t get_uint64(Buff &b) {
   return internal::get<uint64_t, Buff>(b);
 }
 }
+class BaseBuffer {
+protected:
+  size_t m_position{0};
+  size_t m_size{0};
+
+private:
+public:
+  BaseBuffer() {
+  }
+  BaseBuffer(const BaseBuffer &o) : m_position(o.m_position), m_size(o.m_size) {
+  }
+  virtual ~BaseBuffer() {
+  }
+};
+
 template <size_t t_capacity>
-class Buffer {
+class Buffer : public BaseBuffer {
 private:
   using Arr = array<uint8_t, t_capacity>;
   Arr m_data;
-  size_t m_position{0};
-  size_t m_size{0};
 
 public:
   explicit Buffer(Arr &&data) : m_data(std::move(data)) {
@@ -114,9 +127,7 @@ public:
 
   Buffer(const Buffer &) = delete;
 
-  Buffer(Buffer &&o)
-      : m_data(std::move(o.m_data)), m_position(o.m_position),
-        m_size(o.m_size) {
+  Buffer(Buffer &&o) : BaseBuffer(o), m_data(std::move(o.m_data)) {
   }
 
 private:
@@ -163,7 +174,7 @@ public:
     }
     auto begin = &datum[0];
     auto end = begin + length;
-    for (auto it = begin; it != end; ++it) {
+    for (auto it = begin; it != end; it++) {
       i_put(*it);
     }
   }
@@ -215,6 +226,12 @@ public:
   constexpr size_t capacity() const {
     return t_capacity;
   }
+};
+
+class HeapBuffer {
+public:
+  // HeapBuffer(){
+  // }
 };
 }
 

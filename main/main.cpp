@@ -28,7 +28,7 @@ private:
   Journals<hash_t> &m_jorunal;
 
 public:
-  explicit Tx(Context<hash_t>& ctx) : m_jorunal(ctx.journal()) {
+  explicit Tx(Context<hash_t> &ctx) : m_jorunal(ctx.journal()) {
   }
   template <typename Table_t>
   Transaction begin() {
@@ -44,14 +44,18 @@ private:
   using Table = typename Meta_t::Table;
   db::Context<hash_t> &m_ctx;
   std::unique_ptr<Segments<Meta_t>> m_segments;
+  Journals<hash_t> &m_journals;
 
 public:
   explicit Store(db::Context<hash_t> &ctx)
-      : m_ctx(ctx), m_segments(make_unique<Segments<Meta_t>>(m_ctx)) {
+      : m_ctx(ctx), m_segments(make_unique<Segments<Meta_t>>(m_ctx)),
+        m_journals(ctx.journal()) {
   }
 
-  db::transaction::xid_t create(const db::Transaction &, const Table &) {
-    m_segments->reserve();
+  db::transaction::xid_t create(const db::Transaction &t, const Table &data) {
+    auto res = m_segments->reserve();
+    m_journals.create(t.jid, res, data);
+    // m_segments->write(res, data);
     return 0;
   }
 

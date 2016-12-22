@@ -9,9 +9,8 @@
 #include <string.h>
 
 namespace sp {
-    namespace hash {
-        using std::array;
-
+namespace hash {
+using std::array;
 
 //    uint16_t gen_crc16(const uint8_t *data, uint16_t size) {
 //        const int CRC16 = 0x8005;
@@ -30,7 +29,8 @@ namespace sp {
 //
 //            /* Get next bit: */
 //            out <<= 1;
-//            out |= (*data >> bits_read) & 1; // item a) work from the least significant bits
+//            out |= (*data >> bits_read) & 1; // item a) work from the least
+//            significant bits
 //
 //            /* Increment bit counter: */
 //            bits_read++;
@@ -66,53 +66,52 @@ namespace sp {
 //        return crc;
 //    }
 
-        template<size_t T_bytes>
-        class crc {
-        private:
-        public:
-            using type =array<uint8_t, T_bytes>;
+template <size_t T_bytes>
+class crc {
+private:
+public:
+  using type = array<uint8_t, T_bytes>;
 
+  template <size_t t_size>
+  type digest(const array<uint8_t, t_size> &) {
+    //            const uint8_t *c = "123456789";
+    //            gen_crc16(c, strlen(c));
 
-            template<size_t t_size>
-            type digest(const array<uint8_t, t_size> &buff) {
-//            const uint8_t *c = "123456789";
-//            gen_crc16(c, strlen(c));
+    type res{0};
 
-                type res{0};
+    return res;
+  }
 
-                return res;
-            }
+  void update(uint8_t) {
+  }
 
+  void update(uint16_t) {
+  }
 
-            void update(uint8_t) {
-            }
+  void update(uint32_t) {
+  }
 
-            void update(uint16_t) {
-            }
+  void update(uint64_t) {
+  }
 
-            void update(uint32_t) {
-            }
+  template <size_t length>
+  void update(const std::array<uint8_t, length> &) {
+  }
 
-            void update(uint64_t) {
-            }
+  template <size_t length>
+  void update(const std::array<char, length> &) {
+  }
+  template <typename Buffer>
+  void update(const Buffer &) {
+  }
 
-            template<size_t length>
-            void update(std::array<uint8_t, length>) {
-            }
+  type digest() {
+    type res{0};
+    return res;
+  }
+};
 
-            template<size_t length>
-            void update(std::array<char, length>) {
-            }
-
-            type digest() {
-                type res{0};
-                return res;
-            }
-
-
-        };
-
-        using crc32 = crc<4>;
-    }
+using crc32 = crc<4>;
+}
 }
 #endif //_SP_HASH_H

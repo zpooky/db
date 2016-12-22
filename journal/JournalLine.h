@@ -1,6 +1,7 @@
 #ifndef JOURNAL_LINE_H
 #define JOURNAL_LINE_H
 
+#include "../shared/Buffer.h"
 #include "../shared/entities.h"
 #include "../shared/shared.h"
 
@@ -9,21 +10,32 @@ namespace journal {
 enum class Type : uint8_t {
   /* Start the journal transaction
    */
-  BEGIN,
+  BEGIN = 0,
   /* specific entry for either
    * - semgent journal entry
    * - line journal entry
    */
-  ENTRY,
+  ENTRY = 1,
   /*
    */
-  COMMIT,
+  COMMIT = 2,
   /*
    */
-  ROLLBACK,
+  ROLLBACK = 3,
   /*
    */
-  INTERNAL
+  INTERNAL = 4
+};
+enum class EntryType : uint8_t {
+  /**
+   */
+  NOP = 0,
+  /** represent a segmet create entry
+   */
+  SEGMENT = 1,
+  /** represent a line change
+   */
+  LINE = 2
 };
 
 template <typename hash_t>
@@ -50,23 +62,41 @@ public:
   /*
    */
   const Type type;
+  /**
+   */
+  const EntryType entry_type;
+  /**
+   */
+  db::HeapBuffer buffer;
 
 public:
   JournalLine(const hash_type &p_hash, journal::id p_id,
-              const name_type &p_table, Type p_type)
-      : hash{p_hash}, id{p_id}, table{p_table}, type{p_type} {
+              const name_type &p_table, Type p_type, EntryType p_entry_type,
+              db::HeapBuffer &&b)
+      : hash{p_hash}, table{p_table}, id{p_id}, type{p_type},
+        entry_type{p_entry_type}, buffer{b} {
   }
 };
 
 template <typename hash_t>
-JournalLine<hash_t> segment_line(journal::id p_id,
-                                 const db::table::name::type &p_table,
-                                 Type p_type) {
+JournalLine<hash_t>
+segment_line(journal::id p_id, const db::table::name::type &p_table,
+             Type p_type, EntryType p_entry_type, db::HeapBuffer &&b) {
   hash_t h;
   h.update(p_id);
   h.update(p_table);
   h.update(static_cast<std::underlying_type<Type>::type>(p_type));
-  return {h.digest(), p_id, p_table, p_type};
+  h.update(static_cast<std::underlying_type<EntryType>::type>(p_entry_type));
+  h.update(b);
+  return {h.digest(), p_id, p_table, p_type, p_entry_type, std::move(b)};
+}
+namespace line {
+template <typename hash_t>
+JournalLine<hash_t> segment_line(journal::id p_id,
+                                 const db::table::name::type &p_table,
+                                 Type p_type) {
+  return segment_line<hash_t>(p_id, p_table, p_type, EntryType::NOP,
+                              db::HeapBuffer());
 }
 
 template <typename hash_t>
@@ -77,19 +107,23 @@ JournalLine<hash_t> empty_segment_line() {
 }
 
 template <typename hash_t>
-JournalLine<hash_t> xbegin(journal::id jid,
+JournalLine<hash_t> create(journal::id jid, const db::table::name::type &table,
+                           EntryType type, db::HeapBuffer &&b) {
+  assert(type != EntryType::NOP);
+  return segment_line<hash_t>(jid, table, Type::ENTRY, type, std::move(b));
+}
+
+template <typename hash_t>
+JournalLine<hash_t> begin(journal::id jid,
                            const db::table::name::type &table) {
   return segment_line<hash_t>(jid, table, Type::BEGIN);
 }
 
 template <typename hash_t>
-JournalLine<hash_t> create() {
-}
-
-template <typename hash_t>
-JournalLine<hash_t> commitx(journal::id jid,
-                          const db::table::name::type &table) {
+JournalLine<hash_t> commit(journal::id jid,
+                            const db::table::name::type &table) {
   return segment_line<hash_t>(jid, table, Type::COMMIT);
+}
 }
 }
 #endif

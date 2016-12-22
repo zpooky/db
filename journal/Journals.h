@@ -39,28 +39,55 @@ public:
   Journals(const Journals &) = delete;
 
 public:
+  /**
+   * Journal type: BEGIN
+   * Creates a new journal transaction.
+   */
   template <typename Table_t>
   journal::id begin() {
     auto journal_id = ++m_counter;
-    m_consumer.add(xbegin<hash_t>(journal_id, Table_t::table_name()));
+    constexpr auto table = Table_t::table_name();
+    m_consumer.add(journal::line::begin<hash_t>(journal_id, table));
     return journal_id;
   }
+  /**
+   * Journal Type: ENTRY
+   * Journal entry for CREATE line
+   */
   template <typename Table_t>
-  void create(const db::Reservation<Table_t> &r, const Table_t &t) {
-    // m_consumer.add(create());
+  void create(journal::id jid, const db::Reservation<Table_t> &r,
+              const Table_t &t) {
+    db::HeapBuffer b;
+    // TODO populate buffer
+    constexpr auto table = Table_t::table_name();
+    auto type = EntryType::LINE;
+    m_consumer.add(
+        journal::line::create<hash_t>(jid, table, type, std::move(b)));
   }
-
+  /**
+   * Journal Type: ENTRY
+   * Journal entry for CREATE segment file
+   */
   template <typename Table_t>
   void create(journal::id jid, db::segment::id sid) {
-    // m_consumer.add(create());
+    db::HeapBuffer b;
+    // TODO populate buffer
+    constexpr auto table = Table_t::table_name();
+    auto type = EntryType::SEGMENT;
+    m_consumer.add(
+        journal::line::create<hash_t>(jid, table, type, std::move(b)));
   }
 
   // void rollback() {
   // }
-
+  /**
+   * Journal TYPE: COMMIT
+   * Journal entry for commit journal transaction
+   */
   template <typename Table_t>
   void commit(journal::id id) {
-    m_consumer.add(commitx<hash_t>(id, Table_t::table_name()));
+    constexpr auto table = Table_t::table_name();
+    m_consumer.add(journal::line::commit<hash_t>(id, table));
   }
 };
 }
