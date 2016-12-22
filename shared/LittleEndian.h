@@ -2,6 +2,7 @@
 #define PROJECT_LITTLE_ENDIAN_H
 
 #include "Buffer.h"
+#include <type_traits>
 
 namespace db {
 class LittleEndian {
@@ -28,9 +29,9 @@ private:
     }
   }
 
-public:
   template <typename T, typename Buff>
   static T get(Buff &b) {
+    static_assert(std::is_integral<T>::value,"");
     constexpr size_t bytes(sizeof(T) / sizeof(uint8_t));
     std::array<uint8_t, bytes> buff;
     b.get(buff);
@@ -45,7 +46,7 @@ public:
     // std::cout << ")" << std::endl;
     return res;
   }
-
+public:
   template <typename Buff>
   static void put(Buff &b, uint64_t datum) {
     put_req<uint64_t, Buff>(0, datum, b);
