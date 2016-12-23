@@ -76,6 +76,10 @@ public:
       : hash{p_hash}, table{p_table}, id{p_id}, type{p_type},
         entry_type{p_entry_type}, buffer{b} {
   }
+  JournalLine()
+      : hash{0}, table{0}, id{journal::NO_ID}, type{Type::INTERNAL},
+        entry_type{EntryType::NOP}, buffer{} {
+  }
 };
 
 template <typename hash_t>
@@ -114,14 +118,13 @@ JournalLine<hash_t> create(journal::id jid, const db::table::name::type &table,
 }
 
 template <typename hash_t>
-JournalLine<hash_t> begin(journal::id jid,
-                           const db::table::name::type &table) {
+JournalLine<hash_t> begin(journal::id jid, const db::table::name::type &table) {
   return segment_line<hash_t>(jid, table, Type::BEGIN);
 }
 
 template <typename hash_t>
 JournalLine<hash_t> commit(journal::id jid,
-                            const db::table::name::type &table) {
+                           const db::table::name::type &table) {
   return segment_line<hash_t>(jid, table, Type::COMMIT);
 }
 }

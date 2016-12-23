@@ -57,6 +57,7 @@ public:
 
 template <typename T_Meta>
 SegmentFile V1SegmentInit<T_Meta>::create(db::segment::id segment_id) {
+  using Table_t = typename T_Meta::Table;
   Filename filename{db::Segment_name<Table_t>::name(segment_id)};
 
   using capacity = unsigned long long;
@@ -75,7 +76,7 @@ SegmentFile V1SegmentInit<T_Meta>::create(db::segment::id segment_id) {
   } while (target > 0);
   stream.flush();
   vfs::sync(Directory{file.parent()});
-  return SegmentFile{segment_id, file, line_size, lines};
+  return SegmentFile{segment_id, file, line_size, lines, Table_t::latest_version};
 }
 
 /* Used to parse a segment file acccording to the v1 format.

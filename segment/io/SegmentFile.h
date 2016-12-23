@@ -9,27 +9,35 @@
 #include "../../shared/shared.h"
 #include <cstddef>
 #include <utility>
+#include <set>
 
 namespace db {
 namespace fs {
 class SegmentFile {
 private:
   const db::segment::id m_id;
-  File m_file;
+  const File m_file;
   const size_t m_line_size;
   const size_t m_number;
+  const db::table::version m_version;
+private:
+  /**
+   * collection of uncommited journals
+   */
+  std::set<journal::id> m_uncommited;
 
 public:
   SegmentFile(db::segment::id id, const File &file, size_t line_size,
-              size_t number)
-      : m_id{id}, m_file{file}, m_line_size{line_size}, m_number{number} {
+              size_t number, db::table::version version)
+      : m_id{id}, m_file{file}, m_line_size{line_size}, m_number{number},
+        m_version{version} {
   }
 
   SegmentFile(const SegmentFile &) = delete;
 
   SegmentFile(SegmentFile &&o)
       : m_id{o.m_id}, m_file{std::move(o.m_file)}, m_line_size{o.m_line_size},
-        m_number{o.m_number} {
+        m_number{o.m_number}, m_version{o.m_version} {
   }
 
   const File &file() const {

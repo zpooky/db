@@ -2,6 +2,7 @@
 #define JOURNAL_THREAD_H
 
 #include "../collection/Queue.h"
+#include "../shared/vfs.h"
 #include "Consumer.h"
 #include "JournalFileProvider.h"
 #include "JournalLine.h"
@@ -12,26 +13,27 @@ namespace journal {
 /*
  * - Runs in a separate thread
  * - async reads from a queue of journal events.
- * - Inteface to query if a transa
  */
-template <typename hash_algh>
-class JournalThread : public Consumer<JournalLine<hash_algh>> {
+template <typename hash_t>
+class JournalThread : public Consumer<JournalLine<hash_t>> {
 private:
-  using SegLine = JournalLine<hash_algh>;
-  JournalFileProvider m_provider;
-  JournalPageBufferedFileWriter<hash_algh> m_writer;
+  using SegLine = JournalLine<hash_t>;
+  JournalFileProvider<hash_t> m_provider;
+  JournalPageBufferedFileWriter<hash_t> m_writer;
   sp::Queue<SegLine> m_queue;
   std::atomic<bool> m_interrupted;
 
 public:
-  explicit JournalThread(const db::Directory &journal_root)
-      : m_provider{journal_root}, m_writer(m_provider),
-        m_queue(/*empty_segment_line<hash_algh>()*/), m_interrupted(false) {
+  explicit JournalThread(const db::Directory &root)
+      : m_provider{root},
+        m_writer(m_provider, vfs::sector::logical::size(root.c_str())),
+        m_queue(/*empty_segment_line<hash_t>()*/), m_interrupted(false) {
   }
 
-  JournalThread(JournalThread<hash_algh> &&o)
-      : m_writer(o.m_writer), m_queue(std::move(o.m_queue)),
-        m_interrupted(o.m_interrupted.load()) {
+  JournalThread(JournalThread<hash_t> &&o)
+      : m_provider{std::move(o.m_provider)},
+        m_writer{m_provider, std::move(o.m_writer)},
+        m_queue(std::move(o.m_queue)), m_interrupted(o.m_interrupted.load()) {
   }
 
   JournalThread(const JournalThread &) = delete;
@@ -50,9 +52,9 @@ public:
 
   void operator()() {
     while (!m_interrupted) {
-      auto entries = m_queue.drain();
-      m_writer.write(entries);
+      m_writer.write(m_queue.drain());
     }
+    m_writer.force_flush();
   }
 };
 }

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(db)
 
+find_package (Threads)
 #journal
 add_subdirectory(../journal journal_lib)
 include_directories(journal)
@@ -26,3 +27,4 @@ add_executable(db ${SOURCE_FILES})
 target_link_libraries(db journal_lib)
 target_link_libraries(db config_lib)
 target_link_libraries(db fs_lib)
+target_link_libraries(db Threads::Threads)

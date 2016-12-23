@@ -1,11 +1,12 @@
 #ifndef _PROJECT_ALIGNED_BUFFER_H
 #define _PROJECT_ALIGNED_BUFFER_H
 
+#include <cassert>
 #include <fcntl.h>
-#include <utility>
+#include <stdexcept>
 #include <stdint.h>
 #include <unistd.h>
-#include <cassert>
+#include <utility>
 
 namespace db {
 struct AlignedBuffer {
@@ -51,6 +52,17 @@ public:
     m_aligned = m_alloc + diff;
     //::posix_memalign();
   }
+
+  AlignedBuffer(AlignedBuffer &&o)
+      : m_alloc{nullptr}, m_aligned{nullptr}, m_index{0},
+        m_size{0}, m_capacity{0} {
+      std::swap(m_alloc, o.m_alloc);
+      std::swap(m_aligned, o.m_aligned);
+      std::swap(m_index, o.m_index);
+      std::swap(m_size,o.m_size);
+      std::swap(m_capacity, o.m_capacity);
+  }
+
   void flip() {
     std::swap(m_index, m_size);
   }

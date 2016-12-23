@@ -11,14 +11,16 @@ constexpr id START_ID(1);
 constexpr id NO_ID(0);
 }
 namespace db {
+
 namespace table {
+using version = uint64_t;
+
 namespace name {
 
 constexpr size_t length(64);
 using type = std::array<char, length>;
 }
 }
-
 namespace reservation {
 
 using id = uint64_t;

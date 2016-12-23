@@ -5,8 +5,8 @@
 #ifndef PROJECT_PAGEBUFFEREDFILEWRITER_H
 #define PROJECT_PAGEBUFFEREDFILEWRITER_H
 
-#include "../../fs/DirectFileWriter.h"
 #include "../../fs/AlignedBuffer.h"
+#include "../../fs/DirectFileWriter.h"
 #include "../JournalFileProvider.h"
 #include "../JournalLine.h"
 #include "JournalFile.h"
@@ -33,84 +33,92 @@
  */
 namespace journal {
 
-template <typename hash_algh>
+template <typename hash_t>
 class JournalPageBufferedFileWriter;
 
-template <typename hash_algh>
-using JPBFW = JournalPageBufferedFileWriter<hash_algh>;
+template <typename hash_t>
+using JPBFW = JournalPageBufferedFileWriter<hash_t>;
 
-template <typename hash_algh>
+template <typename hash_t>
 class JournalPageBufferedFileWriter {
 private:
-  JournalFileProvider &m_provider;
-  JournalFile &m_file;
+  JournalFileProvider<hash_t> &m_provider;
 
   db::AlignedBuffer m_buffer;
-  db::DirectFileWriter m_writer;
 
   // TODO keep track of Pending entres(not yet commited)
   // if this is empty we can insert a safepoint
   // (this is not enough since we need to ensure
   // that the page cache in the db is also flushed)
   // std::vector<journal_id> id m_pending;
-  using JLine = JournalLine<hash_algh>;
+  using JLine = JournalLine<hash_t>;
 
 public:
-  explicit JournalPageBufferedFileWriter(JournalFileProvider &provider)
-      : m_provider{provider}, m_file{m_provider()},
-        m_buffer{m_file.sector_size}, m_writer(m_file.file) {
+  explicit JournalPageBufferedFileWriter(JournalFileProvider<hash_t> &provider,
+                                         size_t sector_size)
+      : m_provider{provider}, m_buffer{sector_size} {
+  }
+  JournalPageBufferedFileWriter(JournalFileProvider<hash_t> &provider,
+                                JPBFW<hash_t> &&o)
+      : m_provider(provider), m_buffer{std::move(o.m_buffer)} {
   }
 
-  JournalPageBufferedFileWriter(const JPBFW<hash_algh> &&) = delete;
+  JournalPageBufferedFileWriter(const JPBFW<hash_t> &&) = delete;
 
-  JournalPageBufferedFileWriter(const JPBFW<hash_algh> &) = delete;
+  JournalPageBufferedFileWriter(const JPBFW<hash_t> &) = delete;
 
-  JPBFW<hash_algh> &operator=(const JPBFW<hash_algh> &&) = delete;
+  JPBFW<hash_t> &operator=(const JPBFW<hash_t> &&) = delete;
 
-  JPBFW<hash_algh> &operator=(const JPBFW<hash_algh> &) = delete;
+  JPBFW<hash_t> &operator=(const JPBFW<hash_t> &) = delete;
+
   ~JournalPageBufferedFileWriter() {
-    force_flush();
   }
 
-  /* TODO int is placeholder
+  /*
    * return the id of the forced flush events?
    */
-  void write(std::vector<JLine> &events) {
+  void write(std::vector<JLine> &&events) {
     assert(!events.empty());
-    auto flush_ids = sort(events);
-    bool require_flush(false);
+    m_provider.with([&](db::DirectFileWriter &writer) {
+      auto flush_ids = sort(events);
+      bool require_flush(false);
 
-    for (auto &event : events) {
-      // m_buffer.write(event);
-      if (event.state == journal::Type::COMMIT) {
-        require_flush = true;
+      for (auto &event : events) {
+        // m_buffer.write(event);
+        if (event.type == journal::Type::COMMIT) {
+          require_flush = true;
+        }
+
+        write(event);
+
+        if (m_buffer.is_full()) {
+          force_flush(writer);
+          m_buffer.clear();
+          // We have flushed thease commits
+          // so no need to flush at the end
+          require_flush = false;
+        }
       }
 
-      write(event);
-
-      if (m_buffer.is_full()) {
-        force_flush();
-        m_buffer.clear();
-        // We have flushed thease commits
-        // so no need to flush at the end
-        require_flush = false;
+      if (require_flush) {
+        force_flush(writer);
       }
-    }
-
-    if (require_flush) {
-      force_flush();
-    }
-  }
-
-private:
-  void write(const JLine &line) {
+    });
   }
 
   void force_flush() {
+    m_provider.with([&](db::DirectFileWriter &writer) { force_flush(writer); });
+  }
+
+private:
+  void write(const JLine &) {
+  }
+
+  void force_flush(db::DirectFileWriter &writer) {
     if (!m_buffer.is_empty()) {
       m_buffer.flip();
-      m_writer.write(m_buffer);
-      m_writer.flush();
+      writer.write(m_buffer);
+      writer.flush();
       m_buffer.flip();
     }
   }

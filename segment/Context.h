@@ -5,11 +5,11 @@
 #ifndef PROJECT_CONTEXT_H
 #define PROJECT_CONTEXT_H
 
-#include "../shared/shared.h"
-#include "../shared/LittleEndian.h"
 #include "../journal/JournalThread.h"
 #include "../journal/Journals.h"
+#include "../shared/LittleEndian.h"
 #include "../shared/entities.h"
+#include "../shared/shared.h"
 #include <thread>
 
 namespace db {
@@ -21,8 +21,8 @@ template <typename hash_t>
 class Context {
 private:
   const db::Directory m_root;
-private:
 
+private:
   journal::JournalThread<hash_t> m_runnable;
   journal::Journals<hash_t> m_journal;
   std::thread m_thread;
@@ -31,8 +31,10 @@ public:
   explicit Context(const Directory &p_root)
       : m_root(p_root), m_runnable(p_root.cd(DirectoryName("journal"))),
         m_journal(m_runnable)
-  // , m_thread(std::move(m_runnable))
-  {
+        , m_thread([&]{
+          // m_runnable();
+        })
+        {
   }
 
   Context(const Context &&) = delete;
