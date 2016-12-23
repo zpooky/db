@@ -44,27 +44,27 @@ private:
   using hash_type = typename hash_t::type;
   using name_type = db::table::name::type;
   using segment_id = db::segment::id;
-
+//TODO encapsulate
 public:
   /* A hash of the JournalLine itself
    */
-  const hash_type hash;
+  hash_type hash;
   /* Table name to represent what table
    */
-  const name_type table;
+  name_type table;
   /* Id to group related journal entries.
    * journalId<->transactionId
    */
-  const journal::id id;
+  journal::id id;
   // #<{(| Segment id to represent which segment file
   //  |)}>#
   // const segment_id idx;
   /*
    */
-  const Type type;
+  Type type;
   /**
    */
-  const EntryType entry_type;
+  EntryType entry_type;
   /**
    */
   db::HeapBuffer buffer;
@@ -79,6 +79,23 @@ public:
   JournalLine()
       : hash{0}, table{0}, id{journal::NO_ID}, type{Type::INTERNAL},
         entry_type{EntryType::NOP}, buffer{} {
+  }
+  JournalLine(const JournalLine&o) 
+      : hash{o.hash}, table{o.table}, id{o.id}, type{o.type},
+        entry_type{o.entry_type}, buffer{o.buffer} {
+
+  }
+  JournalLine& operator=(JournalLine o){
+    swap(o);
+    return *this;
+  }
+  void swap(JournalLine<hash_t> &o){
+    std::swap(hash, o.hash);
+    std::swap(table, o.table);
+    std::swap(id, o.id);
+    std::swap(type, o.type);
+    std::swap(entry_type, o.entry_type);
+    std::swap(buffer, o.buffer);
   }
 };
 
