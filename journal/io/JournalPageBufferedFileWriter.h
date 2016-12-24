@@ -78,7 +78,7 @@ public:
    * return the id of the forced flush events?
    */
   void write(std::vector<JLine> &&events) {
-    assert(!events.empty());
+    // assert(!events.empty());
     m_provider.with([&](db::DirectFileWriter &writer) {
       auto flush_ids = sort(events);
       bool require_flush(false);
@@ -107,7 +107,7 @@ public:
   }
 
   void force_flush() {
-    m_provider.with([&](db::DirectFileWriter &writer) { force_flush(writer); });
+    m_provider.with([&](auto &writer) { force_flush(writer); });
   }
 
 private:
@@ -125,7 +125,7 @@ private:
 
   auto sort(std::vector<JLine> &events) const {
     // TODO implement real
-    auto cmp = [](JLine f, JLine s) { return false; };
+    auto cmp = [](const JLine& f, const JLine& s) { return false; };
     std::sort(begin(events), end(events), cmp);
     return std::vector<journal::id>{};
   }

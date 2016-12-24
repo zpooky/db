@@ -32,7 +32,7 @@ public:
       : m_root(p_root), m_runnable(p_root.cd(DirectoryName("journal"))),
         m_journal(m_runnable)
         , m_thread([&]{
-          // m_runnable();
+          m_runnable();
         })
         {
   }
