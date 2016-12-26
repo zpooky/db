@@ -10,8 +10,9 @@
 #include "../../fs/Line.h"
 #include "../../shared/conversions.h"
 #include "../../shared/vfs.h"
-#include "../PresentSet.h"
-#include "../io/SegmentFile.h"
+#include "../../shared/entities.h"
+#include "../io/FilePageMeta.h"
+#include "../../segment/PresentSet.h"
 /*
  * Header:
  * size in bytes:
@@ -30,13 +31,7 @@
  * - big endian     0
  * - little endian  1
  */
-namespace db {
-namespace segment {
-
-using db::fs::SegmentFile;
-using db::fs::Line_size;
-using db::FileWriter;
-using db::PresentSet;
+namespace page {
 
 /**
  * Used to create a segment file according to the v1 format.
@@ -45,28 +40,28 @@ template <typename T_Meta>
 class V1SegmentInit {
 private:
   using Table_t = typename T_Meta::Table;
-  const Directory m_root;
+  const db::Directory m_root;
 
 public:
-  explicit V1SegmentInit(const Directory &root) : m_root(root) {
+  explicit V1SegmentInit(const db::Directory &root) : m_root(root) {
     db::assert_is_table<Table_t>();
   }
 
-  SegmentFile create(db::segment::id);
+  FilePageMeta create(db::segment::id);
 };
 
 template <typename T_Meta>
-SegmentFile V1SegmentInit<T_Meta>::create(db::segment::id segment_id) {
+FilePageMeta V1SegmentInit<T_Meta>::create(db::segment::id sid) {
   using Table_t = typename T_Meta::Table;
-  Filename filename{db::Segment_name<Table_t>::name(segment_id)};
+  db::Filename filename{db::Segment_name<Table_t>::name(sid)};
 
   using capacity = unsigned long long;
-  constexpr size_t line_size = Line_size<T_Meta>::value();
-  constexpr size_t lines = T_Meta::lines();
+  constexpr size_t line_size = db::fs::Line_size<T_Meta>::value();
+  constexpr size_t lines = T_Meta::extent_lines();
   capacity target = line_size * lines;
   //
-  File file = m_root.cd(filename);
-  FileWriter stream{file};
+  db::File file = m_root.cd(filename);
+  db::FileWriter stream{file};
   // TODO use heap buffer instead
   std::array<char, vfs::page::default_size> buf{0};
   do {
@@ -75,8 +70,8 @@ SegmentFile V1SegmentInit<T_Meta>::create(db::segment::id segment_id) {
     stream.init_write(buf, counter);
   } while (target > 0);
   stream.flush();
-  vfs::sync(Directory{file.parent()});
-  return SegmentFile{segment_id, file, line_size, lines, Table_t::latest_version};
+  vfs::sync(db::Directory{file.parent()});
+  return FilePageMeta{sid, file, line_size, lines, T_Meta::latest_version};
 }
 
 /* Used to parse a segment file acccording to the v1 format.
@@ -91,13 +86,13 @@ public:
     db::assert_is_table<Table_t>();
   }
 
-  PresentSet<T_Meta> parse(const File &);
+  db::PresentSet<T_Meta> parse(const db::File &);
 
-  db::segment::id get_id(const File &);
+  db::segment::id get_id(const db::File &);
 };
 
 template <typename T_Meta>
-PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const File &file) {
+db::PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const db::File &file) {
   using db::fs::Line;
   using db::fs::Table_size;
   using Line_t = Line<Table_size<Table_t>::value(), typename T_Meta::hash_algh>;
@@ -105,8 +100,8 @@ PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const File &file) {
   using db::Buffer;
   auto present = [](const Line_t &line) { return line.id != db::raw::EMPTY_LINE; };
   //
-  const size_t line_size = Line_size<T_Meta>::value();
-  constexpr size_t lines = T_Meta::lines();
+  const size_t line_size = db::fs::Line_size<T_Meta>::value();
+  constexpr size_t lines = T_Meta::extent_lines();
   //
   std::bitset<lines> res;
   FileReader fr(file);
@@ -120,11 +115,11 @@ PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const File &file) {
     Line_t line{buffer};
     res[current++] = present(line);
   }
-  return PresentSet<T_Meta>{res};
+  return db::PresentSet<T_Meta>{res};
 }
 
 template <typename T_Meta>
-db::segment::id V1SegmentParser<T_Meta>::get_id(const File &file) {
+db::segment::id V1SegmentParser<T_Meta>::get_id(const db::File &file) {
   auto fname = file.filename();
   return db::to<db::segment::id>(fname.name);
 }
@@ -146,7 +141,6 @@ public:
     return V1SegmentParser<T_Meta>{};
   }
 };
-}
 }
 
 #endif // PROJECT_FORMAT_H

@@ -15,44 +15,44 @@
 namespace db {
 namespace fs {
 
-template <typename T_Meta>
+template <typename Meta_t>
 class Reservations {
 private:
-  using T_Table = typename T_Meta::Table;
+  using Table_t = typename Meta_t::Table;
 
 private:
   const db::segment::id segment_id;
-  db::ReservationSet<T_Meta::lines()> m_reservations;
+  db::ReservationSet<Meta_t::extent_lines()> m_reservations;
 
 public:
-    //                db::assert_is_meta<T_Meta>();
-  explicit Reservations(db::segment::id id, const PresentSet<T_Meta> &p)
+    //                db::assert_is_meta<Meta_t>();
+  explicit Reservations(db::segment::id id, const PresentSet<Meta_t> &p)
       : segment_id{id}, m_reservations{p} {
   }
 
-  Reservations(Reservations<T_Meta> &&o)
+  Reservations(Reservations<Meta_t> &&o)
       : segment_id{o.segment_id}, m_reservations{std::move(o.m_reservations)} {
   }
 
   Reservations(const Reservations &) = delete;
 
-  sp::Maybe<Reservation<T_Table>> reserve() {
+  sp::Maybe<Reservation<Table_t>> reserve() {
     auto optResId = m_reservations.reserve();
     if (optResId) {
-      Reservation<T_Table> r{optResId.get(), segment_id};
-      return sp::Maybe<Reservation<T_Table>>{r};
+      Reservation<Table_t> r{optResId.get(), segment_id};
+      return sp::Maybe<Reservation<Table_t>>{r};
     }
-    return sp::Maybe<Reservation<T_Table>>{};
+    return sp::Maybe<Reservation<Table_t>>{};
   }
 
-  void unreserve(const Reservation<T_Table> &) {
+  void unreserve(const Reservation<Table_t> &) {
   }
 
   bool has_free() const;
 };
 
-template <typename T_Meta>
-bool Reservations<T_Meta>::has_free() const {
+template <typename Meta_t>
+bool Reservations<Meta_t>::has_free() const {
   return m_reservations.has_free();
 }
 }

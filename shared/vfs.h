@@ -5,7 +5,7 @@
 #ifndef PROJECT_VFS_H
 #define PROJECT_VFS_H
 
-#include "../shared/entities.h"
+#include "entities.h"
 #include <stddef.h>
 
 //#ifndef BLKGETSIZE

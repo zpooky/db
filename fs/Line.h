@@ -5,10 +5,10 @@
 #ifndef _SP_FS_LINE_H
 #define _SP_FS_LINE_H
 
+#include "../segment/Context.h"
 #include "../shared/Assertions.h"
 #include "../shared/Buffer.h"
 #include "../shared/shared.h"
-#include "../segment/Context.h"
 #include <iostream>
 #include <stddef.h>
 #include <type_traits>
@@ -30,7 +30,8 @@ public:
   }
 
   template <size_t bytes>
-  explicit Line(Buffer<bytes> &buf) : id(Context<hash_t>::endianess::get_uint64(buf)) {
+  explicit Line(Buffer<bytes> &buf)
+      : id(Context<hash_t>::endianess::get_uint64(buf)) {
   }
 
   static constexpr size_t bytes() {
@@ -48,9 +49,8 @@ private:
 
 public:
   static constexpr size_t size() {
-    return multipleOf(
-        sizeof(db::raw::id) +
-        /* sizeof(T_hash_type) */ sizeof(raw_type_t));
+    return multipleOf(sizeof(db::raw::id) +
+                      /* sizeof(T_hash_type) */ sizeof(raw_type_t));
   }
 };
 
@@ -92,7 +92,8 @@ auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_t>;
 template <size_t LINE_SIZE, typename hash_t>
 auto buffer(const Line<LINE_SIZE, hash_t> &l) {
   Buffer<Line<LINE_SIZE, hash_t>::size()> buf;
-  Context<hash_t>::endianess::put(buf, l.id);
+  using format = typename Context<hash_t>::endianess;
+  format::put(buf, l.id);
   //            buf.put(l.checksum);
   //            auto state = static_cast<unsigned char>(l.state);
   //            buf.put(state);

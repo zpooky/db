@@ -32,14 +32,9 @@ else ()
                      Segment.cpp
                      Reservations.h
                      Segments.h
-                     format/Format.cpp
-                     format/Format.h
-                     io/SegmentFile.h
                      PresentSet.h
                      ReservationSet.cpp
                      ReservationSet.h
-                     format/SegmentFileParser.cpp
-                     format/SegmentFileParser.h
                      Context.h)
 
     add_library(segment_lib STATIC ${SOURCE_FILES})

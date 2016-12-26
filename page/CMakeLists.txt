@@ -20,7 +20,11 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Transient.cpp Transient.h)
+    set(SOURCE_FILES Transient.cpp
+                     Transient.h
+                     format/Format.cpp
+                     format/Format.h
+        )
 
     add_library(page_lib STATIC ${SOURCE_FILES})
     set_target_properties(page_lib PROPERTIES LINKER_LANGUAGE CXX)

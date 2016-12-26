@@ -28,17 +28,6 @@ private:
   //    }
 
 public:
-  /**
-   * Version of this table structure
-   */
-  constexpr static db::table::version latest_version = 1;
-  /**
-   * Tablename
-   */
-  constexpr static db::table::name::type table_name() {
-    //        return to_array("test_table");
-    return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e', 0};
-  }
 
   //    size_t size() const noexcept {
   //        return sizeof(TestTable);

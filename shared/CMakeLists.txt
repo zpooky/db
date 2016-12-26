@@ -19,7 +19,17 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Buffer.h Assertions.h vfs.cpp vfs.h entities.cpp entities.h hash.cpp hash.h TableMeta.h Maybe.h conversions.h)
+    set(SOURCE_FILES
+                    Buffer.h
+                    Assertions.h
+                    vfs.cpp
+                    vfs.h
+                    entities.cpp
+                    entities.h
+                    hash.cpp
+                    hash.h
+                    Maybe.h
+                    conversions.h)
 
     add_library(shared_lib STATIC ${SOURCE_FILES})
     set_target_properties(shared_lib PROPERTIES LINKER_LANGUAGE CXX)

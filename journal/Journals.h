@@ -36,17 +36,17 @@ public:
       : m_consumer(o.m_consumer), m_counter(o.m_counter.load()) {
   }
 
-  Journals(const Journals &) = delete;
+  Journals(const Journals<hash_t> &) = delete;
 
 public:
   /**
    * Journal type: BEGIN
    * Creates a new journal transaction.
    */
-  template <typename Table_t>
+  template <typename Meta_t>
   journal::id begin() {
     auto journal_id = ++m_counter;
-    constexpr auto table = Table_t::table_name();
+    constexpr auto table = Meta_t::table_name();
     m_consumer.add(journal::line::begin<hash_t>(journal_id, table));
     return journal_id;
   }
@@ -54,12 +54,12 @@ public:
    * Journal Type: ENTRY
    * Journal entry for CREATE line
    */
-  template <typename Table_t>
-  void create(journal::id jid, const db::Reservation<Table_t> &r,
-              const Table_t &t) {
+  template <typename Meta_t>
+  void create(journal::id jid, const db::Reservation<typename Meta_t::Table> &r,
+              const typename Meta_t::Table &t) {
     db::HeapBuffer b;
     // TODO populate buffer
-    constexpr auto table = Table_t::table_name();
+    constexpr auto table = Meta_t::table_name();
     auto type = EntryType::LINE;
     m_consumer.add(
         journal::line::create<hash_t>(jid, table, type, std::move(b)));
@@ -68,11 +68,11 @@ public:
    * Journal Type: ENTRY
    * Journal entry for CREATE segment file
    */
-  template <typename Table_t>
+  template <typename Meta_t>
   void create(journal::id jid, db::segment::id sid) {
     db::HeapBuffer b;
     // TODO populate buffer
-    constexpr auto table = Table_t::table_name();
+    constexpr auto table = Meta_t::table_name();
     auto type = EntryType::SEGMENT;
     m_consumer.add(
         journal::line::create<hash_t>(jid, table, type, std::move(b)));
@@ -84,9 +84,9 @@ public:
    * Journal TYPE: COMMIT
    * Journal entry for commit journal transaction
    */
-  template <typename Table_t>
+  template <typename Meta_t>
   void commit(journal::id id) {
-    constexpr auto table = Table_t::table_name();
+    constexpr auto table = Meta_t::table_name();
     m_consumer.add(journal::line::commit<hash_t>(id, table));
   }
 };

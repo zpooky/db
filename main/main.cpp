@@ -6,8 +6,9 @@
 #include "../segment/Segment.h"
 #include "../segment/SegmentReservations.h"
 #include "../segment/Segments.h"
-#include "../shared/TableMeta.h"
 #include "../shared/vfs.h"
+#include "PageFilesParser.h"
+#include "TableMeta.h"
 #include "TestTable.h"
 
 using namespace journal;
@@ -19,7 +20,7 @@ namespace db {
 struct Transaction {
   const db::transaction::id tid;
   const journal::id jid;
-  Transaction(journal::id id) : tid(0), jid(id) {
+  explicit Transaction(journal::id id) : tid(0), jid(id) {
   }
 };
 template <typename hash_t>
@@ -30,31 +31,41 @@ private:
 public:
   explicit Tx(Context<hash_t> &ctx) : m_jorunal(ctx.journal()) {
   }
-  template <typename Table_t>
+  template <typename Meta_t>
   Transaction begin() {
-    auto id = m_jorunal.begin<Table_t>();
-    return {id};
+    auto id = m_jorunal.begin<Meta_t>();
+    return Transaction{id};
   }
 };
 }
 
-template <typename hash_t, typename Meta_t>
+template <typename Meta_t>
 class Store {
 private:
   using Table = typename Meta_t::Table;
+  using hash_t = typename Meta_t::hash_algh;
+  using page_t = typename Meta_t::Page;
+
+private:
   db::Context<hash_t> &m_ctx;
   std::unique_ptr<Segments<Meta_t>> m_segments;
   Journals<hash_t> &m_journals;
 
+private:
 public:
   explicit Store(db::Context<hash_t> &ctx)
-      : m_ctx(ctx), m_segments(make_unique<Segments<Meta_t>>(m_ctx)),
-        m_journals(ctx.journal()) {
+      : m_ctx(ctx), m_segments(nullptr), m_journals(ctx.journal()) {
+
+    auto segment_root = ctx.root().cdx(Meta_t::table_name());
+    vfs::mkdir(segment_root);
+
+    page::PageFilesParser<Meta_t> parser(ctx, segment_root);
+    m_segments.reset(parser());
   }
 
   db::transaction::xid_t create(const db::Transaction &t, const Table &data) {
     auto res = m_segments->reserve();
-    m_journals.create(t.jid, res, data);
+    // m_journals.create<Meta_t>(t.jid, res, data);
     // m_segments->write(res, data);
     return 0;
   }
@@ -80,10 +91,10 @@ int main(int, char *[]) {
   db::Directory root("/tmp/db");
   vfs::mkdir(root);
   db::Context<hash_t> ctx{root};
-  Store<hash_t, TTT> store{ctx};
+  Store<TTT> store{ctx};
   db::Tx<hash_t> tx{ctx};
   {
-    auto t = tx.begin<TestTable>();
+    auto t = tx.begin<TTT>();
     TestTable entry;
     store.create(t, entry);
 

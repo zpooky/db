@@ -14,7 +14,7 @@ namespace db {
     template<typename T_Meta>
     class PresentSet {
     private:
-        using Bitset_t = std::bitset<T_Meta::lines()>;
+        using Bitset_t = std::bitset<T_Meta::extent_lines()>;
         Bitset_t m_bitset;
     public:
         PresentSet() :
