@@ -119,6 +119,15 @@ public:
     return node->value;
   }
 
+  template <typename Predicate>
+  T *search(Predicate p) const {
+    auto node = find(p);
+    if (node) {
+      return &node->value;
+    }
+    return nullptr;
+  }
+
   void push_front(T &&data);
 };
 

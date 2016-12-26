@@ -17,10 +17,17 @@ using namespace std;
 using namespace sp::hash;
 
 namespace db {
-struct Transaction {
+class Transaction {
+private:
+  // journal::Journals<hash_t> &journal;
+public:
   const db::transaction::id tid;
   const journal::id jid;
   explicit Transaction(journal::id id) : tid(0), jid(id) {
+  }
+  // Transaction(const Transaction&) = delete;
+  ~Transaction(){
+    // journal.commit(jid);
   }
 };
 template <typename hash_t>
@@ -62,24 +69,30 @@ public:
     page::PageFilesParser<Meta_t> parser(ctx, segment_root);
     m_segments.reset(parser());
   }
-
-  db::transaction::xid_t create(const db::Transaction &t, const Table &data) {
+  db::raw::version_t create(const db::Transaction &t, const Table &data) {
     auto res = m_segments->reserve();
-    // m_journals.create<Meta_t>(t.jid, res, data);
-    // m_segments->write(res, data);
-    return 0;
+    m_journals.template create<Meta_t>(t.jid, res, data);
+    return m_segments->create(res, data);
   }
 
   Table read(const db::Transaction &, db::raw::id);
-  Table read(const db::Transaction &, db::raw::id, db::raw::version_t);
+  /**
+   * Optimistic locking
+   */
+  // Table read(const db::Transaction &, db::raw::id, db::raw::version_t);
 
-  db::raw::version_t update(const db::Transaction &, const Table &);
+  // db::raw::version_t update(const db::Transaction &, const Table &);
+  /**
+   * Optimistic locking
+   */
   // db::raw::version_t update(const db::Transaction &,
   // db::transaction::version_t, const Table &);
 
-  void del(const db::Transaction &, db::transaction::xid_t);
-  // void del(const db::Transaction &, db::transaction::xid_t,
-  // db::raw::version_t);
+  void del(const db::Transaction &);
+  /**
+   * Optimistic locking
+   */
+  // void del(const db::Transaction &, db::raw::version_t);
 };
 
 int main(int, char *[]) {

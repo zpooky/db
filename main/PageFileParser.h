@@ -5,11 +5,11 @@
 #ifndef PROJECT_SEGMENTFILEPARSER_H
 #define PROJECT_SEGMENTFILEPARSER_H
 
-#include "../segment/Segment.h"
-#include "../shared/entities.h"
+#include "../page/FilePage.h"
 #include "../page/format/Format.h"
 #include "../page/io/FilePageMeta.h"
-#include "../page/FilePage.h"
+#include "../segment/Segment.h"
+#include "../shared/entities.h"
 
 namespace page {
 template <typename Meta_t>
@@ -31,8 +31,9 @@ public:
     // more lines present in file than in lines() constexpr-
     // should work with present set and reservation set
     db::segment::id sid = parser.get_id(m_segment);
-    FilePageMeta meta{sid, m_segment, db::fs::Line_size<Meta_t>::value(),
-                   Meta_t::extent_lines(), table_version};
+    constexpr auto line_size = db::fs::Line_size<Meta_t>::value();
+    constexpr auto extent_lines = Meta_t::extent_lines();
+    FilePageMeta meta{sid, m_segment, line_size, extent_lines, table_version};
 
     FilePage<Meta_t> page(std::move(meta));
     return db::fs::Segment<Meta_t>{std::move(page), parser.parse(m_segment)};

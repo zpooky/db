@@ -37,6 +37,7 @@ private:
   using page_t = typename Meta_t::Page;
   using segment_id = db::segment::id;
   using Factory = typename Meta_t::PageFactory;
+  using version_t = db::raw::version_t;
 
 private:
   Factory m_factory;
@@ -64,6 +65,21 @@ public:
         return maybe_res.get();
       }
     }
+  }
+
+  version_t create(const Reservation<Table_t> &t, const Table_t &data) {
+    auto *segment = m_segments.search([&](const auto &seg) {
+      auto eq = seg.id() == t.segment;
+      return eq;
+    });
+    if(!segment){
+      /**
+      * If segment is not found but we where able to reserve
+      * something is very buggy
+      */
+      throw std::runtime_error("REALY unexpected exception");
+    }
+    return segment->create(t.position, data);
   }
 
 private:

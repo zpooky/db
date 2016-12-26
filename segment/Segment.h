@@ -53,8 +53,10 @@ template <typename Meta_t>
 class Segment {
 private:
   using hash_algh = typename Meta_t::hash_algh;
-  using T_Table = typename Meta_t::Table;
+  using Table_t = typename Meta_t::Table;
   using Page_t = typename Meta_t::Page;
+
+  using version_t = db::raw::version_t;
 
 private:
   Extent<Meta_t> m_extents;
@@ -77,6 +79,15 @@ public:
   }
   Reservations<Meta_t> &reservations() {
     return m_extents.reservations();
+  }
+
+  db::segment::id id() const {
+    return m_page.id();
+  }
+
+  version_t create(page::position pos, const Table_t &data) {
+    // TODO implement
+    return 0;
   }
 };
 }

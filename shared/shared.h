@@ -10,6 +10,10 @@ using id = uint64_t;
 constexpr id START_ID(1);
 constexpr id NO_ID(0);
 }
+namespace page {
+
+using position = uint64_t;
+}
 namespace db {
 
 namespace table {
@@ -34,7 +38,6 @@ using file_id = uint64_t;
 constexpr id NO_ID(0);
 constexpr id START_ID(1);
 }
-
 namespace raw {
 
 using id = uint64_t;
@@ -70,7 +73,7 @@ struct Segment_name {
 template <typename Table_t>
 struct Reservation {
   const db::segment::id segment;
-  const size_t position;
+  const page::position position;
 
   explicit Reservation() : Reservation(0, 0) {
     // TODO fix this
