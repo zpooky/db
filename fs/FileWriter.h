@@ -11,12 +11,13 @@
 
 #include "../shared/Buffer.h"
 #include "../shared/entities.h"
-#include "shared.h"
 #include "Line.h"
+#include "shared.h"
 #include <cassert>
 #include <fcntl.h>
 #include <stdexcept>
 #include <unistd.h>
+#include <algorithm>
 
 // extern int errno;
 namespace db {
@@ -36,8 +37,8 @@ public:
 
   FileWriter(const FileWriter &) = delete;
 
-  FileWriter(FileWriter &&o) : m_file(o.m_file), m_fd{o.m_fd} {
-    o.m_fd = -1;
+  FileWriter(FileWriter &&o) : m_file(o.m_file), m_fd{-1} {
+    std::swap(m_fd, o.m_fd);
   }
 
   ~FileWriter() {
@@ -138,6 +139,5 @@ public:
 
 private:
 };
-
 }
 #endif // FS_FILESYSTEM_H

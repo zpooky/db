@@ -30,7 +30,7 @@ public:
     // TODO calculate no of lines and have a linked bitset list if there are
     // more lines present in file than in lines() constexpr-
     // should work with present set and reservation set
-    db::segment::id sid = parser.get_id(m_segment);
+    db::segment::id sid = db::Segment_name::id(m_segment.filename());
     constexpr auto line_size = db::fs::Line_size<Meta_t>::value();
     constexpr auto extent_lines = Meta_t::extent_lines();
     FilePageMeta meta{sid, m_segment, line_size, extent_lines, table_version};

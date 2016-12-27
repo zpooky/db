@@ -69,7 +69,7 @@ public:
     page::PageFilesParser<Meta_t> parser(ctx, segment_root);
     m_segments.reset(parser());
   }
-  db::raw::version_t create(const db::Transaction &t, const Table &data) {
+  db::raw::id create(const db::Transaction &t, const Table &data) {
     auto res = m_segments->reserve();
     m_journals.template create<Meta_t>(t.jid, res, data);
     return m_segments->create(res, data);

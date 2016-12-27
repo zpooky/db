@@ -6,6 +6,7 @@
 #define PROJECT_RESERVATIONSET_H
 
 #include "../shared/Maybe.h"
+#include "../shared/shared.h"
 #include "PresentSet.h"
 #include <bitset>
 #include <utility>
@@ -29,8 +30,8 @@ public:
       : m_bitset{std::move(o.m_bitset)}, m_cnt{o.m_cnt.load()} {
   }
 
-  sp::Maybe<db::reservation::id> reserve() {
-    using Return_t = sp::Maybe<db::reservation::id>;
+  sp::Maybe<page::position> reserve() {
+    using Return_t = sp::Maybe<page::position>;
     size_t reserved = m_bitset.swap_first(m_cnt, true);
     m_cnt.store(reserved);
     if (reserved != m_bitset.npos) {

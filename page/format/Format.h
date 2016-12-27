@@ -53,7 +53,7 @@ public:
 template <typename T_Meta>
 FilePageMeta V1SegmentInit<T_Meta>::create(db::segment::id sid) {
   using Table_t = typename T_Meta::Table;
-  db::Filename filename{db::Segment_name<Table_t>::name(sid)};
+  db::Filename filename{db::Segment_name::name(sid)};
 
   using capacity = unsigned long long;
   constexpr size_t line_size = db::fs::Line_size<T_Meta>::value();
@@ -98,7 +98,9 @@ db::PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const db::File &file) {
   using Line_t = Line<Table_size<Table_t>::value(), typename T_Meta::hash_algh>;
   using db::fs::FileReader;
   using db::Buffer;
-  auto present = [](const Line_t &line) { return line.id != db::raw::EMPTY_LINE; };
+  auto present = [](const Line_t &line) {
+    return line.id != db::raw::EMPTY_LINE;
+  };
   //
   const size_t line_size = db::fs::Line_size<T_Meta>::value();
   constexpr size_t lines = T_Meta::extent_lines();
@@ -118,11 +120,6 @@ db::PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const db::File &file) {
   return db::PresentSet<T_Meta>{res};
 }
 
-template <typename T_Meta>
-db::segment::id V1SegmentParser<T_Meta>::get_id(const db::File &file) {
-  auto fname = file.filename();
-  return db::to<db::segment::id>(fname.name);
-}
 /* Facade for creating and parsing segment files
  */
 class Format {

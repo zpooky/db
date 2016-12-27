@@ -1,6 +1,8 @@
 #ifndef _H_SHARED_IDS
 #define _H_SHARED_IDS
 
+#include "conversions.h"
+#include "entities.h"
 #include <array>
 #include <string>
 
@@ -25,10 +27,6 @@ constexpr size_t length(64);
 using type = std::array<char, length>;
 }
 }
-namespace reservation {
-
-using id = uint64_t;
-}
 
 namespace segment {
 
@@ -39,9 +37,11 @@ constexpr id NO_ID(0);
 constexpr id START_ID(1);
 }
 namespace raw {
-
+using size = size_t;
 using id = uint64_t;
+constexpr id START_ID(1);
 using version_t = uint64_t;
+constexpr version_t START_VERSION(1);
 constexpr id EMPTY_LINE(0ul);
 template <size_t size>
 using type = std::array<uint8_t, size>;
@@ -49,11 +49,9 @@ using type = std::array<uint8_t, size>;
 
 namespace transaction {
 
-using xid_t = uint64_t;
 using id = uint64_t;
 }
 
-template <typename T_table>
 struct Segment_name {
   Segment_name() {
   }
@@ -67,6 +65,10 @@ struct Segment_name {
 
     ::sprintf(buf, "%lu", id);
     return std::string{buf};
+  }
+
+  static segment::id id(const db::Filename &fname) {
+    return db::to<db::segment::id>(fname.name);
   }
 };
 
@@ -83,7 +85,7 @@ struct Reservation {
       : segment{p_id}, position{p_position} {
   }
   bool is_valid() const {
-    return position != size_t(0) || segment != db::segment::id(0);
+    return position != page::position(0) || segment != db::segment::id(0);
   }
 };
 

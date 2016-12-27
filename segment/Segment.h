@@ -55,7 +55,6 @@ private:
   using hash_algh = typename Meta_t::hash_algh;
   using Table_t = typename Meta_t::Table;
   using Page_t = typename Meta_t::Page;
-
   using version_t = db::raw::version_t;
 
 private:
@@ -65,7 +64,7 @@ private:
 public:
   //                db::assert_is_meta<Meta_t>();
   explicit Segment(Page_t &&page, PresentSet<Meta_t> &&lines)
-      : m_extents{m_page.id(), std::move(lines)}, m_page{std::move(page)} {
+      : m_extents{page.id(), std::move(lines)}, m_page{std::move(page)} {
   }
 
   Segment(Segment<Meta_t> &&o)
@@ -81,13 +80,11 @@ public:
     return m_extents.reservations();
   }
 
-  db::segment::id id() const {
+  auto id() const {
     return m_page.id();
   }
-
-  version_t create(page::position pos, const Table_t &data) {
-    // TODO implement
-    return 0;
+  Page_t &page() {
+    return m_page;
   }
 };
 }

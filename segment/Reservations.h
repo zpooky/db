@@ -25,7 +25,7 @@ private:
   db::ReservationSet<Meta_t::extent_lines()> m_reservations;
 
 public:
-    //                db::assert_is_meta<Meta_t>();
+  //                db::assert_is_meta<Meta_t>();
   explicit Reservations(db::segment::id id, const PresentSet<Meta_t> &p)
       : segment_id{id}, m_reservations{p} {
   }
@@ -37,15 +37,12 @@ public:
   Reservations(const Reservations &) = delete;
 
   sp::Maybe<Reservation<Table_t>> reserve() {
-    auto optResId = m_reservations.reserve();
-    if (optResId) {
-      Reservation<Table_t> r{optResId.get(), segment_id};
+    auto optional_res = m_reservations.reserve();
+    if (optional_res) {
+      Reservation<Table_t> r{segment_id, optional_res.get()};
       return sp::Maybe<Reservation<Table_t>>{r};
     }
     return sp::Maybe<Reservation<Table_t>>{};
-  }
-
-  void unreserve(const Reservation<Table_t> &) {
   }
 
   bool has_free() const;

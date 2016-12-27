@@ -6,10 +6,10 @@
 #define SHARED_ENTITIES_H
 
 #include <array>
+#include <cassert>
 #include <string>
 #include <utility>
 #include <vector>
-#include <cassert>
 
 //#include <boost/filesystem.hpp>
 
@@ -23,6 +23,9 @@ struct Filename {
   explicit Filename(std::string &&p_name) : name{p_name} {
   }
 
+  const char *c_str() const {
+    return name.c_str();
+  }
   //        operator string() const {
   //            return name;
   //        }
@@ -43,10 +46,10 @@ public:
   Filename filename() const {
     auto index = path.rfind('/');
     if (index != std::string::npos) {
-      auto file = path.substr(index);
+      auto file = path.substr(index + 1);
       return Filename{std::move(file)};
     }
-   return Filename{std::string(path)};
+    return Filename{std::string(path)};
   }
 
   const char *c_str() const {
