@@ -15,6 +15,10 @@ namespace page {
 template <typename Meta_t>
 class PageFileParser {
 private:
+  using Table_t = typename Meta_t::Table;
+  using hash_t = typename Meta_t::hash_algh;
+
+private:
   const db::File m_segment;
 
 public:
@@ -31,7 +35,7 @@ public:
     // more lines present in file than in lines() constexpr-
     // should work with present set and reservation set
     db::segment::id sid = db::Segment_name::id(m_segment.filename());
-    constexpr auto line_size = db::fs::Line_size<Meta_t>::value();
+    constexpr auto line_size = db::Line<Table_t, hash_t>::size();
     constexpr auto extent_lines = Meta_t::extent_lines();
     FilePageMeta meta{sid, m_segment, line_size, extent_lines, table_version};
 

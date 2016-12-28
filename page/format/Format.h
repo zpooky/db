@@ -8,11 +8,13 @@
 #include "../../fs/FileReader.h"
 #include "../../fs/FileWriter.h"
 #include "../../fs/Line.h"
-#include "../../shared/conversions.h"
-#include "../../shared/vfs.h"
-#include "../../shared/entities.h"
-#include "../io/FilePageMeta.h"
 #include "../../segment/PresentSet.h"
+#include "../../shared/Assertions.h"
+#include "../../shared/conversions.h"
+#include "../../shared/entities.h"
+#include "../../shared/vfs.h"
+#include "../io/FilePageMeta.h"
+#include "../../shared/LittleEndian.h"
 /*
  * Header:
  * size in bytes:
@@ -36,10 +38,10 @@ namespace page {
 /**
  * Used to create a segment file according to the v1 format.
  */
-template <typename T_Meta>
+template <typename Meta_t>
 class V1SegmentInit {
 private:
-  using Table_t = typename T_Meta::Table;
+  using Table_t = typename Meta_t::Table;
   const db::Directory m_root;
 
 public:
@@ -50,14 +52,15 @@ public:
   FilePageMeta create(db::segment::id);
 };
 
-template <typename T_Meta>
-FilePageMeta V1SegmentInit<T_Meta>::create(db::segment::id sid) {
-  using Table_t = typename T_Meta::Table;
+template <typename Meta_t>
+FilePageMeta V1SegmentInit<Meta_t>::create(db::segment::id sid) {
+  using Table_t = typename Meta_t::Table;
+  using hash_t = typename Meta_t::hash_algh;
   db::Filename filename{db::Segment_name::name(sid)};
 
   using capacity = unsigned long long;
-  constexpr size_t line_size = db::fs::Line_size<T_Meta>::value();
-  constexpr size_t lines = T_Meta::extent_lines();
+  constexpr size_t line_size = db::Line<Table_t, hash_t>::size();
+  constexpr size_t lines = Meta_t::extent_lines();
   capacity target = line_size * lines;
   //
   db::File file = m_root.cd(filename);
@@ -71,39 +74,37 @@ FilePageMeta V1SegmentInit<T_Meta>::create(db::segment::id sid) {
   } while (target > 0);
   stream.flush();
   vfs::sync(db::Directory{file.parent()});
-  return FilePageMeta{sid, file, line_size, lines, T_Meta::latest_version};
+  return FilePageMeta{sid, file, line_size, lines, Meta_t::latest_version};
 }
 
 /* Used to parse a segment file acccording to the v1 format.
  */
-template <typename T_Meta>
+template <typename Meta_t>
 class V1SegmentParser {
 private:
-  using Table_t = typename T_Meta::Table;
+  using Table_t = typename Meta_t::Table;
 
 public:
   V1SegmentParser() {
     db::assert_is_table<Table_t>();
   }
 
-  db::PresentSet<T_Meta> parse(const db::File &);
-
-  db::segment::id get_id(const db::File &);
+  db::PresentSet<Meta_t> parse(const db::File &);
 };
 
-template <typename T_Meta>
-db::PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const db::File &file) {
-  using db::fs::Line;
-  using db::fs::Table_size;
-  using Line_t = Line<Table_size<Table_t>::value(), typename T_Meta::hash_algh>;
+template <typename Meta_t>
+db::PresentSet<Meta_t> V1SegmentParser<Meta_t>::parse(const db::File &file) {
+  using hash_t = typename Meta_t::hash_algh;
+  using Line_t = db::Line<Table_t, hash_t>;
   using db::fs::FileReader;
-  using db::Buffer;
+  //
   auto present = [](const Line_t &line) {
     return line.id != db::raw::EMPTY_LINE;
   };
   //
-  const size_t line_size = db::fs::Line_size<T_Meta>::value();
-  constexpr size_t lines = T_Meta::extent_lines();
+  constexpr size_t line_size = Line_t::size();
+  using Buffer_t = db::Buffer<line_size>;
+  constexpr size_t lines = Meta_t::extent_lines();
   //
   std::bitset<lines> res;
   FileReader fr(file);
@@ -111,13 +112,15 @@ db::PresentSet<T_Meta> V1SegmentParser<T_Meta>::parse(const db::File &file) {
   // TODO advice to skip page cache
   size_t current(0);
   while (current < lines) {
-    Buffer<line_size> buffer;
+    Buffer_t buffer;
     fr.read(buffer);
     buffer.flip();
-    Line_t line{buffer};
+    // TODO parse endianess
+    using Endianess = db::LittleEndian;
+    Line_t line = Line_t::template read<Endianess, Buffer_t>(buffer);
     res[current++] = present(line);
   }
-  return db::PresentSet<T_Meta>{res};
+  return db::PresentSet<Meta_t>{res};
 }
 
 /* Facade for creating and parsing segment files
@@ -127,15 +130,15 @@ private:
 public:
   /* Every new segment file should be created using the latest format.
    */
-  template <typename T_Meta>
-  using latest = V1SegmentInit<T_Meta>;
+  template <typename Meta_t>
+  using latest = V1SegmentInit<Meta_t>;
 
   /* Get parser based on segment version
    */
-  template <typename T_Meta>
-  static constexpr V1SegmentParser<T_Meta> parser(db::segment::version) {
+  template <typename Meta_t>
+  static constexpr V1SegmentParser<Meta_t> parser(db::segment::version) {
     // TODO version support
-    return V1SegmentParser<T_Meta>{};
+    return V1SegmentParser<Meta_t>{};
   }
 };
 }

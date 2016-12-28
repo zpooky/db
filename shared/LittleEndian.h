@@ -29,33 +29,48 @@ private:
     }
   }
 
-  template <typename T, typename Buff>
-  static T get(Buff &b) {
-    static_assert(std::is_integral<T>::value,"");
-    constexpr size_t bytes(sizeof(T) / sizeof(uint8_t));
+  template <typename datum_t, typename Buff>
+  static datum_t get(Buff &b) {
+    constexpr size_t bytes(sizeof(datum_t) / sizeof(uint8_t));
     std::array<uint8_t, bytes> buff;
     b.get(buff);
-    T res(0);
+    datum_t res(0);
     // std::cout << "makeLong(";
     for (size_t i = 0; i < bytes; ++i) {
       // std::cout << "\tget(a + " << i << ") << " << (i) << ",# " <<
       // size_t(buff[i])<<std::endl;
-      res = res | (T(buff[i]) << (i * 8));
+      res = res | (datum_t(buff[i]) << (i * 8));
       // std::cout << "";
     }
     // std::cout << ")" << std::endl;
     return res;
   }
+
 public:
-  template <typename Buff>
-  static void put(Buff &b, uint64_t datum) {
-    put_req<uint64_t, Buff>(0, datum, b);
+  template <typename Buff, typename datum_t>
+  static void put(Buff &b, datum_t datum) {
+    static_assert(std::is_integral<datum_t>::value, "");
+    put_req<datum_t, Buff>(0, datum, b);
   }
 
-  template <typename Buff>
-  static uint64_t get_uint64(Buff &b) {
-    return get<uint64_t, Buff>(b);
+  template <typename Buff, typename datum_t>
+  static datum_t read(Buff &b) {
+    static_assert(std::is_integral<datum_t>::value, "");
+    return get<datum_t, Buff>(b);
   }
+  template <typename Buff, typename datum_t, size_t size>
+  static std::array<datum_t, size> read_arr(Buff &b) {
+    std::array<datum_t, size> res{};
+    for (size_t i(0); i < size; ++i) {
+      res[i] = read<Buff, datum_t>(b);
+    }
+    return res;
+  }
+
+  // template <typename Buff>
+  // static uint64_t get_uint64(Buff &b) {
+  //   return get<uint64_t, Buff>(b);
+  // }
 };
 }
 #endif

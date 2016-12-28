@@ -1,116 +1,65 @@
-//
-// Created by spooky on 2016-03-03.
-//
-
 #ifndef _SP_FS_LINE_H
 #define _SP_FS_LINE_H
 
-#include "../segment/Context.h"
-#include "../shared/Assertions.h"
-#include "../shared/Buffer.h"
 #include "../shared/shared.h"
-#include <iostream>
-#include <stddef.h>
-#include <type_traits>
-#include <utility>
 
 namespace db {
-namespace fs {
-template <size_t T_bytes, typename hash_t>
-struct Line {
-private:
-  using raw_type_t = db::raw::type<T_bytes>;
 
+template <typename Table_t, typename hash_t>
+class Line {
 public:
   const db::raw::id id;
-  //            T_hash_type checksum;
-  raw_type_t data;
+  const db::raw::version_t version;
+  const Table_t data;
 
-  explicit Line(Table &&table) : id(1) {
+  explicit Line(db::raw::id p_id, db::raw::version_t p_v, const Table_t &table)
+      : id(p_id), version(p_v), data(table) {
   }
 
-  template <size_t bytes>
-  explicit Line(Buffer<bytes> &buf)
-      : id(Context<hash_t>::endianess::get_uint64(buf)) {
+  explicit Line(db::raw::id p_id, db::raw::version_t p_v, const Table_t &&table)
+      : id(p_id), version(p_v), data(std::move(table)) {
   }
 
-  static constexpr size_t bytes() {
-    return T_bytes;
+  Line(Line<Table_t, hash_t> &&o) : id(o.id), version(o.version), data(o.data) {
+  }
+
+  Line(Line<Table_t, hash_t> &) = delete;
+
+  template <typename Endianess, typename Buffer>
+  void write(Buffer &b) const noexcept {
+    Endianess::put(id);
+    Endianess::put(version);
+    data.write<Endianess, Buffer>(b);
+  }
+
+  static constexpr db::raw::size size() {
+    return sizeof(db::raw::id) + sizeof(db::raw::version_t) + Table_t::size();
+  }
+
+  // TODO endianess should be base on the file no determined in compile time
+  template <typename Endianess, typename Buffer>
+  static Line<Table_t, hash_t> read(Buffer &b) {
+    auto id = Endianess::template read<Buffer, db::raw::id>(b);
+    auto v = Endianess::template read<Buffer, db::raw::version_t>(b);
+    auto data = Table_t::template read<Endianess, Buffer>(b);
+    return Line<Table_t, hash_t>(id, v, data);
   }
 
 private:
-  static constexpr size_t multipleOf(size_t size, size_t multiple) {
-    return size < multiple ? multiple : multipleOf(size, multiple * 2);
-  }
-
-  static constexpr size_t multipleOf(size_t size) {
-    return multipleOf(size, 8);
-  }
-
-public:
-  static constexpr size_t size() {
-    return multipleOf(sizeof(db::raw::id) +
-                      /* sizeof(T_hash_type) */ sizeof(raw_type_t));
-  }
-};
-
-template <typename T_Table>
-struct Table_size {
-private:
-public:
-  Table_size() {
-    db::assert_is_table<T_Table>();
-  }
-
-  static constexpr size_t value() {
-    return sizeof(T_Table);
-  }
-};
-
-template <typename T_Meta>
-struct Line_size {
-private:
-  using T_Table = typename T_Meta::Table;
-  using hash_t = typename T_Meta::hash_algh;
+  // static constexpr size_t multipleOf(size_t size, size_t multiple) {
+  //   return size < multiple ? multiple : multipleOf(size, multiple * 2);
+  // }
+  //
+  // static constexpr size_t multipleOf(size_t size) {
+  //   return multipleOf(size, 8);
+  // }
 
 public:
-  Line_size() {
-    db::assert_is_table<T_Table>();
-  }
-
-  static constexpr size_t value() {
-    return Line<Table_size<T_Table>::value(), hash_t>::size();
-  }
+  // static constexpr size_t size() {
+  //   return multipleOf(sizeof(db::raw::id) +
+  //                     #<{(| sizeof(T_hash_type) |)}># sizeof(raw_type_t));
+  // }
 };
-
-template <size_t LINE_SIZE, typename hash_t>
-auto buffer(const Line<LINE_SIZE, hash_t> &);
-
-template <typename T_Table, typename hash_t>
-auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_t>;
-
-template <size_t LINE_SIZE, typename hash_t>
-auto buffer(const Line<LINE_SIZE, hash_t> &l) {
-  Buffer<Line<LINE_SIZE, hash_t>::size()> buf;
-  using format = typename Context<hash_t>::endianess;
-  format::put(buf, l.id);
-  //            buf.put(l.checksum);
-  //            auto state = static_cast<unsigned char>(l.state);
-  //            buf.put(state);
-  buf.put(l.data);
-  return buf;
-}
-
-template <typename T_Table, typename hash_t>
-auto to_line(T_Table &&table) -> Line<sizeof(T_Table), hash_t> {
-  db::assert_is_table<T_Table>();
-  std::cout << "sizeof:" << sizeof(T_Table) << "\n";
-  //            sizeof(std::remove_const<std::remove_reference<std::decay<decltype(table)>::type>::type>::type)
-  //            << "\n";
-  Line<sizeof(table), hash_t> line{std::forward<T_Table>(table)};
-  return line;
-}
-}
 }
 
 #endif // FS_LINE_H

@@ -30,21 +30,24 @@ using type = std::array<char, length>;
 
 namespace segment {
 
-using version = uint16_t;
-using id = uint64_t;
 using file_id = uint64_t;
+
+using version = uint16_t;
+
+using id = uint64_t;
 constexpr id NO_ID(0);
 constexpr id START_ID(1);
 }
 namespace raw {
-using size = size_t;
+
+using size = uint64_t;
+
 using id = uint64_t;
 constexpr id START_ID(1);
+constexpr id EMPTY_LINE(0ul);
+
 using version_t = uint64_t;
 constexpr version_t START_VERSION(1);
-constexpr id EMPTY_LINE(0ul);
-template <size_t size>
-using type = std::array<uint8_t, size>;
 }
 
 namespace transaction {

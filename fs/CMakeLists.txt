@@ -24,7 +24,10 @@ else ()
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-    set(SOURCE_FILES Line.cpp FileWriter.cpp FileReader.cpp LineWriter.cpp)
+    set(SOURCE_FILES Line.cpp
+                     FileWriter.cpp
+                     FileReader.cpp
+                     )
 
     add_library(fs_lib STATIC ${SOURCE_FILES})
     set_target_properties(fs_lib PROPERTIES LINKER_LANGUAGE CXX)

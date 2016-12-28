@@ -59,7 +59,7 @@ private:
 
   template <size_t bytes>
   void i_get(std::array<uint8_t, bytes> &buff) {
-    for (size_t i = 0; i < buff.size(); ++i) {
+    for (size_t i(0); i < buff.size(); ++i) {
       buff[i] = m_data[m_position++];
     }
   }
