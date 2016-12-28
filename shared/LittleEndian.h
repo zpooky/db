@@ -16,6 +16,10 @@ private:
     return uint8_t(datum >> shift);
   }
 
+  static uint8_t to_uint8(uint8_t datum, size_t) {
+    return datum;
+  }
+
   template <typename In, typename Buff>
   static void put_req(size_t index, In in, Buff &b) {
     /**
@@ -53,11 +57,19 @@ public:
     put_req<datum_t, Buff>(0, datum, b);
   }
 
+  template <typename Buff, typename datum_t, size_t size>
+  static void put_arr(Buff &b, const std::array<datum_t, size> &datum) {
+    for (size_t i(0); i < size; ++i) {
+      put(b, datum[i]);
+    }
+  }
+
   template <typename Buff, typename datum_t>
   static datum_t read(Buff &b) {
     static_assert(std::is_integral<datum_t>::value, "");
     return get<datum_t, Buff>(b);
   }
+
   template <typename Buff, typename datum_t, size_t size>
   static std::array<datum_t, size> read_arr(Buff &b) {
     std::array<datum_t, size> res{};
@@ -66,11 +78,6 @@ public:
     }
     return res;
   }
-
-  // template <typename Buff>
-  // static uint64_t get_uint64(Buff &b) {
-  //   return get<uint64_t, Buff>(b);
-  // }
 };
 }
 #endif

@@ -5,6 +5,7 @@
 
 namespace db {
 
+// TODO maybe do not copy Table_t data
 template <typename Table_t, typename hash_t>
 class Line {
 public:
@@ -27,11 +28,11 @@ public:
 
   template <typename Endianess, typename Buffer>
   void write(Buffer &b) const noexcept {
-    Endianess::put(id);
-    Endianess::put(version);
+    Endianess::put(b, id);
+    Endianess::put(b, version);
     data.write<Endianess, Buffer>(b);
   }
-
+  // TODO allign with 8
   static constexpr db::raw::size size() {
     return sizeof(db::raw::id) + sizeof(db::raw::version_t) + Table_t::size();
   }

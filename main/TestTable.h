@@ -22,7 +22,7 @@ public:
 public:
   template <typename Endianess, typename Buffer>
   void write(Buffer &b) const noexcept {
-    Endianess::put(b, data);
+    Endianess::put_arr(b, data);
     Endianess::put(b, id);
   }
   static constexpr db::raw::size size() {

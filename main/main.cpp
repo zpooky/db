@@ -26,7 +26,7 @@ public:
   explicit Transaction(journal::id id) : tid(0), jid(id) {
   }
   // Transaction(const Transaction&) = delete;
-  ~Transaction(){
+  ~Transaction() {
     // journal.commit(jid);
   }
 };
@@ -110,13 +110,6 @@ int main(int, char *[]) {
     auto t = tx.begin<TTT>();
     TestTable entry;
     store.create(t, entry);
-
-    // auto jid = journal.begin();
-    // auto reserv = segments->reserve();
-    // // auto line = to_line<TestTable,hash_t>(move(table));
-    // // segment.write(reserv, table);
-    // journal.prepare(jid, reserv);
-    // journal.commit(jid);
   }
 
   return 0;

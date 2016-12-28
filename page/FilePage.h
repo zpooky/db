@@ -3,6 +3,7 @@
 
 #include "../fs/Line.h"
 #include "../fs/shared.h"
+#include "../shared/LittleEndian.h"
 #include "../shared/shared.h"
 #include "io/FilePageMeta.h"
 #include <algorithm>
@@ -15,11 +16,18 @@
 
 namespace page {
 class MMAP_File {
-  public:
+public:
   int fd;
 
   MMAP_File() : fd(-1) {
   }
+
+  MMAP_File(const MMAP_File &) = delete;
+
+  MMAP_File(MMAP_File &&o) : fd{-1} {
+    std::swap(fd, o.fd);
+  }
+
 
   explicit MMAP_File(const db::File &file) : MMAP_File() {
     int flags = O_RDWR;
@@ -27,38 +35,69 @@ class MMAP_File {
     fd = ::open(file.c_str(), flags, permssion);
     error("MMAP_File", fd);
   }
+  MMAP_File& operator=(MMAP_File&&o){
+    release();
+    std::swap(fd, o.fd);
+    return *this;
+  }
 
   ~MMAP_File() {
+    release();
+  }
+  private:
+  void release(){
     if (fd != -1) {
       ::close(fd);
       fd = -1;
     }
   }
+
 };
 
 class MMAP_Buffer {
-  public:
+public:
   uint8_t *buffer;
   size_t m_size;
 
   MMAP_Buffer() : buffer(nullptr), m_size(0) {
   }
 
+  MMAP_Buffer(const MMAP_Buffer &) = delete;
+
+  MMAP_Buffer(MMAP_Buffer &&o) : buffer(nullptr), m_size(0) {
+    std::swap(buffer, o.buffer);
+    std::swap(m_size, o.m_size);
+  }
+  MMAP_Buffer &operator=(MMAP_Buffer &&o) {
+    release();
+    std::swap(buffer,o.buffer);
+    std::swap(m_size, o.m_size);
+    return *this;
+  }
+
   explicit MMAP_Buffer(const MMAP_File &file, size_t size)
       : buffer(nullptr), m_size(size) {
-    int mmap_flags = PROT_READ | PROT_WRITE;
-    auto ptr = ::mmap(nullptr, m_size, mmap_flags, MAP_SHARED, file.fd, 0);
+    int prot = PROT_READ | PROT_WRITE;
+    auto ptr = ::mmap(0, m_size, prot, MAP_SHARED, file.fd, 0);
     error_mmap("MMAP_Buffer", ptr);
-    buffer = static_cast<uint8_t *>(ptr);
+    buffer = reinterpret_cast<uint8_t *>(ptr);
   }
-  uint8_t *at_offset(size_t offset) const {
-    return &buffer[offset];
+  auto at_offset(size_t offset) const {
+    return buffer + offset;
+  }
+  auto size() const {
+    return m_size;
   }
 
   ~MMAP_Buffer() {
+    release();
+  }
+  private:
+  void release(){
     if (buffer) {
       ::munmap(buffer, m_size);
       buffer = nullptr;
+      m_size = 0;
     }
   }
 };
@@ -70,27 +109,32 @@ private:
   using hash_t = typename Meta_t::hash_algh;
 
 private:
-  const size_t m_line_size;
   MMAP_File m_file;
   MMAP_Buffer m_buffer;
 
 public:
   explicit MMapFilePage(const FilePageMeta &meta)
-      : m_line_size(meta.line_size), m_file(meta.file), m_buffer() {
+      : m_file(meta.file), m_buffer() {
     // TODO headers and stuff
-    size_t size = m_line_size * meta.number;
-    m_buffer = MMAP_Buffer(m_file, size);
+    size_t file_size = meta.line_size * meta.number;
+    m_buffer = MMAP_Buffer(m_file, file_size);
   }
-  MMapFilePage(MMapFilePage &&o)
-      : m_line_size(o.m_line_size), m_file(), m_buffer() {
+
+  MMapFilePage(MMapFilePage &&o) : m_file(), m_buffer() {
     std::swap(m_file, o.m_file);
     std::swap(m_buffer, o.m_buffer);
   }
+
   void write(page::position p, const db::Line<Table_t, hash_t> &l) {
     // TODO header
-    size_t offset = m_line_size * p;
+    size_t offset = l.size() * p;
+    assert(offset + l.size() < m_buffer.size());
+
     auto ptr = m_buffer.at_offset(offset);
-    l.write(ptr);
+    db::PointerBuffer buffer(ptr, l.size());
+    // TODO endianess
+    using Endianess = db::LittleEndian;
+    l.template write<Endianess, db::PointerBuffer>(buffer);
   }
 };
 
@@ -101,6 +145,7 @@ private:
   using Table_t = typename Meta_t::Table;
   using version_t = db::raw::version_t;
   using id_t = db::raw::id;
+  using hash_t = typename Meta_t::hash_algh;
 
 private:
   FilePageMeta m_meta;
@@ -124,6 +169,10 @@ public:
   id_t create(page::position pos, const Table_t &data) {
     assert(pos < m_meta.number);
     // assert(Table_t::version == m_meta.version);
+    auto id = db::raw::START_ID;
+    auto version = db::raw::START_VERSION;
+    db::Line<Table_t, hash_t> line(id, version, data);
+    m_mapped.write(pos, line);
     return db::raw::START_ID;
   }
 };

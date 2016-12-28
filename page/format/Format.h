@@ -98,12 +98,13 @@ db::PresentSet<Meta_t> V1SegmentParser<Meta_t>::parse(const db::File &file) {
   using Line_t = db::Line<Table_t, hash_t>;
   using db::fs::FileReader;
   //
-  auto present = [](const Line_t &line) {
+  auto is_present = [](const Line_t &line) {
     return line.id != db::raw::EMPTY_LINE;
   };
-  //
+  // TODO read header and determine version then line size
   constexpr size_t line_size = Line_t::size();
   using Buffer_t = db::Buffer<line_size>;
+  //TODO dynamic lines
   constexpr size_t lines = Meta_t::extent_lines();
   //
   std::bitset<lines> res;
@@ -118,7 +119,7 @@ db::PresentSet<Meta_t> V1SegmentParser<Meta_t>::parse(const db::File &file) {
     // TODO parse endianess
     using Endianess = db::LittleEndian;
     Line_t line = Line_t::template read<Endianess, Buffer_t>(buffer);
-    res[current++] = present(line);
+    res[current++] = is_present(line);
   }
   return db::PresentSet<Meta_t>{res};
 }

@@ -20,7 +20,7 @@ include_directories(fs)
 link_directories(${FS_LIB_INCLUDE_DIR})
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -ggdb")
 
 set(SOURCE_FILES main.cpp TestTable.h)
 add_executable(db ${SOURCE_FILES})

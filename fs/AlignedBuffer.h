@@ -9,7 +9,8 @@
 #include <utility>
 
 namespace db {
-struct AlignedBuffer {
+// TODO refactor to inherit BaseBuffer
+class AlignedBuffer {
 private:
   uint8_t *m_alloc;
   uint8_t *m_aligned;

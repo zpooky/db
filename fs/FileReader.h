@@ -51,6 +51,7 @@ private:
       throw std::runtime_error(err);
     }
   }
+
 public:
   template <size_t capacity>
   void read(db::Buffer<capacity> &buffer);
