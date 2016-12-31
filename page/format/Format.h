@@ -1,7 +1,3 @@
-//
-// Created by spooky on 2016-07-05.
-//
-
 #ifndef PROJECT_FORMAT_H
 #define PROJECT_FORMAT_H
 

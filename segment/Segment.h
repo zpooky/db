@@ -13,7 +13,6 @@
 #include "Reservations.h"
 
 namespace db {
-namespace fs {
 /**
  * Represent a fix arena of data
  * Segment
@@ -87,7 +86,6 @@ public:
     return m_page;
   }
 };
-}
 }
 
 #endif // FS_SEGMENT_H

@@ -14,7 +14,6 @@
 #include <vector>
 
 namespace db {
-namespace fs {
 /* Frontend for table segments
  * - used for aquiring a reservation
  *   behind the scenes creates new segments
@@ -92,6 +91,5 @@ private:
     return seg.reservations();
   }
 };
-}
 }
 #endif // PROJECT_SEGMENTS_H

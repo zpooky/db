@@ -33,7 +33,7 @@ public:
 
 private:
   auto init(const std::vector<db::File> &files) const {
-    std::vector<db::fs::Segment<Meta_t>> result;
+    std::vector<db::Segment<Meta_t>> result;
     // TODO preallocate vector
     for (const auto &file : files) {
       PageFileParser<Meta_t> parser(file);
@@ -43,7 +43,7 @@ private:
   }
 
 public:
-  db::fs::Segments<Meta_t> *operator()() {
+  db::Segments<Meta_t> *operator()() {
     db::segment::id seg_cnt;
     std::vector<db::File> segments;
     std::tie(seg_cnt, segments) = parser();
@@ -51,7 +51,7 @@ public:
     db::segment::id next_id = db::segment::id(seg_cnt + 1);
     PageFactory factory(m_context, next_id, m_root);
 
-    return new db::fs::Segments<Meta_t>(std::move(factory), init(segments));
+    return new db::Segments<Meta_t>(std::move(factory), init(segments));
   }
 };
 }

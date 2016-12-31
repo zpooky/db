@@ -59,7 +59,7 @@ public:
     db::HeapBuffer b;
     // TODO populate buffer
     constexpr auto table = Table_t::table_name();
-    auto type = EntryType::LINE;
+    constexpr auto type = EntryType::LINE;
     m_consumer.add(
         journal::line::create<hash_t>(jid, table, type, std::move(b)));
   }
@@ -73,7 +73,7 @@ public:
     db::HeapBuffer b;
     // TODO populate buffer
     constexpr auto table = Table_t::table_name();
-    auto type = EntryType::SEGMENT;
+    constexpr auto type = EntryType::SEGMENT;
     m_consumer.add(
         journal::line::create<hash_t>(jid, table, type, std::move(b)));
   }

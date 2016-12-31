@@ -25,7 +25,7 @@ public:
   explicit PageFileParser(const db::File &segment) : m_segment(segment) {
   }
 
-  db::fs::Segment<Meta_t> parse() {
+  db::Segment<Meta_t> parse() {
     // TODO parse version
     db::segment::version v(1u);
     db::table::version table_version(1u);
@@ -40,7 +40,7 @@ public:
     FilePageMeta meta{sid, m_segment, line_size, extent_lines, table_version};
 
     FilePage<Meta_t> page(std::move(meta));
-    return db::fs::Segment<Meta_t>{std::move(page), parser.parse(m_segment)};
+    return db::Segment<Meta_t>{std::move(page), parser.parse(m_segment)};
   }
 };
 }

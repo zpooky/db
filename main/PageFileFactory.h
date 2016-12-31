@@ -37,7 +37,7 @@ public:
   ~PageFileFactory() {
   }
 
-  db::fs::Segment<Meta_t> operator()() {
+  db::Segment<Meta_t> operator()() {
     PageFileInitJournal<Meta_t> init{m_root, m_journal};
     return init.create(m_seg_counter++);
   }

@@ -13,7 +13,6 @@
 #include <utility>
 
 namespace db {
-namespace fs {
 
 template <typename Meta_t>
 class Reservations {
@@ -51,7 +50,6 @@ public:
 template <typename Meta_t>
 bool Reservations<Meta_t>::has_free() const {
   return m_reservations.has_free();
-}
 }
 }
 

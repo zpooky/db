@@ -91,5 +91,19 @@ struct Reservation {
     return position != page::position(0) || segment != db::segment::id(0);
   }
 };
+
+class Transaction {
+private:
+  // journal::Journals<hash_t> &journal;
+public:
+  const db::transaction::id tid;
+  const journal::id jid;
+  explicit Transaction(journal::id id) : tid(0), jid(id) {
+  }
+  // Transaction(const Transaction&) = delete;
+  ~Transaction() {
+    // journal.commit(jid);
+  }
+};
 }
 #endif

@@ -4,10 +4,10 @@
 #include "../../shared/conversions.h"
 #include "../../shared/entities.h"
 #include "../../shared/shared.h"
+#include <algorithm>
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 namespace page {
 class DD {
