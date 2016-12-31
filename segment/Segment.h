@@ -5,10 +5,6 @@
 #ifndef FS_SEGMENT_H
 #define FS_SEGMENT_H
 
-#include "../fs/FileWriter.h"
-#include "../journal/Journals.h"
-#include "../shared/Assertions.h"
-#include "../shared/entities.h"
 #include "PresentSet.h"
 #include "Reservations.h"
 
@@ -83,6 +79,9 @@ public:
     return m_page.id();
   }
   Page_t &page() {
+    return m_page;
+  }
+  const Page_t &page() const {
     return m_page;
   }
 };

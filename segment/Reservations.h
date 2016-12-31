@@ -9,7 +9,6 @@
 #include "../shared/entities.h"
 #include "../shared/shared.h"
 #include "ReservationSet.h"
-#include "Segment.h"
 #include <utility>
 
 namespace db {

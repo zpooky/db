@@ -1,9 +1,10 @@
 #include <iostream>
 
 #include "../segment/Context.h"
+#include "Store.h"
 #include "TableMeta.h"
 #include "TestTable.h"
-#include "Store.h"
+#include "../shared/hash.h"
 
 using namespace journal;
 using namespace db::fs;

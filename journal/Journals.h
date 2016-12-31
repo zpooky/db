@@ -6,8 +6,6 @@
 #define PROJECT_SEGMENTJOURNAL_H
 
 #include "../collection/Queue.h"
-#include "../fs/FileWriter.h"
-#include "../shared/hash.h"
 #include "Consumer.h"
 #include "JournalLine.h"
 #include <atomic>
