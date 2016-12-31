@@ -32,6 +32,7 @@ public:
     Endianess::put(b, version);
     data.write<Endianess, Buffer>(b);
   }
+
   // TODO allign with 8
   static constexpr db::raw::size size() {
     return sizeof(db::raw::id) + sizeof(db::raw::version_t) + Table_t::size();

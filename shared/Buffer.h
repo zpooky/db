@@ -1,15 +1,9 @@
-//
-// Created by spooky on 2016-03-09.
-//
-
 #ifndef PROJECT_BUFFER_H
 #define PROJECT_BUFFER_H
 
 #include <array>
 #include <iostream>
 #include <sstream>
-// #include <glob.h>
-// #include <iostream>
 
 namespace db {
 
@@ -55,7 +49,7 @@ public:
   size_t capacity() const {
     return m_capacity;
   }
-  size_t postion() const {
+  size_t position() const {
     return m_position;
   }
 
@@ -74,14 +68,14 @@ public:
 
 public:
   void put(uint8_t datum) {
-    if (postion() >= capacity()) {
+    if (position() >= capacity()) {
       throw std::runtime_error("put position() >= capacity()");
     }
     i_put(datum);
   }
 
   void put(const uint8_t *datum, size_t length) {
-    if (postion() + length >= capacity()) {
+    if (position() + length >= capacity()) {
       throw std::runtime_error("put position() + length >= capacity()");
     }
     auto begin = &datum[0];
@@ -102,7 +96,7 @@ public:
   }
 
   uint8_t get() {
-    if (postion() > size()) {
+    if (position() > size()) {
       throw std::runtime_error("get position() > size()");
     }
     return data()[m_position++];
@@ -110,9 +104,9 @@ public:
 
   template <size_t bytes>
   void get(std::array<uint8_t, bytes> &buff) {
-    if ((postion() + bytes) > size()) {
+    if ((position() + bytes) > size()) {
       std::stringstream b("");
-      b << "postion(" << postion() << ") + bytes(" << bytes << ") > size("
+      b << "position(" << position() << ") + bytes(" << bytes << ") > size("
         << size() << ")capacity[" << capacity() << "]" << std::endl;
       throw std::runtime_error(b.str());
     }
@@ -120,7 +114,7 @@ public:
   }
 
   uint8_t *writable_data() {
-    return data() + postion();
+    return data() + position();
   }
 
   const uint8_t *full_data() const {
@@ -129,7 +123,7 @@ public:
 
   void position(size_t pos) {
     m_position = pos;
-    if (postion() > size()) {
+    if (position() > size()) {
       m_size = pos;
     }
   }

@@ -59,11 +59,11 @@ public:
 
 template <size_t capacity>
 void FileReader::read(db::Buffer<capacity> &buffer) {
-  size_t length(buffer.capacity() - buffer.postion());
+  size_t length(buffer.capacity() - buffer.position());
   if (length > size_t(0)) {
     ssize_t read = ::read(m_fd, buffer.writable_data(), length);
     error("read", read);
-    buffer.position(buffer.postion() + read);
+    buffer.position(buffer.position() + read);
   }
 }
 }

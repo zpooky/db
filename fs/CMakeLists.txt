@@ -33,4 +33,6 @@ else ()
     set_target_properties(fs_lib PROPERTIES LINKER_LANGUAGE CXX)
     target_link_libraries(fs_lib shared_lib)
     target_link_libraries(fs_lib config_lib)
+     
+    add_subdirectory(test)
 endif ()

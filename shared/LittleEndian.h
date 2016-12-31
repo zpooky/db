@@ -10,26 +10,26 @@ private:
   template <typename In>
   static uint8_t to_uint8(In datum, size_t index) {
     uint8_t shift(index * 8);
-    // std::cout << "x >> " << size_t(shift) << "# " << size_t(uint8_t(datum >>
-    // bits));
+    // std::cout << "x >> " << size_t(shift) << "# "
+    //           << size_t(uint8_t(datum >> shift));
 
     return uint8_t(datum >> shift);
   }
 
-  static uint8_t to_uint8(uint8_t datum, size_t) {
+  static constexpr uint8_t to_uint8(uint8_t datum, size_t) {
     return datum;
   }
 
   template <typename In, typename Buff>
-  static void put_req(size_t index, In in, Buff &b) {
+  static void put_rec(size_t index, In in, Buff &b) {
     /**
      * put the most right byte first in the buffer
      */
-    // std::cout << "_put(a + " << index << ", long" << index << "(x); # ";
+    // std::cout << "\t_put(a + " << index << ", long" << index << "(x); # ";
     b.put(to_uint8<In>(in, index));
     // std::cout << std::endl;
     if (index != sizeof(In) - 1) {
-      put_req<In, Buff>(index + 1, in, b);
+      put_rec<In, Buff>(index + 1, in, b);
     }
   }
 
@@ -39,10 +39,10 @@ private:
     std::array<uint8_t, bytes> buff;
     b.get(buff);
     datum_t res(0);
-    // std::cout << "makeLong(";
+    // std::cout << "get(";
     for (size_t i = 0; i < bytes; ++i) {
-      // std::cout << "\tget(a + " << i << ") << " << (i) << ",# " <<
-      // size_t(buff[i])<<std::endl;
+      // std::cout << "\tget(a + " << i << ") << " << (i) << ",# "
+                // << size_t(buff[i]) << std::endl;
       res = res | (datum_t(buff[i]) << (i * 8));
       // std::cout << "";
     }
@@ -54,7 +54,9 @@ public:
   template <typename Buff, typename datum_t>
   static void put(Buff &b, datum_t datum) {
     static_assert(std::is_integral<datum_t>::value, "");
-    put_req<datum_t, Buff>(0, datum, b);
+    // std::cout << "put(" << datum << "){"<< std::endl;
+    put_rec<datum_t, Buff>(0, datum, b);
+    // std::cout << "}" << std::endl;
   }
 
   template <typename Buff, typename datum_t, size_t size>

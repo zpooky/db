@@ -21,16 +21,18 @@ public:
 
 public:
   template <typename Endianess, typename Buffer>
-  void write(Buffer &b) const noexcept {
+  void write(Buffer &b) const {
     Endianess::put_arr(b, data);
     Endianess::put(b, id);
   }
+
   static constexpr db::raw::size size() {
     return sizeof(data_t) + sizeof(id_t);
   }
+
   template <typename Endianess, typename Buffer>
   static TestTable read(Buffer &b) {
-    auto data = Endianess::template read_arr<Buffer, char, 5>(b);
+    auto data = Endianess::template read_arr<Buffer, data_t::value_type, 5>(b);
     auto id = Endianess::template read<Buffer, id_t>(b);
     return TestTable{data, id};
   }
