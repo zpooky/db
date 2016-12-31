@@ -29,7 +29,7 @@ public:
   PageFileInitJournal(const PageFileInitJournal &&) = delete;
 
   db::fs::Segment<Meta_t> create(db::segment::id sid) {
-    auto jid = m_journal.template begin<Meta_t>();
+    auto jid = m_journal.template begin();
 
     m_journal.template create<Meta_t>(jid, sid);
 
@@ -42,7 +42,7 @@ public:
     db::fs::Segment<Meta_t> res{FilePage<Meta_t>(std::move(meta)),
                                 std::move(p)};
 
-    m_journal.template commit<Meta_t>(jid);
+    m_journal.template commit(jid);
     return res;
   }
 };

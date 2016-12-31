@@ -91,9 +91,5 @@ struct Reservation {
     return position != page::position(0) || segment != db::segment::id(0);
   }
 };
-
-class Table {
-  //        static size_t size() const noexcept = 0;
-};
 }
 #endif

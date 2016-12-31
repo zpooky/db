@@ -43,11 +43,9 @@ public:
    * Journal type: BEGIN
    * Creates a new journal transaction.
    */
-  template <typename Meta_t>
   journal::id begin() {
     auto journal_id = ++m_counter;
-    constexpr auto table = Meta_t::table_name();
-    m_consumer.add(journal::line::begin<hash_t>(journal_id, table));
+    m_consumer.add(journal::line::begin<hash_t>(journal_id));
     return journal_id;
   }
   /**
@@ -84,10 +82,8 @@ public:
    * Journal TYPE: COMMIT
    * Journal entry for commit journal transaction
    */
-  template <typename Meta_t>
   void commit(journal::id id) {
-    constexpr auto table = Meta_t::table_name();
-    m_consumer.add(journal::line::commit<hash_t>(id, table));
+    m_consumer.add(journal::line::commit<hash_t>(id));
   }
 };
 }

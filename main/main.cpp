@@ -38,9 +38,8 @@ private:
 public:
   explicit Tx(Context<hash_t> &ctx) : m_jorunal(ctx.journal()) {
   }
-  template <typename Meta_t>
   Transaction begin() {
-    auto id = m_jorunal.begin<Meta_t>();
+    auto id = m_jorunal.begin();
     return Transaction{id};
   }
 };
@@ -63,12 +62,18 @@ public:
   explicit Store(db::Context<hash_t> &ctx)
       : m_ctx(ctx), m_segments(nullptr), m_journals(ctx.journal()) {
 
-    auto segment_root = ctx.root().cdx(Meta_t::table_name());
+    auto &root = ctx.root();
+    auto segment_root = root.cdx(Meta_t::table_name());
     vfs::mkdir(segment_root);
 
     page::PageFilesParser<Meta_t> parser(ctx, segment_root);
     m_segments.reset(parser());
   }
+
+  Store(const Store<Meta_t> &&) = delete;
+  Store(const Store<Meta_t> &) = delete;
+
+public:
   db::raw::id create(const db::Transaction &t, const Table &data) {
     auto res = m_segments->reserve();
     m_journals.template create<Meta_t>(t.jid, res, data);
@@ -99,17 +104,23 @@ int main(int, char *[]) {
   cout << "sector size:" << vfs::sector::logical::size("") << endl;
   cout << "page size:" << vfs::page::size() << endl;
   using hash_t = crc32;
-  using TTT = db::TableMeta<TestTable, hash_t>;
+  using Test1Meta = db::TableMeta<TestTable, hash_t>;
+  using Test2Meta = db::TableMeta<Test2Table, hash_t>;
 
   db::Directory root("/tmp/db");
   vfs::mkdir(root);
+
   db::Context<hash_t> ctx{root};
-  Store<TTT> store{ctx};
   db::Tx<hash_t> tx{ctx};
+  
+  Store<Test1Meta> t1_store{ctx};
+  // Store<Test2Meta> t2_store{ctx};
   {
-    auto t = tx.begin<TTT>();
+    auto t = tx.begin();
     TestTable entry;
-    store.create(t, entry);
+    t1_store.create(t, entry);
+    // Test2Table entry2;
+    // t2_store.create(t, entry2);
   }
 
   return 0;

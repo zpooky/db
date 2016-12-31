@@ -44,7 +44,7 @@ private:
   using hash_type = typename hash_t::type;
   using name_type = db::table::name::type;
   using segment_id = db::segment::id;
-//TODO encapsulate
+  // TODO encapsulate
 public:
   /* A hash of the JournalLine itself
    */
@@ -80,16 +80,15 @@ public:
       : hash{0}, table{0}, id{journal::NO_ID}, type{Type::INTERNAL},
         entry_type{EntryType::NOP}, buffer{} {
   }
-  JournalLine(const JournalLine&o) 
+  JournalLine(const JournalLine &o)
       : hash{o.hash}, table{o.table}, id{o.id}, type{o.type},
         entry_type{o.entry_type}, buffer{o.buffer} {
-
   }
-  JournalLine& operator=(JournalLine o){
+  JournalLine &operator=(JournalLine o) {
     swap(o);
     return *this;
   }
-  void swap(JournalLine<hash_t> &o){
+  void swap(JournalLine<hash_t> &o) {
     std::swap(hash, o.hash);
     std::swap(table, o.table);
     std::swap(id, o.id);
@@ -114,16 +113,15 @@ segment_line(journal::id p_id, const db::table::name::type &p_table,
 namespace line {
 template <typename hash_t>
 JournalLine<hash_t> segment_line(journal::id p_id,
-                                 const db::table::name::type &p_table,
                                  Type p_type) {
-  return segment_line<hash_t>(p_id, p_table, p_type, EntryType::NOP,
+  return segment_line<hash_t>(p_id, {0}, p_type, EntryType::NOP,
                               db::HeapBuffer());
 }
 
 template <typename hash_t>
 JournalLine<hash_t> empty_segment_line() {
   using name_type = db::table::name::type;
-  name_type name{0};
+  constexpr name_type name{0};
   return segment_line<hash_t>(journal::NO_ID, name, Type::INTERNAL);
 }
 
@@ -135,14 +133,13 @@ JournalLine<hash_t> create(journal::id jid, const db::table::name::type &table,
 }
 
 template <typename hash_t>
-JournalLine<hash_t> begin(journal::id jid, const db::table::name::type &table) {
-  return segment_line<hash_t>(jid, table, Type::BEGIN);
+JournalLine<hash_t> begin(journal::id jid) {
+  return segment_line<hash_t>(jid, Type::BEGIN);
 }
 
 template <typename hash_t>
-JournalLine<hash_t> commit(journal::id jid,
-                           const db::table::name::type &table) {
-  return segment_line<hash_t>(jid, table, Type::COMMIT);
+JournalLine<hash_t> commit(journal::id jid) {
+  return segment_line<hash_t>(jid, Type::COMMIT);
 }
 }
 }

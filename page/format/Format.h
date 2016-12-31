@@ -117,6 +117,7 @@ template <typename Meta_t>
 db::PresentSet<Meta_t> V1SegmentParser<Meta_t>::parse(const db::File &file) {
   using hash_t = typename Meta_t::hash_algh;
   using Line_t = db::Line<Table_t, hash_t>;
+  using Endianess = db::LittleEndian;
   //
   auto is_present = [](const Line_t &line) {
     return line.id != db::raw::EMPTY_LINE;
@@ -137,7 +138,6 @@ db::PresentSet<Meta_t> V1SegmentParser<Meta_t>::parse(const db::File &file) {
     fr.read(buffer);
     buffer.flip();
     // TODO parse endianess
-    using Endianess = db::LittleEndian;
     Line_t line = Line_t::template read<Endianess, Buffer_t>(buffer);
     res[current++] = is_present(line);
     buffer.clear();

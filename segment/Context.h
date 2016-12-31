@@ -47,7 +47,7 @@ public:
 public:
   using endianess = db::LittleEndian;
 
-  const db::Directory root() const {
+  const db::Directory& root() const {
     return m_root;
   }
   journal::Journals<hash_t> &journal() {

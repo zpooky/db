@@ -5,10 +5,10 @@
 #ifndef PROJECT_TABLECONTEXT_H
 #define PROJECT_TABLECONTEXT_H
 
-#include <cstddef>
-#include <type_traits>
 #include "../page/FilePage.h"
 #include "PageFileFactory.h"
+#include <cstddef>
+#include <type_traits>
 
 namespace db {
 // TODO remove HASH algh use the context one instead
