@@ -63,7 +63,7 @@ public:
       : m_ctx(ctx), m_segments(nullptr), m_journals(ctx.journal()) {
 
     auto &root = ctx.root();
-    auto segment_root = root.cdx(Meta_t::table_name());
+    auto segment_root = root.cdx(Table::table_name());
     vfs::mkdir(segment_root);
 
     page::PageFilesParser<Meta_t> parser(ctx, segment_root);
@@ -114,13 +114,13 @@ int main(int, char *[]) {
   db::Tx<hash_t> tx{ctx};
   
   Store<Test1Meta> t1_store{ctx};
-  // Store<Test2Meta> t2_store{ctx};
+  Store<Test2Meta> t2_store{ctx};
   {
     auto t = tx.begin();
     TestTable entry;
     t1_store.create(t, entry);
-    // Test2Table entry2;
-    // t2_store.create(t, entry2);
+    Test2Table entry2;
+    t2_store.create(t, entry2);
   }
 
   return 0;

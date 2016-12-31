@@ -26,20 +26,9 @@ public:
   static constexpr size_t extent_lines() {
     return 1024ul;
   }
-  /**
-   * Version of this table structure
-   */
-  constexpr static db::table::version latest_version = 1;
-  /**
-   * Tablename
-   */
-  constexpr static db::table::name::type table_name() {
-    //        return to_array("test_table");
-    return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e', 0};
-  }
 
-  using Page = page::FilePage<TableMeta<Table_t,hash_t>>;
-  using PageFactory = page::PageFileFactory<TableMeta<Table_t,hash_t>>;
+  using Page = page::FilePage<TableMeta<Table_t, hash_t>>;
+  using PageFactory = page::PageFileFactory<TableMeta<Table_t, hash_t>>;
 };
 
 //    template<typename T>

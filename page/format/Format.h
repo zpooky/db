@@ -110,7 +110,7 @@ FilePageMeta V1SegmentInitializer<Meta_t>::create(db::segment::id sid) {
   } while (target > 0);
   stream.flush();
   vfs::sync(db::Directory{file.parent()});
-  return FilePageMeta{sid, file, line_size, lines, Meta_t::latest_version};
+  return FilePageMeta{sid, file, line_size, lines, Table_t::latest_version};
 }
 
 template <typename Meta_t>
