@@ -8,6 +8,7 @@
 #include "../collection/Queue.h"
 #include "Consumer.h"
 #include "JournalLine.h"
+#include "Specification.h"
 #include <atomic>
 #include <cassert>
 #include <thread>
@@ -54,8 +55,8 @@ public:
   void create(journal::id jid, const db::Reservation<typename Meta_t::Table> &r,
               const typename Meta_t::Table &t) {
     using Table_t = typename Meta_t::Table;
-    db::HeapBuffer b;
-    // TODO populate buffer
+    db::HeapBuffer b(1);//TODO
+    SegmentSpec<Table_t>::create(b, t);
     constexpr auto table = Table_t::table_name();
     constexpr auto type = EntryType::LINE;
     m_consumer.add(
@@ -68,8 +69,8 @@ public:
   template <typename Meta_t>
   void create(journal::id jid, db::segment::id sid) {
     using Table_t = typename Meta_t::Table;
-    db::HeapBuffer b;
-    // TODO populate buffer
+    db::HeapBuffer b(1);//TODO
+    PageFileSpec<Table_t>::create(b, sid);
     constexpr auto table = Table_t::table_name();
     constexpr auto type = EntryType::SEGMENT;
     m_consumer.add(

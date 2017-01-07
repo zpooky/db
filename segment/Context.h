@@ -29,8 +29,8 @@ private:
 
 public:
   explicit Context(const Directory &p_root)
-      : m_root(p_root), m_runnable(p_root.cd(DirectoryName("journal"))),
-        m_journal(m_runnable), m_thread([&] { m_runnable(); }) {
+      : m_root(p_root), m_runnable(p_root.cd("journal")), m_journal(m_runnable),
+        m_thread([&] { m_runnable(); }) {
   }
 
   Context(const Context &&) = delete;
@@ -47,7 +47,7 @@ public:
 public:
   using endianess = db::LittleEndian;
 
-  const db::Directory& root() const {
+  const db::Directory &root() const {
     return m_root;
   }
   journal::Journals<hash_t> &journal() {

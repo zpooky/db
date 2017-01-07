@@ -1,3 +1,14 @@
+---
+1. create a lock file when creating/init table
+2. table name should configurable in runtime like TableTest should be able to be used in multiple stores.
+3. configurable Isolation(Transaction)&Durability(WAL journal) for each table
+4. update(id, version, data)
+5. bitset agresssive allocate multiple in onesingle cas. used by batch interface
+6. support multiple versions TableV2(TableV1 &&) move constructor to update.
+7. Queue<TestTable> a queue implementation where the entriesin the queue are backed in the db
+8. Add extent to existing segment file. journal and stuff.
+
+
 Insert
 
 -Journal.begin

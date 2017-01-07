@@ -1,6 +1,7 @@
 #ifndef PROJECT_FILE_PAGE_H
 #define PROJECT_FILE_PAGE_H
 
+#include "../shared/Maybe.h"
 #include "../fs/Line.h"
 #include "../fs/shared.h"
 #include "../shared/LittleEndian.h"
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include <cassert>
 #include <fcntl.h>
+#include <iostream>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -28,14 +30,13 @@ public:
     std::swap(fd, o.fd);
   }
 
-
   explicit MMAP_File(const db::File &file) : MMAP_File() {
     int flags = O_RDWR;
     int permssion = 0;
     fd = ::open(file.c_str(), flags, permssion);
     error("MMAP_File", fd);
   }
-  MMAP_File& operator=(MMAP_File&&o){
+  MMAP_File &operator=(MMAP_File &&o) {
     release();
     std::swap(fd, o.fd);
     return *this;
@@ -44,14 +45,14 @@ public:
   ~MMAP_File() {
     release();
   }
-  private:
-  void release(){
+
+private:
+  void release() {
     if (fd != -1) {
       ::close(fd);
       fd = -1;
     }
   }
-
 };
 
 class MMAP_Buffer {
@@ -70,7 +71,7 @@ public:
   }
   MMAP_Buffer &operator=(MMAP_Buffer &&o) {
     release();
-    std::swap(buffer,o.buffer);
+    std::swap(buffer, o.buffer);
     std::swap(m_size, o.m_size);
     return *this;
   }
@@ -92,8 +93,9 @@ public:
   ~MMAP_Buffer() {
     release();
   }
-  private:
-  void release(){
+
+private:
+  void release() {
     if (buffer) {
       ::munmap(buffer, m_size);
       buffer = nullptr;
@@ -114,10 +116,8 @@ private:
 
 public:
   explicit MMapFilePage(const FilePageMeta &meta)
-      : m_file(meta.file), m_buffer() {
+      : m_file(meta.file), m_buffer(m_file, meta.line_size * meta.lines) {
     // TODO headers and stuff
-    size_t file_size = meta.line_size * meta.number;
-    m_buffer = MMAP_Buffer(m_file, file_size);
   }
 
   MMapFilePage(MMapFilePage &&o) : m_file(), m_buffer() {
@@ -128,7 +128,7 @@ public:
   void write(page::position p, const db::Line<Table_t, hash_t> &l) {
     // TODO header
     size_t offset = l.size() * p;
-    assert(offset + l.size() < m_buffer.size());
+    assert(offset + l.size() <= m_buffer.size());
 
     auto ptr = m_buffer.at_offset(offset);
     db::PointerBuffer buffer(ptr, l.size());
@@ -143,17 +143,18 @@ class FilePage {
 private:
   using Page_t = typename Meta_t::Page;
   using Table_t = typename Meta_t::Table;
+  using hash_t = typename Meta_t::hash_algh;
+  using Line_t = db::Line<Table_t, hash_t>;
   using version_t = db::raw::version_t;
   using id_t = db::raw::id;
-  using hash_t = typename Meta_t::hash_algh;
 
 private:
   FilePageMeta m_meta;
   MMapFilePage<Meta_t> m_mapped;
 
 public:
-  explicit FilePage(FilePageMeta &&meta)
-      : m_meta{std::move(meta)}, m_mapped{m_meta} {
+  explicit FilePage(const FilePageMeta &meta)
+      : m_meta{meta}, m_mapped{m_meta} {
   }
 
   FilePage(const FilePage &) = delete;
@@ -166,14 +167,23 @@ public:
   auto id() const {
     return m_meta.id;
   }
-  id_t create(page::position pos, const Table_t &data) {
-    assert(pos < m_meta.number);
+
+  id_t create(db::segment::id id, page::position pos, const Table_t &data) {
+    assert(pos < m_meta.lines);
     // assert(Table_t::version == m_meta.version);
-    auto id = db::raw::START_ID;
     auto version = db::raw::START_VERSION;
-    db::Line<Table_t, hash_t> line(id, version, data);
+    Line_t line(db::LineMeta(id, version), data);
     m_mapped.write(pos, line);
     return db::raw::START_ID;
+  }
+
+  void remove(page::position pos) {
+    assert(pos < m_meta.lines);
+    // m_mapped.write(Line_t());
+  }
+
+  sp::Maybe<Table_t> read(page::position pos){
+    assert(pos < m_meta.lines);
   }
 };
 }

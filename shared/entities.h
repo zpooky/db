@@ -166,6 +166,24 @@ Directory Directory::cd(const char (&d)[N]) const {
 }
 
 std::vector<File> files(const Directory &);
-}
+
+} // END namespace
+
+// std::ostream &operator<<(std::ostream &o, const db::DirectoryName &d) {
+//   o << d.name;
+//   return o;
+// }
+// std::ostream &operator<<(std::ostream &o, const db::Directory &d) {
+//   o << d.path;
+//   return o;
+// }
+// std::ostream &operator<<(std::ostream &o, const db::Filename &f) {
+//   o << f.name;
+//   return o;
+// }
+// std::ostream &operator<<(std::ostream &o, const db::File &f) {
+//   o << f.path;
+//   return o;
+// }
 
 #endif // SHARED_ENTITIES_H

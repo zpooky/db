@@ -30,7 +30,6 @@ private:
   using Table_t = typename Meta_t::Table;
   using hash_t = typename Meta_t::hash_algh;
   using page_t = typename Meta_t::Page;
-  using segment_id = db::segment::id;
   using Factory = typename Meta_t::PageFactory;
   using version_t = db::raw::version_t;
   using id_t = db::raw::id;
@@ -38,16 +37,19 @@ private:
 private:
   Factory m_factory;
   sp::List<Segment<Meta_t>> m_segments;
+  std::atomic<db::segment::id> m_id;
 
 public:
-  explicit Segments(Factory &&factory,
+  explicit Segments(db::segment::id id, Factory &&factory,
                     std::vector<Segment<Meta_t>> &&p_segments)
-      : m_factory{std::move(factory)}, m_segments{std::move(p_segments)} {
+      : m_factory{std::move(factory)}, m_segments{std::move(p_segments)},
+        m_id(id) {
     //                db::assert_is_context<Meta_t>();
   }
 
   Segments(Segments<Meta_t> &&o)
-      : m_factory{std::move(o.m_factory)}, m_segments{std::move(o.m_segments)} {
+      : m_factory{std::move(o.m_factory)}, m_segments{std::move(o.m_segments)},
+        m_id(o.m_id.load()) {
   }
 
   ~Segments() {
@@ -76,7 +78,7 @@ public:
       throw std::runtime_error("REALY unexpected exception");
     }
     auto &page = segment->page();
-    return page.create(t.position, data);
+    return page.create(m_id++, t.position, data);
   }
 
 private:

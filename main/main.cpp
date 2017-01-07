@@ -39,13 +39,15 @@ int main(int, char *[]) {
 
   db::Context<hash_t> ctx{root};
   db::Tx<hash_t> tx{ctx};
-  
+
   db::Store<Test1Meta> t1_store{ctx};
   db::Store<Test2Meta> t2_store{ctx};
   {
     auto t = tx.begin();
-    TestTable entry;
-    t1_store.create(t, entry);
+    for (size_t i(0); i < 100000; ++i) {
+      TestTable entry;
+      t1_store.create(t, entry);
+    }
     Test2Table entry2;
     t2_store.create(t, entry2);
   }

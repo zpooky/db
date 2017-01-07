@@ -4,6 +4,7 @@
 #include <array>
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 namespace db {
 
@@ -57,7 +58,7 @@ public:
     return m_size;
   }
   void flip() {
-    m_position = size_t(0);
+    std::swap(m_position, m_size);
   }
 
   void clear() {
@@ -123,9 +124,6 @@ public:
 
   void position(size_t pos) {
     m_position = pos;
-    if (position() > size()) {
-      m_size = pos;
-    }
   }
 };
 
@@ -134,15 +132,21 @@ private:
   uint8_t *m_data;
 
 public:
-  explicit PointerBuffer(uint8_t *ptr, uint64_t p_size)
+  explicit PointerBuffer(size_t p_size) : PointerBuffer(nullptr, p_size) {
+  }
+
+  explicit PointerBuffer(uint8_t *ptr, size_t p_size)
       : BaseBuffer(0, 0, p_size), m_data(ptr) {
   }
 
 protected:
+  void data(uint8_t *data) {
+    m_data = data;
+  }
+
   void i_put(uint8_t datum) {
     // std::cout<<"datum[c"<<m_capacity<<",s"<<m_size<<",p"<<m_position<<"]="<<datum<<"\n";
     m_data[m_position++] = datum;
-    ++m_size;
   }
 
   void i_get(uint8_t *buff, size_t size) {
@@ -180,7 +184,6 @@ public:
 protected:
   void i_put(uint8_t datum) {
     m_data[m_position++] = datum;
-    ++m_size;
   }
 
   void i_get(uint8_t *buff, size_t size) {
@@ -200,10 +203,46 @@ protected:
 public:
 };
 
-class HeapBuffer {
+std::ostream &operator<<(std::ostream &o, const BaseBuffer &b) {
+  o << "BaseBuffer[position(" << b.position() << "), size(" << b.size()
+    << "), capacity(" << b.capacity() << ")]";
+  return o;
+}
+
+class HeapBuffer : public PointerBuffer {
+private:
+  uint8_t *m_data;
+
 public:
-  // HeapBuffer(){
-  // }
+  HeapBuffer() : HeapBuffer(0) {
+  }
+  explicit HeapBuffer(size_t p_capacity)
+      : PointerBuffer(p_capacity), m_data(nullptr) {
+    m_data = p_capacity != 0 ? new uint8_t[p_capacity] : nullptr;
+    data(m_data);
+  }
+
+  HeapBuffer(HeapBuffer &&o) : PointerBuffer(o.m_capacity), m_data(nullptr) {
+    std::swap(m_data, o.m_data);
+    data(m_data);
+  }
+  HeapBuffer(const HeapBuffer&o) : PointerBuffer(o.m_capacity), m_data(nullptr) {
+    m_data = m_capacity != 0 ? new uint8_t[m_capacity] : nullptr;
+    std::memcpy(m_data, o.m_data, m_capacity);
+    data(m_data);
+  }
+
+  HeapBuffer &operator=(HeapBuffer &&o) noexcept {
+    std::swap(m_data, o.m_data);
+    return *this;
+  }
+
+  ~HeapBuffer() {
+    if (m_data) {
+      delete[] m_data;
+      m_data = nullptr;
+    }
+  }
 };
 }
 

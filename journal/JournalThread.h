@@ -28,6 +28,7 @@ public:
       : m_provider{root},
         m_writer(m_provider, vfs::sector::logical::size(root.c_str())),
         m_queue(/*empty_segment_line<hash_t>()*/), m_interrupted(false) {
+    vfs::mkdir(root);
   }
 
   JournalThread(JournalThread<hash_t> &&o)

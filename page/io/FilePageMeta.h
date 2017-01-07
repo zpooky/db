@@ -20,7 +20,7 @@ struct FilePageMeta {
    * TODO allow resize of existing FilePage using extents
    *      this field should not be const
    */
-  const size_t number;
+  const size_t lines;
   const db::table::version version;
 private:
   // #<{(|*
@@ -30,8 +30,8 @@ private:
 
 public:
   FilePageMeta(db::segment::id p_id, const db::File &p_file, db::raw::size p_line_size,
-              size_t p_number, db::table::version p_version)
-      : id{p_id}, file{p_file}, line_size{p_line_size}, number{p_number},
+              size_t p_lines, db::table::version p_version)
+      : id{p_id}, file{p_file}, line_size{p_line_size}, lines{p_lines},
         version{p_version} {
   }
 };

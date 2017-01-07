@@ -9,54 +9,55 @@
 
 namespace sp {
 
-    template<typename T>
-    class Maybe {
-    private:
-        const bool m_present;
-        T m_data;
+template <typename T>
+class Maybe {
+private:
+  const bool m_present;
+  T m_data;
 
-    public:
-        explicit Maybe(const T &p_data) :
-                m_present{true},
-                m_data{p_data} {
-        }
+public:
+  explicit Maybe(const T &p_data) : m_present{true}, m_data{p_data} {
+  }
 
-        explicit Maybe(T &&p_data) :
-                m_present(true),
-                m_data{std::forward<T>(p_data)} {
-        }
+  explicit Maybe(T &&p_data)
+      : m_present(true), m_data{std::forward<T>(p_data)} {
+  }
 
+  explicit Maybe() : m_present{false}, m_data{} {
+  }
 
-        explicit Maybe() :
-                m_present{false},
-                m_data{} {
-        }
+  bool is_present() const {
+    return m_present;
+  }
 
-        bool is_present() const {
-            return m_present;
-        }
+  operator bool() const {
+    return m_present;
+  }
 
-        operator bool() const {
-            return m_present;
-        }
+  const T &get() const & {
+    return m_data;
+  }
 
-        T &get() {
-            return m_data;
-        }
+  T &get() & {
+    return m_data;
+  }
+  T &&get() && {
+    return std::move(m_data);
+  }
 
-        const T &get_or(const T &def) const {
-            if (m_present) {
-                return m_data;
-            }
-            return def;
-        }
+  const T &get_or(const T &def) const {
+    if (m_present) {
+      return m_data;
+    }
+    return def;
+  }
 
-        T &get_or(T &def) {
-            if (m_present) {
-                return m_data;
-            }
-            return def;
-        }
-    };
+  T &get_or(T &def) {
+    if (m_present) {
+      return m_data;
+    }
+    return def;
+  }
+};
 }
-#endif //PROJECT_MAYBE_H
+#endif // PROJECT_MAYBE_H

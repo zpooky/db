@@ -44,7 +44,7 @@ using size = uint64_t;
 
 using id = uint64_t;
 constexpr id START_ID(1);
-constexpr id EMPTY_LINE(0ul);
+constexpr id EMPTY(0ul);
 
 using version_t = uint64_t;
 constexpr version_t START_VERSION(1);

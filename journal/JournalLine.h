@@ -74,7 +74,7 @@ public:
               const name_type &p_table, Type p_type, EntryType p_entry_type,
               db::HeapBuffer &&b)
       : hash{p_hash}, table{p_table}, id{p_id}, type{p_type},
-        entry_type{p_entry_type}, buffer{b} {
+        entry_type{p_entry_type}, buffer{std::move(b)} {
   }
   JournalLine()
       : hash{0}, table{0}, id{journal::NO_ID}, type{Type::INTERNAL},
@@ -84,10 +84,21 @@ public:
       : hash{o.hash}, table{o.table}, id{o.id}, type{o.type},
         entry_type{o.entry_type}, buffer{o.buffer} {
   }
-  JournalLine &operator=(JournalLine o) {
+
+  JournalLine &operator=(const JournalLine &o) {
+    if (this != &o) {
+      return assign(o);
+    }
+    return *this;
+  }
+
+private:
+  JournalLine &assign(JournalLine o) {
     swap(o);
     return *this;
   }
+
+public:
   void swap(JournalLine<hash_t> &o) {
     std::swap(hash, o.hash);
     std::swap(table, o.table);
@@ -112,10 +123,9 @@ segment_line(journal::id p_id, const db::table::name::type &p_table,
 }
 namespace line {
 template <typename hash_t>
-JournalLine<hash_t> segment_line(journal::id p_id,
-                                 Type p_type) {
+JournalLine<hash_t> segment_line(journal::id p_id, Type p_type) {
   return segment_line<hash_t>(p_id, {0}, p_type, EntryType::NOP,
-                              db::HeapBuffer());
+                              db::HeapBuffer(0));
 }
 
 template <typename hash_t>

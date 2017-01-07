@@ -60,7 +60,7 @@ public:
   const data_t data2;
   const id_t id;
 
-  Test2Table() : data{"sPooKy"}, id{1}, data2{"WaSdAx"} {
+  Test2Table() : data{"sPooKy"}, data2{"WaSdAx"}, id{1} {
   }
 
   Test2Table(id_t p_id, data_t p_data, data_t p_data2)

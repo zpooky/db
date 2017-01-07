@@ -53,12 +53,10 @@ private:
   }
 
 public:
-  template <size_t capacity>
-  void read(db::Buffer<capacity> &buffer);
+  void read(db::BaseBuffer &buffer);
 };
 
-template <size_t capacity>
-void FileReader::read(db::Buffer<capacity> &buffer) {
+void FileReader::read(db::BaseBuffer &buffer) {
   size_t length(buffer.capacity() - buffer.position());
   if (length > size_t(0)) {
     ssize_t read = ::read(m_fd, buffer.writable_data(), length);

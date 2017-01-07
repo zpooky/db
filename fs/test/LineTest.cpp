@@ -45,7 +45,7 @@ TEST(LineTest, test) {
   db::raw::id id(~0);
   db::raw::version_t v(1294394994);
   Table_t t(data_t{"wasd"}, 1337ul);
-  Line_t line(id, v, t);
+  Line_t line(db::LineMeta(id, v), t);
   Buffer_t b;
 
   line.write<db::LittleEndian, Buffer_t>(b);
@@ -59,8 +59,8 @@ TEST(LineTest, test) {
   ASSERT_EQ(b.position(), size_t(0));
 
   Line_t read = line.read<db::LittleEndian, Buffer_t>(b);
-  ASSERT_EQ(read.id, line.id);
-  ASSERT_EQ(read.version, line.version);
+  ASSERT_EQ(read.meta.id, line.meta.id);
+  ASSERT_EQ(read.meta.version, line.meta.version);
   auto readData = read.data;
   ASSERT_EQ(readData.data, t.data);
   ASSERT_EQ(readData.id, t.id);

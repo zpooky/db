@@ -4,32 +4,55 @@
 #include "../shared/shared.h"
 
 namespace db {
+struct LineMeta {
+  const db::raw::id id;
+  const db::raw::version_t version;
 
+  explicit LineMeta(db::raw::id p_id, db::raw::version_t p_v)
+      : id(p_id), version(p_v) {
+  }
+
+  template <typename Endianess, typename Buffer>
+  void write(Buffer &b) const {
+    Endianess::put(b, id);
+    Endianess::put(b, version);
+  }
+
+  template <typename Endianess, typename Buffer>
+  static LineMeta read(Buffer &b) {
+    auto id = Endianess::template read<Buffer, db::raw::id>(b);
+    auto v = Endianess::template read<Buffer, db::raw::version_t>(b);
+    return LineMeta(id, v);
+  }
+
+  operator bool() const {
+    return id != db::raw::EMPTY;
+  }
+};
 // TODO maybe do not copy Table_t data
 template <typename Table_t, typename hash_t>
 class Line {
 public:
-  const db::raw::id id;
-  const db::raw::version_t version;
+  const LineMeta meta;
   const Table_t data;
 
-  explicit Line(db::raw::id p_id, db::raw::version_t p_v, const Table_t &table)
-      : id(p_id), version(p_v), data(table) {
+  explicit Line(const LineMeta &m, const Table_t &table)
+      : meta{m}, data(table) {
   }
 
-  explicit Line(db::raw::id p_id, db::raw::version_t p_v, const Table_t &&table)
-      : id(p_id), version(p_v), data(std::move(table)) {
+  explicit Line(const LineMeta &m, Table_t &&table)
+      : meta{m}, data(std::move(table)) {
   }
 
-  Line(Line<Table_t, hash_t> &&o) : id(o.id), version(o.version), data(o.data) {
+  Line(Line<Table_t, hash_t> &&o)
+      : meta{std::move(o.meta)}, data(std::move(o.data)) {
   }
 
   Line(Line<Table_t, hash_t> &) = delete;
 
   template <typename Endianess, typename Buffer>
-  void write(Buffer &b) const noexcept {
-    Endianess::put(b, id);
-    Endianess::put(b, version);
+  void write(Buffer &b) const {
+    meta.write<Endianess, Buffer>(b);
     data.write<Endianess, Buffer>(b);
   }
 
@@ -41,10 +64,9 @@ public:
   // TODO endianess should be base on the file no determined in compile time
   template <typename Endianess, typename Buffer>
   static Line<Table_t, hash_t> read(Buffer &b) {
-    auto id = Endianess::template read<Buffer, db::raw::id>(b);
-    auto v = Endianess::template read<Buffer, db::raw::version_t>(b);
+    auto meta = db::LineMeta::read<Endianess, Buffer>(b);
     auto data = Table_t::template read<Endianess, Buffer>(b);
-    return Line<Table_t, hash_t>(id, v, data);
+    return Line<Table_t, hash_t>(meta, data);
   }
 
 private:
