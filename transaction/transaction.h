@@ -1,15 +1,25 @@
-//
-// Created by spooky on 2016-03-06.
-//
+#ifndef DB_TX_TRANSACTION_H
+#define DB_TX_TRANSACTION_H
 
-#ifndef PROJECT_TRANSACTION_H
-#define PROJECT_TRANSACTION_H
+#include "Settings.h"
+#include "../shared/shared.h"
 
-namespace db {
-    namespace transaction {
-        enum class State : unsigned char {
-            PENDING, PREPARED, COMMIT, ROLLBACK
-        };
-    }
+namespace tx {
+
+class Transaction {
+private:
+  // journal::Journals<hash_t> &journal;
+public:
+  const tx::Settings settings;
+  const db::transaction::id tid;
+  const journal::id jid;
+  explicit Transaction(journal::id id, tx::Settings &&s)
+      : settings(s), tid(0), jid(id) {
+  }
+  // Transaction(const Transaction&) = delete;
+  ~Transaction() {
+    // journal.commit(jid);
+  }
+};
 }
-#endif //PROJECT_TRANSACTION_H
+#endif // PROJECT_TRANSACTION_H

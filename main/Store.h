@@ -5,6 +5,7 @@
 #include "PageFilesParser.h"
 #include "../journal/Journals.h"
 #include "../segment/Context.h"
+#include "../transaction/transaction.h"
 
 namespace db {
 
@@ -37,13 +38,13 @@ public:
   Store(const Store<Meta_t> &) = delete;
 
 public:
-  db::raw::id create(const Transaction &t, const Table &data) {
+  db::raw::id create(const tx::Transaction &t, const Table &data) {
     auto res = m_segments->reserve();
     m_journals.template create<Meta_t>(t.jid, res, data);
     return m_segments->create(res, data);
   }
 
-  Table read(const Transaction &, db::raw::id);
+  Table read(const tx::Transaction &, db::raw::id);
   /**
    * Optimistic locking
    */
@@ -56,7 +57,7 @@ public:
   // db::raw::version_t update(const db::Transaction &,
   // db::transaction::version_t, const Table &);
 
-  void del(const db::Transaction &);
+  void del(const tx::Transaction &);
   /**
    * Optimistic locking
    */

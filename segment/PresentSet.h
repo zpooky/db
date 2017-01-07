@@ -5,16 +5,14 @@
 #ifndef PROJECT_PRESENTSET_H
 #define PROJECT_PRESENTSET_H
 
-#include "../collection/Bitset.h"
-#include "../fs/Line.h"
 #include <bitset>
 
 namespace db {
 
-template <typename T_Meta>
+template <size_t size>
 class PresentSet {
 private:
-  using Bitset_t = std::bitset<T_Meta::extent_lines()>;
+  using Bitset_t = std::bitset<size>;
   Bitset_t m_bitset;
 
 public:
@@ -32,6 +30,9 @@ public:
   const Bitset_t &get_bitset() const {
     return m_bitset;
   }
+  // Bitset_t &&get_bitset() && {
+  //   return std::move(m_bitset);
+  // }
 
 private:
 };

@@ -14,6 +14,8 @@ class PageFileInitJournal {
 private:
   using Table_t = typename Meta_t::Table;
   using hash_t = typename Meta_t::hash_algh;
+  using Extent_t = db::Extent<Meta_t>;
+  using Extents_t = db::Extents<Meta_t>;
 
 private:
   const db::Directory &m_root;
@@ -37,9 +39,14 @@ public:
 
     m_journal.template create<Meta_t>(jid, sid);
 
-    db::PresentSet<Meta_t> p{};
     FilePageMeta meta = init.create(sid);
-    db::Segment<Meta_t> res{FilePage<Meta_t>(std::move(meta)), std::move(p)};
+
+    using std::move;
+    std::vector<Extent_t> xs{};
+    xs.emplace_back(sid);
+    Extents_t extents(move(xs));
+
+    db::Segment<Meta_t> res{FilePage<Meta_t>(move(meta)), move(extents)};
 
     m_journal.template commit(jid);
     return res;

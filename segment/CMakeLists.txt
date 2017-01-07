@@ -30,7 +30,6 @@ else ()
 
     set(SOURCE_FILES SegmentReservations.h
                      Segment.cpp
-                     Reservations.h
                      Segments.h
                      PresentSet.h
                      ReservationSet.cpp

@@ -1,10 +1,12 @@
 #include <iostream>
 
 #include "../segment/Context.h"
+#include "../shared/hash.h"
+#include "../transaction/Settings.h"
+#include "../transaction/transaction.h"
 #include "Store.h"
 #include "TableMeta.h"
 #include "TestTable.h"
-#include "../shared/hash.h"
 
 using namespace journal;
 using namespace db::fs;
@@ -20,9 +22,12 @@ private:
 public:
   explicit Tx(Context<hash_t> &ctx) : m_jorunal(ctx.journal()) {
   }
-  Transaction begin() {
+  tx::Transaction begin() {
+    return begin(tx::Settings());
+  }
+  tx::Transaction begin(tx::Settings&& s) {
     auto id = m_jorunal.begin();
-    return Transaction{id};
+    return tx::Transaction{id, std::move(s)};
   }
 };
 }

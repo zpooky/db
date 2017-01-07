@@ -1,40 +1,99 @@
 #ifndef PROJECT_SEGMENT_BUILDER_H
 #define PROJECT_SEGMENT_BUILDER_H
 
-#include "../fs/Line.h"
 #include "../page/FilePage.h"
 #include "../page/io/FilePageMeta.h"
 #include "../segment/Segment.h"
-#include "../shared/entities.h"
-#include <algorithm>
 #include <bitset>
+#include <deque>
+#include <vector>
 
 namespace page {
+template <size_t lines>
+class ExtentBuilder {
+private:
+  std::bitset<lines> m_present;
+  size_t m_current;
+
+public:
+  explicit ExtentBuilder() : m_present(0), m_current(0) {
+  }
+
+  ExtentBuilder(ExtentBuilder<lines> &&o)
+      : m_present{std::move(o.m_present)}, m_current{o.m_current} {
+  }
+
+  ExtentBuilder(const ExtentBuilder<lines> &o)
+      : m_present{o.m_present}, m_current{o.m_current} {
+  }
+
+  void next(bool present) {
+    m_present[m_current++] = present;
+  }
+
+  bool is_full() const {
+    return m_current == lines;
+  }
+  const std::bitset<lines> &present() const & {
+    return m_present;
+  }
+  std::bitset<lines> &present() & {
+    return m_present;
+  }
+  std::bitset<lines> &&present() && {
+    return std::move(m_present);
+  }
+};
+
+template <size_t lines>
+class ExtentsBuilder {
+private:
+  using ExtentBuilder_t = ExtentBuilder<lines>;
+
+private:
+  std::deque<ExtentBuilder_t> m_extents;
+  ExtentBuilder_t *m_current;
+
+public:
+  ExtentsBuilder() : m_extents(), m_current(nullptr) {
+  }
+
+private:
+  bool is_full() const {
+    return m_current == nullptr || m_current->is_full();
+  }
+
+public:
+  void next(bool present) {
+    if (is_full()) {
+      m_extents.emplace_back();
+      m_current = &m_extents.back();
+    }
+    m_current->next(present);
+  }
+
+  std::deque<ExtentBuilder_t> &builders() {
+    return m_extents;
+  }
+};
 
 template <typename Meta_t>
 class SegmentBuilder {
 private:
-  using Table_t = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
-  using Line_t = db::Line<Table_t, hash_t>;
   static constexpr size_t lines = Meta_t::extent_lines();
 
 private:
   const FilePageMeta m_segment;
-
-  std::bitset<lines> m_present;
-  db::segment::id m_greatest;
-  size_t m_current;
+  ExtentsBuilder<lines> m_extents;
 
 public:
   explicit SegmentBuilder(const FilePageMeta &segment)
-      : m_segment(segment), m_present(), m_greatest(db::segment::START_ID), m_current(0) {
+      : m_segment(segment), m_extents() {
   }
 
 public:
   void operator()(const db::LineMeta &line) {
-    m_present[m_current++] = bool(line);
-    m_greatest = std::max(line.id, m_greatest);
+    m_extents.next(bool(line));
   }
 
   db::Segment<Meta_t> build() {
@@ -43,10 +102,18 @@ public:
     // more lines present in file than in lines() constexpr-
     // should work with present set and reservation set
 
+    // TODO verify FIFO order of extents
     FilePage<Meta_t> page(m_segment);
 
-    db::PresentSet<Meta_t> ps{m_present};
-    return db::Segment<Meta_t>{std::move(page), std::move(ps)};
+    using Extent_t = db::Extent<Meta_t>;
+    auto builders = m_extents.builders();
+    std::vector<Extent_t> extents;
+    for (auto &b : builders) {
+      db::PresentSet<lines> ps(b.present());
+      extents.emplace_back(m_segment.id, std::move(ps));
+    }
+
+    return db::Segment<Meta_t>{std::move(page), db::Extents<Meta_t>(extents)};
   }
 };
 }

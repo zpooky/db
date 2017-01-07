@@ -6,6 +6,7 @@
 #define _SP_LIST_H
 
 #include <atomic>
+#include <type_traits>
 #include <utility>
 
 namespace sp {
@@ -50,8 +51,10 @@ public:
   List() : m_head(nullptr), m_cnt(0) {
   }
   template <typename Collection>
-  explicit List(Collection &&c) : List() {
-    for (auto &e : c) {
+  explicit List(Collection &&xs) : List() {
+    using Entry_t = typename Collection::value_type;
+    static_assert(std::is_same<Entry_t, T>::value, "");
+    for (auto &e : xs) {
       push_front(std::move(e));
     }
   }

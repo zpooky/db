@@ -1,13 +1,16 @@
 #ifndef _DB_PAGE_FILES_PARSER
 #define _DB_PAGE_FILES_PARSER
 
+#include "../fs/Line.h"
 #include "../page/FilePage.h"
+#include "../page/MaxIdReplay.h"
 #include "../page/format/ReplayPageFile.h"
 #include "../segment/Context.h"
 #include "../segment/Segment.h"
 #include "../segment/Segments.h"
 #include "../shared/entities.h"
 #include "SegmentBuilder.h"
+#include <functional>
 #include <vector>
 
 namespace page {
@@ -53,21 +56,25 @@ private:
   }
 
   FilePageMeta meta(const db::File &f) const {
-    //TODO
+    // TODO
     auto id = db::Segment_name::id(f.filename());
     db::table::version v(1);
     return FilePageMeta(id, f, Line_t::size(), Meta_t::extent_lines(), v);
   }
 
-  auto init(const std::vector<db::File> &files) const {
+  auto convert(const std::vector<db::File> &files,
+               MaxIdReplay &rawIdReplay) const {
     std::vector<db::Segment<Meta_t>> result;
     // TODO preallocate vector
+
     for (const auto &file : files) {
       auto seg_meta = meta(file);
       ReplayPageFile<Meta_t> r(seg_meta);
       // TODO create checksum verify *Builder*
       SegmentBuilder<Meta_t> segment(seg_meta);
-      std::vector<SegmentBuilder<Meta_t>> xs{segment};
+
+      using Function_t = std::function<void(const db::LineMeta &)>;
+      std::vector<Function_t> xs{segment, rawIdReplay};
       r.replay(xs);
 
       result.push_back(segment.build());
@@ -77,14 +84,19 @@ private:
 
 public:
   db::Segments<Meta_t> *operator()() {
-    auto segments = segment_files();
-    auto max = max_id(segments);
+    auto files = segment_files();
 
+    auto max = max_id(files);
     db::segment::id next_id(max + 1);
+
     PageFactory factory(m_context, next_id, m_root);
 
-    using Segment_t = typename db::Segments<Meta_t>;
-    return new Segment_t(next_id, std::move(factory), init(segments));
+    MaxIdReplay rawIdReplay;
+    auto segments = convert(files, rawIdReplay);
+    auto raw_id = rawIdReplay.next();
+
+    using Segments_t = typename db::Segments<Meta_t>;
+    return new Segments_t(raw_id, std::move(factory), std::move(segments));
   }
 };
 }

@@ -6,7 +6,6 @@
 #include "../shared/shared.h"
 #include "../shared/vfs.h"
 #include "Context.h"
-#include "Reservations.h"
 #include "Segment.h"
 #include <algorithm>
 #include <atomic>
@@ -37,10 +36,10 @@ private:
 private:
   Factory m_factory;
   sp::List<Segment<Meta_t>> m_segments;
-  std::atomic<db::segment::id> m_id;
+  std::atomic<db::raw::id> m_id;
 
 public:
-  explicit Segments(db::segment::id id, Factory &&factory,
+  explicit Segments(db::raw::id id, Factory &&factory,
                     std::vector<Segment<Meta_t>> &&p_segments)
       : m_factory{std::move(factory)}, m_segments{std::move(p_segments)},
         m_id(id) {
@@ -82,9 +81,9 @@ public:
   }
 
 private:
-  Reservations<Meta_t> &free_page() {
+  auto &free_page() {
     auto p = [](const Segment<Meta_t> &s) -> bool {
-      auto &r = s.reservations();
+      const auto &r = s.reservations();
       return r.has_free();
     };
 

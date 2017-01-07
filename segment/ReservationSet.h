@@ -5,6 +5,7 @@
 #ifndef PROJECT_RESERVATIONSET_H
 #define PROJECT_RESERVATIONSET_H
 
+#include "../collection/Bitset.h"
 #include "../shared/Maybe.h"
 #include "../shared/shared.h"
 #include "PresentSet.h"
@@ -19,9 +20,8 @@ private:
   std::atomic<size_t> m_cnt;
 
 public:
-  template <typename t_Meta>
-  explicit ReservationSet(const PresentSet<t_Meta> &p)
-      : m_bitset{p.get_bitset()}, m_cnt{m_bitset.find_first(false)} {
+  explicit ReservationSet(const std::bitset<T_Size> &p)
+      : m_bitset{p}, m_cnt{m_bitset.find_first(false)} {
   }
 
   ReservationSet(const ReservationSet &) = delete;
