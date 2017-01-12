@@ -16,7 +16,10 @@ namespace db {
 template <size_t T_Size>
 class ReservationSet {
 private:
-  sp::Bitset<T_Size> m_bitset;
+  using Return_t = sp::Maybe<page::position>;
+
+private:
+  sp::Bitset<T_Size, uint64_t> m_bitset;
   std::atomic<size_t> m_cnt;
 
 public:
@@ -31,18 +34,24 @@ public:
   }
 
   sp::Maybe<page::position> reserve() {
-    using Return_t = sp::Maybe<page::position>;
-    size_t reserved = m_bitset.swap_first(m_cnt, true);
-    m_cnt.store(reserved);
-    if (reserved != m_bitset.npos) {
-      return Return_t{reserved};
+    auto start = m_cnt.load();
+    if (start != m_bitset.npos) {
+      size_t reserved = m_bitset.swap_first(start, true);
+      if (reserved != m_bitset.npos) {
+        m_cnt.store(reserved);
+        return Return_t{reserved};
+      }
     }
     return Return_t{};
   }
 
   bool has_free() const {
-    bool result = !m_bitset.all(m_cnt.load(), true);
-    return result;
+    auto start = m_cnt.load();
+    if (start != m_bitset.npos) {
+      bool result = !m_bitset.all(start, true);
+      return result;
+    }
+    return false;
   }
 };
 }

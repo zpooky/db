@@ -13,7 +13,6 @@
 #include <type_traits>
 
 namespace sp {
-using std::atomic;
 
 template <size_t T_Size, typename Byte_t = uint8_t>
 class Bitset {
@@ -21,7 +20,7 @@ public:
   static constexpr size_t npos = T_Size;
 
 private:
-  using Entry_t = atomic<Byte_t>;
+  using Entry_t = std::atomic<Byte_t>;
   static constexpr size_t bits = sizeof(Byte_t) * 8;
   static constexpr size_t T_Size_based_on_bits =
       size_t(std::ceil(double(T_Size) / bits));
@@ -83,8 +82,9 @@ private:
     using ttttt = unsigned long long;
 
     void init_with(Byte_t def) {
-      for (size_t idx = 0; idx < T_Size_based_on_bits; ++idx) {
-        word_for(idx).store(def);
+      for (size_t idx(0); idx < T_Size_based_on_bits; ++idx) {
+        auto &word = word_for(idx);
+        word.store(def);
       }
     }
 
@@ -180,7 +180,8 @@ private:
       Byte_t mask = test & mask_right(wordIdx);
 
       for (; idx < T_Size_based_on_bits; ++idx) {
-        Byte_t current = word_for(idx).load();
+        auto &word = word_for(idx);
+        Byte_t current = word.load();
 
         current = current & mask_right(wordIdx);
 
@@ -205,7 +206,8 @@ private:
       const Byte_t mask = find ? Byte_t(0) : ~Byte_t(0);
 
       for (; byteIdx < T_Size_based_on_bits; ++byteIdx) {
-        const Byte_t word = word_for(byteIdx).load();
+        auto &wrd = word_for(byteIdx);
+        const Byte_t &word = wrd.load();
 
         if (mask != word) {
           for (size_t bit = wordIdx; bit < bits; ++bit) {
@@ -220,7 +222,7 @@ private:
         }
         wordIdx = Byte_t(0);
       }
-      return size_t(T_Size - 1);
+      return npos;
     }
 
     size_t swap_first(size_t bitIdx, bool set) {
@@ -268,10 +270,10 @@ private:
   }
 
 public:
-  Bitset() : Bitset{new Entry} {
+  explicit Bitset(const std::bitset<T_Size> &init) : Bitset{new Entry(init)} {
   }
 
-  explicit Bitset(const std::bitset<T_Size> &init) : Bitset{new Entry(init)} {
+  Bitset() : Bitset{new Entry} {
   }
 
   /**
@@ -288,7 +290,7 @@ public:
   }
 
   ~Bitset() {
-    if (m_entry != nullptr) {
+    if (m_entry) {
       delete m_entry;
       m_entry = nullptr;
     }

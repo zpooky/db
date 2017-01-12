@@ -8,8 +8,12 @@ if (TARGET collection_lib_test)
 
 else ()
     # GTest
-    add_subdirectory(googletest/googletest)
-    include_directories(${gtest_SOURCE_DIR}/include)
+#    if(TARGET gtest)
+#        message("gtest is allready defined")
+#    else()
+        add_subdirectory(googletest/googletest)
+        include_directories(${gtest_SOURCE_DIR}/include)
+#    endif()
     #
     include_directories(${COLLECTION_LIB_INCLUDE_DIR})
     link_directories(${COLLECTION_LIB_INCLUDE_DIR})

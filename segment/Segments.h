@@ -31,7 +31,6 @@ private:
   using page_t = typename Meta_t::Page;
   using Factory = typename Meta_t::PageFactory;
   using version_t = db::raw::version_t;
-  using id_t = db::raw::id;
 
 private:
   Factory m_factory;
@@ -66,8 +65,8 @@ public:
 
   id_t create(const Reservation<Table_t> &t, const Table_t &data) {
     auto *segment = m_segments.search([&](const auto &seg) {
-      auto eq = seg.id() == t.segment;
-      return eq;
+      //
+      return seg.id() == t.segment;
     });
     if (!segment) {
       /**
@@ -87,7 +86,10 @@ private:
       return r.has_free();
     };
 
-    auto f = [&]() { return this->m_factory(); };
+    auto f = [&]() {
+      //
+      return this->m_factory();
+    };
     auto &seg = m_segments.find(p, f);
     return seg.reservations();
   }

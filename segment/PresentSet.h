@@ -16,7 +16,7 @@ private:
   Bitset_t m_bitset;
 
 public:
-  PresentSet() : m_bitset() {
+  PresentSet() : m_bitset{} {
   }
 
   explicit PresentSet(const Bitset_t &init) : m_bitset(init) {

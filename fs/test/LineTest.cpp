@@ -49,7 +49,6 @@ TEST(LineTest, test) {
   Buffer_t b;
 
   line.write<db::LittleEndian, Buffer_t>(b);
-  ASSERT_EQ(b.size(), Line_t::size());
   ASSERT_EQ(b.capacity(), Line_t::size());
   ASSERT_EQ(b.position(), Line_t::size());
 

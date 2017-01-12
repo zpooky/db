@@ -6,6 +6,7 @@
 #define _SP_LIST_H
 
 #include <atomic>
+#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -19,25 +20,48 @@ private:
 
     explicit Node(T &&p_value) : value(std::move(p_value)), next{nullptr} {
     }
+  };
+  class ForwardIterator : public std::iterator<std::forward_iterator_tag, T,
+                                               std::ptrdiff_t, T *, T &> {
+  private:
+    Node *m_itr;
 
-    Node *operator++() {
-      return next;
+  public:
+    explicit ForwardIterator(Node *it) : m_itr(it) {
     }
 
-    T &operator*() {
-      return value;
+    ForwardIterator() : m_itr(nullptr) {
+    }
+
+    ForwardIterator &operator++() {
+      m_itr = m_itr->next;
+      return *this;
+    }
+
+    ForwardIterator operator++(int) {
+      ForwardIterator it(*this);
+      m_itr = m_itr->next;
+      return it;
+    }
+
+    bool operator==(const ForwardIterator &o) const {
+      return m_itr == o.m_itr;
+    }
+
+    bool operator!=(const ForwardIterator &o) const {
+      return !operator==(o);
     }
 
     const T &operator*() const {
-      return value;
+      return m_itr->value;
     }
 
-    T *operator->() {
-      return &value;
+    T &operator*() {
+      return m_itr->value;
     }
 
-    const T *operator->() const {
-      return &value;
+    T *operator->() const {
+      return &m_itr->value;
     }
   };
 
@@ -46,7 +70,7 @@ private:
 
 public:
   using element_type = T;
-  using iterator = Node *;
+  using iterator = ForwardIterator;
 
   List() : m_head(nullptr), m_cnt(0) {
   }
@@ -75,25 +99,25 @@ public:
   }
 
   iterator begin() {
-    return m_head;
+    return iterator{m_head};
   }
 
   iterator begin() const {
-    return m_head;
+    return iterator{m_head};
   }
 
   iterator end() {
-    return nullptr;
+    return iterator{};
   }
 
   iterator end() const {
-    return nullptr;
+    return iterator{};
   }
 
 private:
   Node *push_front_i(T &&v) {
     auto p = new Node(std::move(v));
-    p->next = m_head;
+    p->next = m_head.load();
     while (!m_head.compare_exchange_weak(p->next, p))
       ;
     m_cnt++;

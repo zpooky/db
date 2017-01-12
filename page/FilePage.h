@@ -1,10 +1,10 @@
 #ifndef PROJECT_FILE_PAGE_H
 #define PROJECT_FILE_PAGE_H
 
-#include "../shared/Maybe.h"
 #include "../fs/Line.h"
 #include "../fs/shared.h"
 #include "../shared/LittleEndian.h"
+#include "../shared/Maybe.h"
 #include "../shared/shared.h"
 #include "io/FilePageMeta.h"
 #include <algorithm>
@@ -29,6 +29,7 @@ public:
   MMAP_File(MMAP_File &&o) : fd{-1} {
     std::swap(fd, o.fd);
   }
+  MMAP_File(const MMAP_File &&) = delete;
 
   explicit MMAP_File(const db::File &file) : MMAP_File() {
     int flags = O_RDWR;
@@ -36,8 +37,9 @@ public:
     fd = ::open(file.c_str(), flags, permssion);
     error("MMAP_File", fd);
   }
+
+  MMAP_File &operator=(MMAP_File &) = delete;
   MMAP_File &operator=(MMAP_File &&o) {
-    release();
     std::swap(fd, o.fd);
     return *this;
   }
@@ -69,8 +71,9 @@ public:
     std::swap(buffer, o.buffer);
     std::swap(m_size, o.m_size);
   }
+
+  MMAP_Buffer &operator=(MMAP_Buffer &) = delete;
   MMAP_Buffer &operator=(MMAP_Buffer &&o) {
-    release();
     std::swap(buffer, o.buffer);
     std::swap(m_size, o.m_size);
     return *this;
@@ -120,10 +123,14 @@ public:
     // TODO headers and stuff
   }
 
-  MMapFilePage(MMapFilePage &&o) : m_file(), m_buffer() {
-    std::swap(m_file, o.m_file);
-    std::swap(m_buffer, o.m_buffer);
+  MMapFilePage(MMapFilePage &&o)
+      : m_file(std::move(o.m_file)), m_buffer(std::move(o.m_buffer)) {
   }
+
+  MMapFilePage(const MMapFilePage &&) = delete;
+
+  MMapFilePage &operator=(const MMapFilePage &) = delete;
+  MMapFilePage &operator=(const MMapFilePage &&) = delete;
 
   void write(page::position p, const db::Line<Table_t, hash_t> &l) {
     // TODO header
@@ -153,8 +160,7 @@ private:
   MMapFilePage<Meta_t> m_mapped;
 
 public:
-  explicit FilePage(const FilePageMeta &meta)
-      : m_meta{meta}, m_mapped{m_meta} {
+  explicit FilePage(const FilePageMeta &meta) : m_meta{meta}, m_mapped{m_meta} {
   }
 
   FilePage(const FilePage &) = delete;
@@ -162,6 +168,9 @@ public:
   FilePage(FilePage &&o)
       : m_meta{std::move(o.m_meta)}, m_mapped{std::move(o.m_mapped)} {
   }
+
+  FilePage &operator=(const FilePage &) = delete;
+  FilePage &operator=(const FilePage &&) = delete;
 
 public:
   auto id() const {
@@ -182,7 +191,7 @@ public:
     // m_mapped.write(Line_t());
   }
 
-  sp::Maybe<Table_t> read(page::position pos){
+  sp::Maybe<Table_t> read(page::position pos) {
     assert(pos < m_meta.lines);
   }
 };

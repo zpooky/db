@@ -12,9 +12,9 @@ private:
   using Table_t = typename Meta_t::Table;
   using Page_t = typename Meta_t::Page;
   using version_t = db::raw::version_t;
+  using Extents_t = Extents<Meta_t>;
 
 private:
-  using Extents_t = Extents<Meta_t>;
   Extents_t m_extents;
   Page_t m_page;
   // State
@@ -29,6 +29,9 @@ public:
   }
 
   Segment(const Segment &) = delete;
+
+  Segment& operator=(const Segment&) = delete;
+  Segment& operator=(const Segment&&) = delete;
 
   const auto &reservations() const {
     return m_extents;

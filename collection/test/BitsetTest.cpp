@@ -2,8 +2,8 @@
 // Created by spooky on 2016-07-08.
 //
 
-#include "gtest/gtest.h"
 #include "../Bitset.h"
+#include "gtest/gtest.h"
 #include <iostream>
 #include <unordered_set>
 
@@ -219,7 +219,7 @@ void test_find(bool v) {
     Bitset<bits, T> bb{!v};
     for (size_t i = 0; i < bits; ++i) {
 //        cout << "(" << v << ")" << i << endl;
-        ASSERT_EQ(bb.size() - 1, bb.find_first(i, v));
+        ASSERT_EQ(bits, bb.find_first(i, v));
         ASSERT_TRUE(bb.set(i, v));
         ASSERT_EQ(v, bb.test(i));
         ASSERT_EQ(i, bb.find_first(i, v));

@@ -23,7 +23,7 @@ public:
     // TODO think of something better
     // algorithm instead of loops
     for (auto &e : m_extents) {
-      auto maybe = e->reserve();
+      auto maybe = e.reserve();
       if (maybe) {
         return maybe;
       }
@@ -35,7 +35,7 @@ public:
     // TODO think of something better
     // algorithm instead of loops
     for (const auto &e : m_extents) {
-      if (e->has_free()) {
+      if (e.has_free()) {
         return true;
       }
     }
