@@ -49,7 +49,7 @@ int main(int, char *[]) {
   db::Store<Test2Meta> t2_store{ctx};
   {
     auto t = tx.begin();
-    for (size_t i(0); i < Test1Meta::extent_lines()+1; ++i) {
+    for (size_t i(0); i < Test1Meta::extent_lines()*4; ++i) {
       TestTable entry;
       t1_store.create(t, entry);
     }

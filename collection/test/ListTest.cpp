@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
-using sp::List;
+using sp::con::Stack;
 using std::thread;
 using std::vector;
 using std::future;
@@ -20,12 +20,12 @@ using std::endl;
 using std::unordered_set;
 
 template <typename T>
-T &find(List<T> &l, const T find, T gen) {
+T &find(Stack<T> &l, const T find, T gen) {
   return l.find([&](const auto &l) { return find == l; }, [&] { return gen; });
 }
 
 TEST(List, foreach) {
-  List<long> l;
+  Stack<long> l;
   for (auto &i : l) {
     ASSERT_EQ(i, i);
   }
@@ -39,42 +39,42 @@ TEST(List, foreach) {
 }
 
 TEST(List, destruct_empty) {
-  List<long> l;
+  Stack<long> l;
 }
 
 TEST(List, push_front) {
-  List<long> l;
+  Stack<long> l;
   l.push_front(1l);
 }
 
 TEST(List, find_null_true) {
-  List<long> l;
+  Stack<long> l;
   long v = find(l, 1l, 1l);
   ASSERT_EQ(1l, v);
 }
 
 TEST(List, find_null_false) {
-  List<long> l;
+  Stack<long> l;
   long v = find(l, 3l, 1l);
   ASSERT_EQ(1l, v);
 }
 
 TEST(List, find_single_true) {
-  List<long> l;
+  Stack<long> l;
   l.push_front(2l);
   long v = find(l, 2l, 1l);
   ASSERT_EQ(2l, v);
 }
 
 TEST(List, find_single_false) {
-  List<long> l;
+  Stack<long> l;
   l.push_front(2l);
   long v = find(l, 3l, 1l);
   ASSERT_EQ(1l, v);
 }
 
 TEST(List, find_mutltiple) {
-  List<size_t> l;
+  Stack<size_t> l;
   size_t i = 0;
   while (i++ < 100) {
     {
@@ -89,7 +89,7 @@ TEST(List, find_mutltiple) {
 }
 
 TEST(List, push_front_find) {
-  List<size_t> l;
+  Stack<size_t> l;
   size_t i = 0;
   size_t is = 100;
   while (i++ < is) {
@@ -132,7 +132,7 @@ TEST(List, threaded_find) {
   using Vec_t = unordered_set<size_t>;
   using Future_t = future<Vec_t>;
 
-  List<size_t> list;
+  Stack<size_t> list;
   vector<Future_t> v;
   std::atomic<size_t> cnt(0);
   for (size_t i = 0; i < 4; ++i) {

@@ -2,40 +2,77 @@
 #define _DB_COLLECTION_REF_COUNTER
 
 #include <atomic>
+#include <cstdint>
 
-namespace {
-struct Counter;
-struct Counter {
-
-  std::atomic<Counter *> next;
-};
-}
 namespace sp {
+class ReferenceCounter;
+
+
 class ReferenceCounter {
 private:
-  std::atomic<Counter *> m_cnt;
+  std::atomic<std::uint64_t> m_cnt;
 
 public:
-  ReferenceCounter() : m_cnt{nullptr} {
-  }
-  ~ReferenceCounter() {
-    Counter *current = m_cnt;
-  begin:
-    if (current) {
-      auto tmp = current->next;
-      delete current;
-      current = tmp;
-      goto begin;
-    }
+  ReferenceCounter() : m_cnt{0} {
   }
 
+  ReferenceCounter(const ReferenceCounter &&) = delete;
+  ReferenceCounter(const ReferenceCounter &) = delete;
+
+  operator bool() const & {
+    return m_cnt.load() != 0;
+  }
+  operator bool() && = delete;
+
 public:
-  Counter *new_managed() {
-    auto cnt = new Counter;
+  auto decrement() {
+    auto current = m_cnt.load();
     do {
-      cnt->next = m_cnt.load();
-    } while(!m_cnt.compare_exchange_strong(cnt->next, cnt);
-    return cnt;
+      if (current == 0) {
+        break;
+      }
+    } while(!m_cnt.compare_exchange_strong(current, current-1));
+    return current;
+  }
+
+  auto increment() {
+    auto current = m_cnt.load();
+    do {
+      if (current == 0) {
+        break;
+      }
+    } while(!m_cnt.compare_exchange_strong(current, current+1));
+    return current;
+  }
+};
+
+template<typename Counter>
+struct CounterGuard {
+private:
+  Counter &m_cnt;
+  bool m_valid;
+
+public:
+  explicit CounterGuard(Counter &cnt) : m_cnt(cnt), m_valid(false) {
+    auto current = m_cnt.increment();
+    m_valid = current > 0;
+  }
+
+  CounterGuard(const CounterGuard<Counter> &&) = delete;
+  CounterGuard(const CounterGuard<Counter> &) = delete;
+
+  operator bool() const & {
+    return m_valid;
+  }
+  operator bool() & {
+    return m_valid;
+  }
+  operator bool() && = delete;
+
+  ~CounterGuard() {
+    if (m_valid) {
+      m_cnt.decrement();
+    }
   }
 };
 }

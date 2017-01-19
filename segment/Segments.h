@@ -5,6 +5,7 @@
 #include "../shared/Assertions.h"
 #include "../shared/shared.h"
 #include "../shared/vfs.h"
+#include "../transaction/LineAtomicity.h"
 #include "Context.h"
 #include "Segment.h"
 #include <algorithm>
@@ -34,7 +35,7 @@ private:
 
 private:
   Factory m_factory;
-  sp::List<Segment<Meta_t>> m_segments;
+  sp::con::Stack<Segment<Meta_t>> m_segments;
   std::atomic<db::raw::id> m_id;
 
 public:
@@ -63,7 +64,7 @@ public:
     }
   }
 
-  id_t create(const Reservation<Table_t> &t, const Table_t &data) {
+  db::raw::id create(const Reservation<Table_t> &t, const Table_t &data) {
     auto *segment = m_segments.search([&](const auto &seg) {
       //
       return seg.id() == t.segment;

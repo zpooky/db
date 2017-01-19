@@ -265,7 +265,7 @@ constexpr Hex hex() {
   using arr = std::array<uint8_t, 16>;
   return Hex{arr{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
                  'C', 'D', 'E', 'F'},
-             ' '};
+             0};
 }
 
 using Base32 = Base<32>;

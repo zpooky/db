@@ -13,7 +13,7 @@ private:
   using Maybe_t = sp::Maybe<Reservation<Table_t>>;
 
 private:
-  sp::List<Extent_t> m_extents;
+  sp::con::Stack<Extent_t> m_extents;
 
 public:
   template <typename Collection>

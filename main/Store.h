@@ -1,11 +1,12 @@
 #ifndef _DB_STORE_H
-#define  _DB_STORE_H
+#define _DB_STORE_H
 
-#include "../segment/Segments.h"
-#include "PageFilesParser.h"
 #include "../journal/Journals.h"
 #include "../segment/Context.h"
+#include "../segment/Segments.h"
+#include "../transaction/LineAtomicity.h"
 #include "../transaction/transaction.h"
+#include "PageFilesParser.h"
 
 namespace db {
 
@@ -20,11 +21,13 @@ private:
   Context<hash_t> &m_ctx;
   std::unique_ptr<Segments<Meta_t>> m_segments;
   journal::Journals<hash_t> &m_journals;
+  tx::LineAtomicity m_atomicity;
 
 private:
 public:
   explicit Store(db::Context<hash_t> &ctx)
-      : m_ctx(ctx), m_segments(nullptr), m_journals(ctx.journal()) {
+      : m_ctx(ctx), m_segments(nullptr), m_journals(ctx.journal()),
+        m_atomicity{} {
 
     auto &root = ctx.root();
     auto segment_root = root.cdx(Table::table_name());
@@ -44,7 +47,9 @@ public:
     return m_segments->create(res, data);
   }
 
-  Table read(const tx::Transaction &, db::raw::id);
+  Table read(const tx::Transaction &, db::raw::id id) {
+    tx::ReadIntention r{id};
+  }
   /**
    * Optimistic locking
    */
@@ -57,13 +62,14 @@ public:
   // db::raw::version_t update(const db::Transaction &,
   // db::transaction::version_t, const Table &);
 
-  void del(const tx::Transaction &);
+  void remove(const tx::Transaction &, db::raw::id id) {
+    tx::RemoveIntention{id};
+  }
   /**
    * Optimistic locking
    */
   // void del(const db::Transaction &, db::raw::version_t);
 };
-
 }
 
 #endif

@@ -30,7 +30,7 @@ public:
     return m_present;
   }
 
-  operator bool() const {
+  operator bool() const & {
     return m_present;
   }
 

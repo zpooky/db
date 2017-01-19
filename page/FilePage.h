@@ -177,7 +177,7 @@ public:
     return m_meta.id;
   }
 
-  id_t create(db::segment::id id, page::position pos, const Table_t &data) {
+  id_t create(db::raw::id id, page::position pos, const Table_t &data) {
     assert(pos < m_meta.lines);
     // assert(Table_t::version == m_meta.version);
     auto version = db::raw::START_VERSION;
