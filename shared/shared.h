@@ -11,11 +11,19 @@ namespace journal {
 using id = uint64_t;
 constexpr id START_ID(1);
 constexpr id NO_ID(0);
-}
+}// namespace journal
+
+namespace tx {
+
+using id = uint64_t;
+constexpr id START_ID(1);
+} // namespace tx
+
 namespace page {
 
 using position = uint64_t;
-}
+}//namespace page
+
 namespace db {
 
 namespace table {
@@ -25,8 +33,8 @@ namespace name {
 
 constexpr size_t length(64);
 using type = std::array<char, length>;
-}
-}
+} // namespace name
+} // namespace table
 
 namespace segment {
 
@@ -37,7 +45,7 @@ using version = uint16_t;
 using id = uint64_t;
 constexpr id NO_ID(0);
 constexpr id START_ID(1);
-}
+}// namespace segment
 namespace raw {
 
 using size = uint64_t;
@@ -48,12 +56,7 @@ constexpr id EMPTY(0ul);
 
 using version_t = uint64_t;
 constexpr version_t START_VERSION(1);
-}
-
-namespace transaction {
-
-using id = uint64_t;
-}
+}//namespace raw
 
 struct Segment_name {
   Segment_name() {
@@ -91,6 +94,5 @@ struct Reservation {
     return position != page::position(0) || segment != db::segment::id(0);
   }
 };
-
-}
+}//namespace db
 #endif

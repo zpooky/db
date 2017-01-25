@@ -48,7 +48,8 @@ public:
   }
 
   Table read(const tx::Transaction &, db::raw::id id) {
-    tx::ReadIntention r{id};
+    // tx::ReadIntention r{id};
+    return Table{};
   }
   /**
    * Optimistic locking
@@ -63,7 +64,7 @@ public:
   // db::transaction::version_t, const Table &);
 
   void remove(const tx::Transaction &, db::raw::id id) {
-    tx::RemoveIntention{id};
+    // tx::RemoveIntention{id};
   }
   /**
    * Optimistic locking

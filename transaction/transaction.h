@@ -11,11 +11,12 @@ private:
   // journal::Journals<hash_t> &journal;
 public:
   const tx::Settings settings;
-  const db::transaction::id tid;
+  const tx::id tid;
   const journal::id jid;
-  explicit Transaction(journal::id id, tx::Settings &&s)
-      : settings(s), tid(0), jid(id) {
+  explicit Transaction(tx::id p_tid, journal::id p_jid, tx::Settings &&s)
+      : settings(s), tid(p_tid), jid(p_jid) {
   }
+  // Transaction(const Transaction&) = delete;
   // Transaction(const Transaction&) = delete;
   ~Transaction() {
     // journal.commit(jid);

@@ -13,38 +13,77 @@ namespace tx {
 class Meta {
 private:
 public:
+  Meta(){
+  }
+
+  template <typename Presents>
+  explicit Meta(Presents &) {
+  }
+
+  template <typename Transactions>
+  Meta(const Meta &, const Transactions &txs, const tx::Transaction &tx) {
+  }
+
+  Meta(const Meta &&) = delete;
+
 private:
   // db::segment::id
 };
+}
+namespace {
 class Managed {
 private:
-  Meta m_meta;
+  tx::Meta m_meta;
   sp::ReferenceCounter m_refc;
 
 public:
-  Managed() : m_meta(), m_refc() {
+  template <typename Presents>
+  explicit Managed(Presents&p) : m_meta(p), m_refc() {
   }
 
+  Managed():m_meta(),m_refc(){
+  }
+
+  // Internal
   void pin() {
     m_refc.increment();
   }
-  void unpin(){
+  // Internal
+  void unpin() {
     m_refc.decrement();
   }
+  // Internal
+  using Tran = tx::Transaction;
+  template <typename Transactions>
+  void build(const tx::Meta &current, const Transactions &txs, const Tran &tx) {
+    m_meta.~Meta();
+    new (&m_meta) tx::Meta(current, txs, tx);
+  }
+  tx::Meta &meta() {
+    return m_meta;
+  }
+  bool is_dead() const {
+    return !m_refc;
+  }
 };
+}
 
+namespace tx {
 class Current {
 private:
   std::atomic<Managed *> m_current;
 
 public:
-  Current() : m_current{nullptr} {
+  explicit Current(Managed *m) : m_current{m} {
   }
   void swap(Managed *replace) {
     auto current = m_current.load();
     replace->pin();
     assert(m_current.compare_exchange_strong(current, replace));
     current->unpin();
+  }
+  Managed &managed() {
+    return *m_current.load();
   }
 };
 /**
@@ -60,10 +99,17 @@ private:
   sp::con::Stack<tx::Transaction> m_stack;
 
 public:
-  void push_back(const tx::Transaction &) {
+  CoalecedTransactions() : m_stack() {
+  }
+  void push_back(const Transaction &tx) {
+    m_stack.push_front(Transaction(tx));
   }
   sp::Stack<tx::Transaction> drain() {
     return m_stack.drain();
+  }
+  bool contains(const tx::Transaction&) const {
+    //TODO
+    return true;
   }
 };
 struct ReleaseGuard {
@@ -97,23 +143,22 @@ private:
   Current m_current;
   CoalecedTransactions m_transactions;
 
-  Managed *build(Managed *m) const {
-    m->~Managed();
-    return new (m) Managed();
-  }
-
 public:
   Transactionx()
-      : m_commit_lock(), m_await_lock(), m_areas{}, m_current{},
-        m_transactions{} {
+      : m_commit_lock(), m_await_lock(), m_condition{}, m_areas{},
+        m_current{&m_areas[0]}, m_transactions{} {
   }
+
   Transactionx(const Transactions &) = delete;
+
   void commit_await(const Transaction &tx) {
     if (m_commit_lock.try_lock()) {
       {
         ReleaseGuard guard(m_commit_lock);
         auto coaleced = m_transactions.drain();
-        auto managed = build(find_reusable());
+        auto managed = find_reusable();
+        Managed &current = m_current.managed();
+        managed->build(current.meta(), coaleced, tx);
         m_current.swap(managed);
       }
       std::unique_lock<std::mutex> lck(m_await_lock);
@@ -121,9 +166,8 @@ public:
     } else {
       m_transactions.push_back(tx);
       std::unique_lock<std::mutex> lck(m_await_lock);
-      m_condition.wait(m_await_lock, [] {
-        // TODO conditional
-        return true;
+      m_condition.wait(lck, [&] {
+        return m_transactions.contains(tx);
       });
     }
   }
@@ -132,8 +176,13 @@ private:
   /* Current Ref Count should be pinned
    */
   Managed *find_reusable() {
+    // TODO algorithm not loops
     for (auto &area : m_areas) {
+      if (area.is_dead()) {
+        return &area;
+      }
     }
+    assert(false);
     return nullptr;
   }
 };
