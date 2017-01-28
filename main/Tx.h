@@ -8,6 +8,26 @@
 #include "../transaction/Settings.h"
 #include "../transaction/transaction.h"
 
+namespace {
+template <typename Function>
+class RAII {
+private:
+  Function release;
+
+public:
+  explicit RAII(Function f) : release(f) {
+  }
+  RAII(const RAII &) = delete;
+  RAII(const RAII &&) = delete;
+  ~RAII() {
+    release();
+  }
+};
+template <typename Function>
+RAII<Function> raii(Function f) {
+  return RAII<Function>(f);
+}
+}
 namespace tx {
 
 template <typename hash_t>
@@ -29,15 +49,29 @@ public:
   tx::Transaction begin(tx::Settings &&s) {
     auto tid(m_id++);
     auto jid(m_journal.begin());
-    return tx::Transaction{tid,jid, std::move(s)};
+    return tx::Transaction{tid, jid, std::move(s)};
   }
 
   void commit(const Transaction &tx) {
     m_journal.commit(tx.jid);
+    // TODO order between journal commits and transaction commit
+    // does have to be structured when it comes to udates and deletes
+    // the order of which changes is applied should be the same
+    // in the journal and transaction commits
     m_transaction.commit_await(tx);
   }
 
-  void rollback(Transaction &) {
+  void rollback(const Transaction &tx) {
+    auto r1(raii([&] {
+      //
+      m_journal.rollback(tx.jid);
+    }));
+
+    //rollback probobly does not have the same constraints as commit.
+    auto r2(raii([&] {
+      //
+      m_transaction.rollback(tx);
+    }));
   }
 };
 }

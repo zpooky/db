@@ -30,19 +30,18 @@ private:
   using Table_t = typename Meta_t::Table;
   using hash_t = typename Meta_t::hash_algh;
   using page_t = typename Meta_t::Page;
-  using Factory = typename Meta_t::PageFactory;
+  using PageFactory = typename Meta_t::PageFactory;
   using version_t = db::raw::version_t;
 
 private:
-  Factory m_factory;
+  PageFactory m_factory;
   sp::con::Stack<Segment<Meta_t>> m_segments;
   std::atomic<db::raw::id> m_id;
 
 public:
-  explicit Segments(db::raw::id id, Factory &&factory,
-                    std::vector<Segment<Meta_t>> &&p_segments)
-      : m_factory{std::move(factory)}, m_segments{std::move(p_segments)},
-        m_id(id) {
+  explicit Segments(db::raw::id id, PageFactory &&f,
+                    std::vector<Segment<Meta_t>> &&seg)
+      : m_factory{std::move(f)}, m_segments{std::move(seg)}, m_id(id) {
     //                db::assert_is_context<Meta_t>();
   }
 

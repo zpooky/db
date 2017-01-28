@@ -2,13 +2,12 @@
 // Created by spooky on 2016-07-06.
 //
 
-#ifndef PROJECT_RESERVATIONSET_H
-#define PROJECT_RESERVATIONSET_H
+#ifndef DB_RESERVATIONSET_H
+#define DB_RESERVATIONSET_H
 
 #include "../collection/Bitset.h"
 #include "../shared/Maybe.h"
 #include "../shared/shared.h"
-#include "PresentSet.h"
 #include <bitset>
 #include <utility>
 
@@ -23,6 +22,8 @@ private:
   std::atomic<size_t> m_cnt;
 
 public:
+  ReservationSet() : m_bitset(false), m_cnt(m_bitset.find_first(false)) {
+  }
   explicit ReservationSet(const std::bitset<T_Size> &p)
       : m_bitset{p}, m_cnt{m_bitset.find_first(false)} {
   }
@@ -56,4 +57,4 @@ public:
 };
 }
 
-#endif // PROJECT_RESERVATIONSET_H
+#endif // DB_RESERVATIONSET_H

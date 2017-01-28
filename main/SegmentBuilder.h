@@ -102,7 +102,7 @@ public:
     // more lines present in file than in lines() constexpr-
     // should work with present set and reservation set
 
-    // TODO verify FIFO order of extents
+    // TODO test FIFO order of extents
     FilePage<Meta_t> page(m_segment);
 
     using Extent_t = db::Extent<Meta_t>;

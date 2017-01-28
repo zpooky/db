@@ -9,19 +9,18 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace tx {
+namespace {
 class Meta {
 private:
 public:
-  Meta(){
+  Meta() {
   }
 
   template <typename Presents>
-  explicit Meta(Presents &) {
+  explicit Meta(const Presents &) {
   }
 
-  template <typename Transactions>
-  Meta(const Meta &, const Transactions &txs, const tx::Transaction &tx) {
+  Meta(const Meta &, const sp::Stack<tx::Transaction> &) {
   }
 
   Meta(const Meta &&) = delete;
@@ -29,46 +28,41 @@ public:
 private:
   // db::segment::id
 };
-}
-namespace {
+
 class Managed {
 private:
-  tx::Meta m_meta;
-  sp::ReferenceCounter m_refc;
+  Meta m_meta;
+  sp::ReferenceCounter m_ref;
 
 public:
   template <typename Presents>
-  explicit Managed(Presents&p) : m_meta(p), m_refc() {
+  explicit Managed(const Presents &p) : m_meta(p), m_ref() {
   }
 
-  Managed():m_meta(),m_refc(){
+  Managed() : m_meta(), m_ref() {
   }
 
   // Internal
   void pin() {
-    m_refc.increment();
+    m_ref.increment();
   }
   // Internal
   void unpin() {
-    m_refc.decrement();
+    m_ref.decrement();
   }
   // Internal
-  using Tran = tx::Transaction;
-  template <typename Transactions>
-  void build(const tx::Meta &current, const Transactions &txs, const Tran &tx) {
+  void build(const Meta &current, const sp::Stack<tx::Transaction> &txs) {
     m_meta.~Meta();
-    new (&m_meta) tx::Meta(current, txs, tx);
+    new (&m_meta) Meta(current, txs);
   }
-  tx::Meta &meta() {
+  Meta &meta() {
     return m_meta;
   }
   bool is_dead() const {
-    return !m_refc;
+    return !m_ref;
   }
 };
-}
 
-namespace tx {
 class Current {
 private:
   std::atomic<Managed *> m_current;
@@ -77,6 +71,7 @@ public:
   explicit Current(Managed *m) : m_current{m} {
   }
   void swap(Managed *replace) {
+    assert(replace != nullptr);
     auto current = m_current.load();
     replace->pin();
     assert(m_current.compare_exchange_strong(current, replace));
@@ -101,14 +96,14 @@ private:
 public:
   CoalecedTransactions() : m_stack() {
   }
-  void push_back(const Transaction &tx) {
-    m_stack.push_front(Transaction(tx));
+  void push_back(const tx::Transaction &tx) {
+    m_stack.push_front(tx::Transaction(tx));
   }
   sp::Stack<tx::Transaction> drain() {
     return m_stack.drain();
   }
-  bool contains(const tx::Transaction&) const {
-    //TODO
+  bool contains(const tx::Transaction &) const {
+    // TODO
     return true;
   }
 };
@@ -125,6 +120,8 @@ public:
     m_mutex.unlock();
   }
 };
+}
+namespace tx {
 /**
  * Transaction atomicity [tx commit]
  *
@@ -137,6 +134,7 @@ private:
   std::mutex m_commit_lock;
   std::mutex m_await_lock;
   std::condition_variable m_condition;
+  std::atomic<uint64_t> m_commit;
 
 private:
   Areas_t m_areas;
@@ -146,34 +144,45 @@ private:
 public:
   Transactionx()
       : m_commit_lock(), m_await_lock(), m_condition{}, m_areas{},
-        m_current{&m_areas[0]}, m_transactions{} {
+        m_current{&m_areas[0]}, m_transactions{}, m_commit(0) {
   }
 
   Transactionx(const Transactions &) = delete;
 
   void commit_await(const Transaction &tx) {
+    // TODO make work
+    m_transactions.push_back(tx);
+    auto commit_id(m_commit.load());
+  retry:
     if (m_commit_lock.try_lock()) {
       {
         ReleaseGuard guard(m_commit_lock);
         auto coaleced = m_transactions.drain();
-        auto managed = find_reusable();
+        ++m_commit;
+        auto new_ = find_reusable();
         Managed &current = m_current.managed();
-        managed->build(current.meta(), coaleced, tx);
-        m_current.swap(managed);
+        new_->build(current.meta(), coaleced);
+        m_current.swap(new_);
       }
       std::unique_lock<std::mutex> lck(m_await_lock);
       m_condition.notify_all();
     } else {
-      m_transactions.push_back(tx);
       std::unique_lock<std::mutex> lck(m_await_lock);
       m_condition.wait(lck, [&] {
-        return m_transactions.contains(tx);
+        // wait as long as it is the samme commit
+        return commit_id != m_commit.load();
       });
+      if (m_transactions.contains(tx)) {
+        goto retry;
+      }
     }
+  }
+  void rollback(const Transaction &) {
   }
 
 private:
-  /* Current Ref Count should be pinned
+  /* m_current RefCount should be pinned
+   * before calling this function
    */
   Managed *find_reusable() {
     // TODO algorithm not loops

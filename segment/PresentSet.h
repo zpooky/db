@@ -2,18 +2,23 @@
 // Created by spooky on 2016-07-06.
 //
 
-#ifndef PROJECT_PRESENTSET_H
-#define PROJECT_PRESENTSET_H
+#ifndef DB_PRESENTSET_H
+#define DB_PRESENTSET_H
 
 #include <bitset>
 
 namespace db {
-
+/**
+ * key -> Index -> (segment::id, page::position)
+ * segment::id -> Segment
+ * page::position -> Segment -> value
+ */
 template <size_t size>
 class PresentSet {
 private:
+  static_assert(size % 8 == 0, "");
   using Bitset_t = std::bitset<size>;
-  Bitset_t m_bitset;
+  const Bitset_t m_bitset;
 
 public:
   PresentSet() : m_bitset{} {
@@ -27,14 +32,15 @@ public:
   PresentSet(PresentSet &&o) : m_bitset(std::move(o.m_bitset)) {
   }
 
-  const Bitset_t &get_bitset() const {
+  const Bitset_t &get_bitset() const & {
     return m_bitset;
   }
+  // Bitset_t &get_bitset() & {
+  //   return m_bitset;
+  // }
   // Bitset_t &&get_bitset() && {
   //   return std::move(m_bitset);
   // }
-
-private:
 };
 }
-#endif // PROJECT_PRESENTSET_H
+#endif // DB_PRESENTSET_H
