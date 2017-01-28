@@ -26,7 +26,8 @@ int main(int, char *[]) {
   db::Directory root("/tmp/db");
   vfs::mkdir(root);
 
-  db::Context<hash_t> ctx(root);
+  db::Configuration conf(root);
+  db::Context<hash_t> ctx(conf);
 
   db::Store<Test1Meta> t1_store{ctx};
   db::Store<Test2Meta> t2_store{ctx};

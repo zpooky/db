@@ -29,8 +29,10 @@ public:
       : m_ctx(ctx), m_segments(nullptr), m_journals(ctx.journal()),
         m_atomicity{} {
 
-    auto &root = ctx.root();
-    auto segment_root = root.cdx(Table::table_name());
+    auto &conf = ctx.config();
+    auto &root = conf.root;
+    auto table_name = Table::table_name();
+    auto segment_root = root.cdx(table_name);
     vfs::mkdir(segment_root);
 
     page::PageFilesParser<Meta_t> parser(ctx, segment_root);

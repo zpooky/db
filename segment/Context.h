@@ -7,6 +7,7 @@
 
 #include "../journal/JournalThread.h"
 #include "../journal/Journals.h"
+#include "../shared/Configuration.h"
 #include "../shared/LittleEndian.h"
 #include "../shared/entities.h"
 #include "../shared/shared.h"
@@ -20,7 +21,7 @@ namespace db {
 template <typename hash_t>
 class Context {
 private:
-  const Directory m_root;
+  Configuration m_config;
 
 private:
   journal::JournalThread<hash_t> m_runnable;
@@ -28,9 +29,9 @@ private:
   std::thread m_thread;
 
 public:
-  explicit Context(const Directory &p_root)
-      : m_root(p_root), m_runnable(p_root.cd("journal")), m_journal(m_runnable),
-        m_thread([&] { m_runnable(); }) {
+  explicit Context(const Configuration &conf)
+      : m_config(conf), m_runnable(conf.root.cd("journal")),
+        m_journal(m_runnable), m_thread([&] { m_runnable(); }) {
   }
 
   Context(const Context &&) = delete;
@@ -47,8 +48,8 @@ public:
 public:
   using endianess = db::LittleEndian;
 
-  const db::Directory &root() const {
-    return m_root;
+  const Configuration &config() const {
+    return m_config;
   }
   journal::Journals<hash_t> &journal() {
     return m_journal;
