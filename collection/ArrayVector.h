@@ -16,7 +16,7 @@ public:
 
 private:
   constexpr static size_t rounded_size() {
-    return 0;
+    return size;
   }
   std::array<value_type, rounded_size()> m_static;
 

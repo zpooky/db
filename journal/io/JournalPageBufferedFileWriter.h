@@ -54,12 +54,12 @@ private:
   using JLine = JournalLine<hash_t>;
 
 public:
-  explicit JournalPageBufferedFileWriter(JournalFileProvider<hash_t> &provider,
-                                         size_t sector_size)
+  using JFP = JournalFileProvider<hash_t>;
+
+  JournalPageBufferedFileWriter(JFP &provider, size_t sector_size)
       : m_provider{provider}, m_buffer{sector_size} {
   }
-  JournalPageBufferedFileWriter(JournalFileProvider<hash_t> &provider,
-                                JPBFW<hash_t> &&o)
+  JournalPageBufferedFileWriter(JFP &provider, JPBFW<hash_t> &&o)
       : m_provider(provider), m_buffer{std::move(o.m_buffer)} {
   }
 
@@ -125,7 +125,7 @@ private:
 
   auto sort(std::vector<JLine> &events) const {
     // TODO implement real
-    auto cmp = [](const JLine& f, const JLine& s) { return false; };
+    auto cmp = [](const JLine &f, const JLine &s) { return false; };
     std::sort(begin(events), end(events), cmp);
     return std::vector<journal::id>{};
   }

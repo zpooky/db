@@ -20,7 +20,7 @@ private:
   using SegLine = JournalLine<hash_t>;
   JournalFileProvider<hash_t> m_provider;
   JournalPageBufferedFileWriter<hash_t> m_writer;
-  sp::Queue<SegLine> m_queue;
+  sp::con::Queue<SegLine> m_queue;
   std::atomic<bool> m_interrupted;
 
 public:

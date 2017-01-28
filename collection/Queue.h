@@ -12,6 +12,7 @@
 #include <vector>
 
 namespace sp {
+namespace con {
 template <typename T>
 class Queue {
 private:
@@ -62,8 +63,8 @@ public:
 
 template <typename T>
 T Queue<T>::dequeue() {
-  auto val = nullptr;
-  if (val != nullptr) {
+  // auto val = nullptr;
+  // if (val != nullptr) {
     m_sleeping.fetch_add(uint32_t(1));
     do {
       std::unique_lock<std::mutex> lck(m_mutex);
@@ -72,7 +73,7 @@ T Queue<T>::dequeue() {
       //                break;
     } while (true);
     m_sleeping.fetch_sub(1);
-  }
+  // }
   //        return
 }
 template <typename T>
@@ -80,5 +81,6 @@ std::vector<T> Queue<T>::drain() {
   std::vector<T> result;
   return result;
 }
-}
+} // namespace con
+} // namespacce sp
 #endif

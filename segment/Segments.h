@@ -32,6 +32,7 @@ private:
   using page_t = typename Meta_t::Page;
   using PageFactory = typename Meta_t::PageFactory;
   using version_t = db::raw::version_t;
+  using Segments_t = std::vector<Segment<Meta_t>>;
 
 private:
   PageFactory m_factory;
@@ -39,8 +40,7 @@ private:
   std::atomic<db::raw::id> m_id;
 
 public:
-  explicit Segments(db::raw::id id, PageFactory &&f,
-                    std::vector<Segment<Meta_t>> &&seg)
+  explicit Segments(db::raw::id id, PageFactory &&f, Segments_t &&seg)
       : m_factory{std::move(f)}, m_segments{std::move(seg)}, m_id(id) {
     //                db::assert_is_context<Meta_t>();
   }
@@ -50,17 +50,19 @@ public:
         m_id(o.m_id.load()) {
   }
 
+  Segments(const Segments<Meta_t> &) = delete;
+
   ~Segments() {
   }
 
   Reservation<Table_t> reserve() {
-    while (true) {
+    do {
       auto &reservation = free_page();
       auto maybe_res = reservation.reserve();
       if (maybe_res.is_present()) {
         return maybe_res.get();
       }
-    }
+    } while (1);
   }
 
   db::raw::id create(const Reservation<Table_t> &t, const Table_t &data) {
