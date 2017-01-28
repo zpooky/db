@@ -35,7 +35,7 @@ class Tx {
 private:
   journal::Journals<hash_t> &m_journal;
   Transactionx<10> m_transaction;
-  std::atomic<tx::id> m_id;
+  std::atomic<id> m_id;
 
 public:
   explicit Tx(db::Context<hash_t> &ctx)

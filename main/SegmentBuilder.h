@@ -8,7 +8,7 @@
 #include <deque>
 #include <vector>
 
-namespace page {
+namespace {
 template <size_t lines>
 class ExtentBuilder {
 private:
@@ -44,6 +44,8 @@ public:
     return std::move(m_present);
   }
 };
+}
+namespace page {
 
 template <size_t lines>
 class ExtentsBuilder {

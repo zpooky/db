@@ -8,6 +8,7 @@
 #include <cassert>
 #include <condition_variable>
 #include <mutex>
+#include "CommitTree.h"
 
 namespace {
 class Meta {
@@ -143,16 +144,17 @@ private:
 
 public:
   Transactionx()
-      : m_commit_lock(), m_await_lock(), m_condition{}, m_areas{},
-        m_current{&m_areas[0]}, m_transactions{}, m_commit(0) {
+      : m_commit_lock(), m_await_lock(), m_condition{}, m_commit(0), m_areas{},
+        m_current{&m_areas[0]}, m_transactions{} {
   }
 
   Transactionx(const Transactions &) = delete;
 
   void commit_await(const Transaction &tx) {
     // TODO make work
-    m_transactions.push_back(tx);
+    // commit id before tx is visible
     auto commit_id(m_commit.load());
+    m_transactions.push_back(tx);
   retry:
     if (m_commit_lock.try_lock()) {
       {
@@ -167,17 +169,24 @@ public:
       std::unique_lock<std::mutex> lck(m_await_lock);
       m_condition.notify_all();
     } else {
-      std::unique_lock<std::mutex> lck(m_await_lock);
-      m_condition.wait(lck, [&] {
-        // wait as long as it is the samme commit
-        return commit_id != m_commit.load();
-      });
+      {
+        std::unique_lock<std::mutex> lck(m_await_lock);
+        m_condition.wait(lck, [&] {
+          // wait as long as it is the samme commit.
+          // not a guarantee that the tx is commited
+          return commit_id != m_commit.load();
+        });
+      }
       if (m_transactions.contains(tx)) {
         goto retry;
       }
     }
   }
   void rollback(const Transaction &) {
+  }
+
+  void introduce(tx::CommitTree&&) {
+    std::unique_ptr<std::mutex> lck(m_commit_lock);
   }
 
 private:

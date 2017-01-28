@@ -14,7 +14,6 @@ using namespace db::fs;
 using namespace std;
 using namespace sp::hash;
 
-
 int main(int, char *[]) {
   cout << "sector size:" << vfs::sector::logical::size("") << endl;
   cout << "page size:" << vfs::page::size() << endl;
@@ -26,9 +25,9 @@ int main(int, char *[]) {
   using hash_t = crc32;
   db::Context<hash_t> ctx(conf);
 
-  db::Store<TestTableMetax> t1_store{ctx};
-  db::Store<Test2TableMetax> t2_store{ctx};
   tx::Tx<hash_t> tx{ctx};
+  db::Store<TestTableMetax> t1_store{ctx, tx};
+  db::Store<Test2TableMetax> t2_store{ctx, tx};
   {
     auto t = tx.begin();
     for (size_t i(0); i < TestTableMetax::extent_lines() * 4; ++i) {

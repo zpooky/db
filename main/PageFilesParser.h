@@ -10,6 +10,7 @@
 #include "../segment/Segments.h"
 #include "../shared/entities.h"
 #include "SegmentBuilder.h"
+#include "Tx.h"
 #include <functional>
 #include <vector>
 
@@ -25,15 +26,19 @@ private:
 private:
   db::Context<hash_t> &m_context;
   const db::Directory m_root;
+  tx::Tx<hash_t> &m_tx;
 
 public:
-  explicit PageFilesParser(db::Context<hash_t> &ctx, const db::Directory &root)
-      : m_context(ctx), m_root(root.cd("segment")) {
+  PageFilesParser(db::Context<hash_t> &ctx, const db::Directory &root,
+                  tx::Tx<hash_t> &tx)
+      : m_context(ctx), m_root(root.cd("segment")), m_tx(tx) {
     vfs::mkdir(m_root);
   }
 
   PageFilesParser(const PageFilesParser &) = delete;
   PageFilesParser(const PageFilesParser &&) = delete;
+  ~PageFilesParser() {
+  }
 
 private:
   auto segment_files() const {
@@ -42,16 +47,19 @@ private:
 
   db::segment::id max_id(const std::vector<db::File> &segments) const {
     // TODO use a reduce operation instead
-    std::vector<db::segment::id> num_segments(segments.size());
+    std::vector<db::segment::id> segment_id(segments.size());
     auto convert = [](const auto &file) {
       auto fname = file.filename();
       return db::Segment_name::id(fname);
     };
-    std::transform(segments.begin(), segments.end(), num_segments.begin(),
-                   convert);
+    {
+      auto begin = segments.begin();
+      auto end = segments.end();
+      std::transform(begin, end, segment_id.begin(), convert);
+    }
 
-    auto max_it = std::max_element(num_segments.begin(), num_segments.end());
-    auto max = max_it != num_segments.end() ? *max_it : db::segment::START_ID;
+    auto max_it = std::max_element(segment_id.begin(), segment_id.end());
+    auto max = max_it != segment_id.end() ? *max_it : db::segment::NO_ID;
     return max;
   }
 
@@ -62,8 +70,7 @@ private:
     return FilePageMeta(id, f, Line_t::size(), Meta_t::extent_lines(), v);
   }
 
-  auto convert(const std::vector<db::File> &files,
-               MaxIdReplay &rawIdReplay) const {
+  auto parse(const std::vector<db::File> &files, MaxIdReplay &idReplay) const {
     std::vector<db::Segment<Meta_t>> result;
     // TODO preallocate vector
 
@@ -71,13 +78,14 @@ private:
       auto seg_meta = meta(file);
       ReplayPageFile<Meta_t> r(seg_meta);
       // TODO create checksum verify *Builder*
-      SegmentBuilder<Meta_t> segment(seg_meta);
+      SegmentBuilder<Meta_t> segmentReplay(seg_meta);
 
       using Function_t = std::function<void(const db::LineMeta &)>;
-      std::vector<Function_t> xs{segment, rawIdReplay};
+      std::vector<Function_t> xs{segmentReplay, idReplay};
       r.replay(xs);
 
-      result.push_back(segment.build());
+      auto segment(segmentReplay.build());
+      result.push_back(std::move(segment));
     }
     return result;
   }
@@ -91,9 +99,9 @@ public:
 
     PageFactory factory(m_context, next_id, m_root);
 
-    MaxIdReplay rawIdReplay;
-    auto segments = convert(files, rawIdReplay);
-    auto raw_id = rawIdReplay.next();
+    MaxIdReplay idReplay;
+    auto segments = parse(files, idReplay);
+    auto raw_id = idReplay.next();
 
     using Segments_t = typename db::Segments<Meta_t>;
     return new Segments_t(raw_id, std::move(factory), std::move(segments));
