@@ -17,8 +17,8 @@ namespace page {
 template <typename Meta_t>
 class PageFilesParser {
 private:
-  using Table_t = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
+  using Table_t = typename Meta_t::latest;
+  using hash_t = typename Meta_t::hash_t;
   using PageFactory = typename Meta_t::PageFactory;
   using Line_t = db::Line<Table_t, hash_t>;
 

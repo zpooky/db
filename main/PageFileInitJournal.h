@@ -12,8 +12,8 @@ namespace page {
 template <typename Meta_t>
 class PageFileInitJournal {
 private:
-  using Table_t = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
+  using Table_t = typename Meta_t::latest;
+  using hash_t = typename Meta_t::hash_t;
   using Extent_t = db::Extent<Meta_t>;
   using Extents_t = db::Extents<Meta_t>;
 

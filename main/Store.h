@@ -13,8 +13,8 @@ namespace db {
 template <typename Meta_t>
 class Store {
 private:
-  using Table = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
+  using Table = typename Meta_t::latest;
+  using hash_t = typename Meta_t::hash_t;
   using page_t = typename Meta_t::Page;
 
 private:
@@ -31,7 +31,7 @@ public:
 
     auto &conf = ctx.config();
     auto &root = conf.root;
-    auto table_name = Table::table_name();
+    auto table_name = Meta_t::table_name();
     auto segment_root = root.cdx(table_name);
     vfs::mkdir(segment_root);
 

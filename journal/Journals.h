@@ -52,12 +52,12 @@ public:
    * Journal entry for CREATE line
    */
   template <typename Meta_t>
-  void create(journal::id jid, const db::Reservation<typename Meta_t::Table> &r,
-              const typename Meta_t::Table &t) {
-    using Table_t = typename Meta_t::Table;
+  void create(journal::id jid, const db::Reservation<typename Meta_t::latest> &r,
+              const typename Meta_t::latest &t) {
+    using Table_t = typename Meta_t::latest;
     db::HeapBuffer b(1);//TODO
     SegmentSpec<Table_t>::create(b, t);
-    constexpr auto table = Table_t::table_name();
+    constexpr auto table = Meta_t::table_name();
     constexpr auto type = EntryType::LINE;
     m_consumer.add(
         journal::line::create<hash_t>(jid, table, type, std::move(b)));
@@ -68,10 +68,10 @@ public:
    */
   template <typename Meta_t>
   void create(journal::id jid, db::segment::id sid) {
-    using Table_t = typename Meta_t::Table;
+    using Table_t = typename Meta_t::latest;
     db::HeapBuffer b(1);//TODO
     PageFileSpec<Table_t>::create(b, sid);
-    constexpr auto table = Table_t::table_name();
+    constexpr auto table = Meta_t::table_name();
     constexpr auto type = EntryType::SEGMENT;
     m_consumer.add(
         journal::line::create<hash_t>(jid, table, type, std::move(b)));

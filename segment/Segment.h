@@ -8,8 +8,8 @@ namespace db {
 template <typename Meta_t>
 class Segment {
 private:
-  using hash_algh = typename Meta_t::hash_algh;
-  using Table_t = typename Meta_t::Table;
+  using hash_algh = typename Meta_t::hash_t;
+  using Table_t = typename Meta_t::latest;
   using Page_t = typename Meta_t::Page;
   using version_t = db::raw::version_t;
   using Extents_t = Extents<Meta_t>;

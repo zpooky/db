@@ -15,7 +15,7 @@ namespace page {
 template <typename Meta_t>
 class PageFileFactory {
 private:
-  using hash_t = typename Meta_t::hash_algh;
+  using hash_t = typename Meta_t::hash_t;
 
 private:
   std::atomic<db::segment::id> m_seg_counter;

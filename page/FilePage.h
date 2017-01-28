@@ -110,8 +110,8 @@ private:
 template <typename Meta_t>
 class MMapFilePage {
 private:
-  using Table_t = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
+  using Table_t = typename Meta_t::latest;
+  using hash_t = typename Meta_t::hash_t;
 
 private:
   MMAP_File m_file;
@@ -149,8 +149,8 @@ template <typename Meta_t>
 class FilePage {
 private:
   using Page_t = typename Meta_t::Page;
-  using Table_t = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
+  using Table_t = typename Meta_t::latest;
+  using hash_t = typename Meta_t::hash_t;
   using Line_t = db::Line<Table_t, hash_t>;
   using version_t = db::raw::version_t;
   using id_t = db::raw::id;

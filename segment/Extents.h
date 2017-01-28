@@ -8,7 +8,7 @@ namespace db {
 template <typename Meta_t>
 class Extents {
 private:
-  using Table_t = typename Meta_t::Table;
+  using Table_t = typename Meta_t::latest;
   using Extent_t = Extent<Meta_t>;
   using Maybe_t = sp::Maybe<Reservation<Table_t>>;
 

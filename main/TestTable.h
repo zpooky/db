@@ -1,13 +1,23 @@
 #ifndef PROJECT_TESTTABLE_H
 #define PROJECT_TESTTABLE_H
 
+#include "../page/FilePage.h"
+#include "PageFileFactory.h"
 #include "../shared/shared.h"
 #include <array>
+#include "../shared/hash.h"
 
 struct TestTable {
 private:
-  using data_t = std::array<char, 5>;
+  static constexpr size_t data_size = 5;
+  using data_t = std::array<char, data_size>;
   using id_t = uint64_t;
+
+public:
+  /**
+   * Version of this table structure
+   */
+  constexpr static db::table::version version = 1;
 
 public:
   const data_t data;
@@ -32,21 +42,29 @@ public:
 
   template <typename Endianess, typename Buffer>
   static auto read(Buffer &b) {
-    auto data = Endianess::template read_arr<Buffer, data_t::value_type, 5>(b);
+    auto data =
+        Endianess::template read_arr<Buffer, data_t::value_type, data_size>(b);
     auto id = Endianess::template read<Buffer, id_t>(b);
     return TestTable{data, id};
   }
-  /**
-   * Version of this table structure
-   */
-  constexpr static db::table::version latest_version = 1;
-  /**
-   * Tablename
-   */
+};
+
+struct TestTableMetax {
+  using latest = TestTable;
+
   constexpr static db::table::name::type table_name() {
     //        return to_array("test_table");
     return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e', 0};
   }
+
+  using hash_t = sp::hash::crc32;
+
+  static constexpr size_t extent_lines() {
+    return 1024ul;
+  }
+
+  using Page = page::FilePage<TestTableMetax>;
+  using PageFactory = page::PageFileFactory<TestTableMetax>;
 };
 
 struct Test2Table {
@@ -54,6 +72,12 @@ private:
   static constexpr size_t dsize = 7;
   using data_t = std::array<char, dsize>;
   using id_t = uint64_t;
+
+public:
+  /**
+   * Version of this table structure
+   */
+  constexpr static db::table::version version = 1;
 
 public:
   const data_t data;
@@ -88,19 +112,23 @@ public:
     auto data2 = Endianess::template read_arr<Buffer, vt, dsize>(b);
     return Test2Table{id, data, data2};
   }
+};
 
-public:
-  /**
-   * Version of this table structure
-   */
-  constexpr static db::table::version latest_version = 1;
-  /**
-   * Tablename
-   */
+struct Test2TableMetax {
+  using latest = Test2Table;
+
   constexpr static db::table::name::type table_name() {
-    //        return to_array("test_table");
     return {'t', 'e', 's', 't', '2', '_', 't', 'a', 'b', 'l', 'e', 0};
   }
+
+  using hash_t = sp::hash::crc32;
+
+  static constexpr size_t extent_lines() {
+    return 1024ul;
+  }
+
+  using Page = page::FilePage<Test2TableMetax>;
+  using PageFactory = page::PageFileFactory<Test2TableMetax>;
 };
 
 #endif // PROJECT_TESTTABLE_H

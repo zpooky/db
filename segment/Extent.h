@@ -15,7 +15,7 @@ namespace db {
 template <typename Meta_t>
 class Extent {
 private:
-  using Table_t = typename Meta_t::Table;
+  using Table_t = typename Meta_t::latest;
   static constexpr size_t lines = Meta_t::extent_lines();
   using Reservation_t = db::ReservationSet<lines>;
 

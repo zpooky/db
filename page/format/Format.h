@@ -19,7 +19,7 @@ namespace page {
 template <typename Meta_t>
 class V1SegmentInitializer {
 private:
-  using Table_t = typename Meta_t::Table;
+  using Table_t = typename Meta_t::latest;
   const db::Directory m_root;
 
 public:
@@ -37,7 +37,7 @@ public:
 template <typename Meta_t>
 class V1SegmentParser {
 private:
-  using Table_t = typename Meta_t::Table;
+  using Table_t = typename Meta_t::latest;
 
 private:
   const db::File m_file;
@@ -80,8 +80,8 @@ public:
 
 template <typename Meta_t>
 FilePageMeta V1SegmentInitializer<Meta_t>::create(db::segment::id sid) {
-  using Table_t = typename Meta_t::Table;
-  using hash_t = typename Meta_t::hash_algh;
+  using Table_t = typename Meta_t::latest;
+  using hash_t = typename Meta_t::hash_t;
   using Line_t = typename db::Line<Table_t, hash_t>;
   db::Filename filename{db::Segment_name::name(sid)};
 
@@ -102,7 +102,7 @@ FilePageMeta V1SegmentInitializer<Meta_t>::create(db::segment::id sid) {
   } while (target > 0);
   stream.flush();
   vfs::sync(db::Directory{file.parent()});
-  return FilePageMeta{sid, file, line_size, lines, Table_t::latest_version};
+  return FilePageMeta{sid, file, line_size, lines, Meta_t::latest::version};
 }
 
 template <typename Meta_t>
