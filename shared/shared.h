@@ -8,35 +8,42 @@
 
 #define DB_ID_CLASS()                                                          \
   struct id {                                                                  \
-    uint64_t _id;                                                              \
-    id() : _id() {                                                             \
+    using id_type = uint64_t;                                                  \
+    id_type _id;                                                               \
+    constexpr id() : _id() {                                                             \
     }                                                                          \
-    explicit id(uint64_t p_id) : _id(p_id) {                                   \
+    constexpr explicit id(id_type p_id) : _id(p_id) {                                    \
     }                                                                          \
-    id(const id &) = default;                                                  \
-    id(id &&) = default;                                                       \
-    id &operator=(const id &) = default;                                       \
-    id &operator=(id &&) = default;                                            \
-    id operator+(uint64_t i) const {                                           \
+    constexpr id(const id &) = default;                                                  \
+    constexpr id(id &&) = default;                                                       \
+    constexpr id &operator=(const id &) = default;                                       \
+    constexpr id &operator=(id &&) = default;                                            \
+    constexpr id operator+(uint64_t i) const {                                           \
       return id(_id + i);                                                      \
     }                                                                          \
-    bool operator==(const id &o) const {                                       \
+    constexpr bool operator==(const id &o) const {                                       \
       return _id == o._id;                                                     \
     }                                                                          \
-    bool operator!=(const id &o) const {                                       \
+    constexpr bool operator!=(const id &o) const {                                       \
       return !operator==(o);                                                   \
+    }                                                                          \
+    constexpr bool operator<(const id &o) const {                                        \
+      return _id < o._id;                                                      \
+    }                                                                          \
+    constexpr bool operator>(const id &o) const {                                        \
+      return _id > o._id;                                                      \
     }                                                                          \
   };
 
 namespace journal {
 DB_ID_CLASS()
-const id START_ID(1);
-const id NO_ID(0);
+constexpr id START_ID(1);
+constexpr id NO_ID(0);
 
 } // namespace journal
 
 namespace tx {
-using id = uint64_t;
+DB_ID_CLASS()
 constexpr id START_ID(1);
 
 } // namespace tx
@@ -49,7 +56,7 @@ using position = uint64_t;
 namespace db {
 
 namespace table {
-using id = uint64_t;
+DB_ID_CLASS()
 using version = uint64_t;
 
 namespace name {
@@ -65,7 +72,7 @@ namespace segment {
 
 using version = uint16_t;
 
-using id = uint64_t;
+DB_ID_CLASS()
 constexpr id NO_ID(0);
 constexpr id START_ID(1);
 } // namespace segment
@@ -92,12 +99,13 @@ struct Segment_name {
     //            string name{table_name.begin(), table_name.end()};
     //            sprintf(buf, "%s-%ld", name.c_str(), idx);
 
-    ::sprintf(buf, "%lu", id);
+    ::sprintf(buf, "%lu", id._id);
     return std::string{buf};
   }
 
   static segment::id id(const db::Filename &fname) {
-    return db::to<db::segment::id>(fname.name);
+    using id_type = db::segment::id::id_type;
+    return db::segment::id(db::to<id_type>(fname.name));
   }
 };
 
@@ -106,15 +114,15 @@ struct Reservation {
   const db::segment::id segment;
   const page::position position;
 
-  explicit Reservation() : Reservation(0, 0) {
+  explicit Reservation() : Reservation(db::segment::NO_ID, 0) {
     // TODO fix this
   }
 
-  explicit Reservation(db::segment::id p_id, size_t p_position)
-      : segment{p_id}, position{p_position} {
+  explicit Reservation(db::segment::id p_id, page::position pos)
+      : segment{p_id}, position{pos} {
   }
   bool is_valid() const {
-    return position != page::position(0) || segment != db::segment::id(0);
+    return position != page::position(0) || segment != db::segment::NO_ID;
   }
 };
 } // namespace db

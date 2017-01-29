@@ -4,6 +4,7 @@
 #include "../journal/Journals.h"
 #include "../segment/Context.h"
 #include "../shared/shared.h"
+#include "../shared/IdGenerator.h"
 #include "../transaction/LineAtomicity.h"
 #include "../transaction/Settings.h"
 #include "../transaction/transaction.h"
@@ -35,11 +36,11 @@ class Tx {
 private:
   journal::Journals<hash_t> &m_journal;
   Transactionx<10> m_transaction;
-  std::atomic<id> m_id;
+  db::IdGenerator<tx::id> m_counter;
 
 public:
   explicit Tx(db::Context<hash_t> &ctx)
-      : m_journal(ctx.journal()), m_transaction(), m_id(tx::START_ID) {
+      : m_journal(ctx.journal()), m_transaction(), m_counter(tx::START_ID) {
   }
 
   tx::Transaction begin() {
@@ -47,7 +48,7 @@ public:
   }
 
   tx::Transaction begin(tx::Settings &&s) {
-    auto tid(m_id++);
+    auto tid(m_counter.next());
     auto jid(m_journal.begin());
     return tx::Transaction{tid, jid, std::move(s)};
   }

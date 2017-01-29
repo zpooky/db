@@ -5,6 +5,7 @@
 #include "../shared/Assertions.h"
 #include "../shared/shared.h"
 #include "../shared/vfs.h"
+#include "../shared/IdGenerator.h"
 #include "../transaction/LineAtomicity.h"
 #include "Context.h"
 #include "Segment.h"
@@ -37,17 +38,17 @@ private:
 private:
   PageFactory m_factory;
   sp::con::Stack<Segment<Meta_t>> m_segments;
-  std::atomic<db::raw::id> m_id;
+  db::IdGenerator<db::raw::id> m_id;
 
 public:
-  explicit Segments(db::raw::id id, PageFactory &&f, Segments_t &&seg)
-      : m_factory{std::move(f)}, m_segments{std::move(seg)}, m_id(id) {
+  explicit Segments(db::raw::id start, PageFactory &&f, Segments_t &&seg)
+      : m_factory{std::move(f)}, m_segments{std::move(seg)}, m_id(start) {
     //                db::assert_is_context<Meta_t>();
   }
 
   Segments(Segments<Meta_t> &&o)
       : m_factory{std::move(o.m_factory)}, m_segments{std::move(o.m_segments)},
-        m_id(o.m_id.load()) {
+        m_id(o.m_id) {
   }
 
   Segments(const Segments<Meta_t> &) = delete;
@@ -78,7 +79,7 @@ public:
       throw std::runtime_error("REALY unexpected exception");
     }
     auto &page = segment->page();
-    return page.create(m_id++, t.position, data);
+    return page.create(m_id.next(), t.position, data);
   }
 
 private:
