@@ -1,43 +1,49 @@
-#ifndef _H_SHARED_IDS
-#define _H_SHARED_IDS
+#ifndef _H_SHARED_IDS_DB
+#define _H_SHARED_IDS_DB
 
 #include "conversions.h"
 #include "entities.h"
 #include <array>
 #include <string>
 
-// #define DB_ID_CLASS() \
+#define DB_ID_CLASS()                                                          \
+  struct id {                                                                  \
+    uint64_t _id;                                                              \
+    id() : _id() {                                                             \
+    }                                                                          \
+    explicit id(uint64_t p_id) : _id(p_id) {                                   \
+    }                                                                          \
+    id(const id &) = default;                                                  \
+    id(id &&) = default;                                                       \
+    id &operator=(const id &) = default;                                       \
+    id &operator=(id &&) = default;                                            \
+    id operator+(uint64_t i) const {                                           \
+      return id(_id + i);                                                      \
+    }                                                                          \
+    bool operator==(const id &o) const {                                       \
+      return _id == o._id;                                                     \
+    }                                                                          \
+    bool operator!=(const id &o) const {                                       \
+      return !operator==(o);                                                   \
+    }                                                                          \
+  };
 
 namespace journal {
-struct idx {
-  const uint64_t _id;
-  explicit idx(uint64_t p_id) : _id(p_id) {
-  }
-  bool operator==(const idx &o) const {
-    return _id == o._id;
-  }
-  idx operator++() const {
-    return idx(_id + 1);
-  }
-  idx operator++(int)const {
-    return idx(_id + 1);
-  }
-};
+DB_ID_CLASS()
+const id START_ID(1);
+const id NO_ID(0);
 
-using id = uint64_t;
-constexpr id START_ID(1);
-constexpr id NO_ID(0);
 } // namespace journal
 
 namespace tx {
-
 using id = uint64_t;
 constexpr id START_ID(1);
+
 } // namespace tx
 
 namespace page {
-
 using position = uint64_t;
+
 } // namespace page
 
 namespace db {

@@ -38,6 +38,9 @@ public:
 
   Context(const Context &) = delete;
 
+  Context &operator=(const Context &) = delete;
+  Context &operator=(const Context &&) = delete;
+
   ~Context() {
     m_runnable.interrupt();
     if (m_thread.joinable()) {
