@@ -9,21 +9,22 @@
 #include <vector>
 
 namespace {
-template <size_t lines>
+template <size_t capacity>
 class ExtentBuilder {
 private:
-  std::bitset<lines> m_present;
+  using Bitset_t = std::bitset<capacity>;
+  Bitset_t m_present;
   size_t m_current;
 
 public:
   explicit ExtentBuilder() : m_present(0), m_current(0) {
   }
 
-  ExtentBuilder(ExtentBuilder<lines> &&o)
+  ExtentBuilder(ExtentBuilder<capacity> &&o)
       : m_present{std::move(o.m_present)}, m_current{o.m_current} {
   }
 
-  ExtentBuilder(const ExtentBuilder<lines> &o)
+  ExtentBuilder(const ExtentBuilder<capacity> &o)
       : m_present{o.m_present}, m_current{o.m_current} {
   }
 
@@ -32,15 +33,22 @@ public:
   }
 
   bool is_full() const {
-    return m_current == lines;
+    return m_current == capacity;
   }
-  const std::bitset<lines> &present() const & {
+
+  size_t lines() const {
+    return m_current;
+  }
+
+  const Bitset_t &present() const & {
     return m_present;
   }
-  std::bitset<lines> &present() & {
+
+  Bitset_t &present() & {
     return m_present;
   }
-  std::bitset<lines> &&present() && {
+
+  Bitset_t &&present() && {
     return std::move(m_present);
   }
 };
@@ -105,14 +113,17 @@ public:
     // should work with present set and reservation set
 
     // TODO test FIFO order of extents
+    using PresentSet = db::PresentSet<lines>;
     FilePage<Meta_t> page(m_segment);
 
-    using Extent_t = db::Extent<Meta_t>;
-    auto builders = m_extents.builders();
-    std::vector<Extent_t> extents;
-    for (auto &b : builders) {
-      db::PresentSet<lines> ps(b.present());
-      extents.emplace_back(m_segment.id, std::move(ps));
+    auto &builders = m_extents.builders();
+    std::vector<db::Extent<Meta_t>> extents;
+    page::position start(0);
+    auto id(m_segment.id);
+    for (auto &extent : builders) {
+      auto ext_lines(extent.lines());
+      extents.emplace_back(id, PresentSet(extent.present(), start, ext_lines));
+      start = page::position(start + ext_lines);
     }
 
     return db::Segment<Meta_t>{std::move(page), db::Extents<Meta_t>(extents)};

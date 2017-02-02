@@ -4,7 +4,7 @@
 #include "../../fs/FileReader.h"
 #include "../../fs/FileWriter.h"
 #include "../../fs/Line.h"
-#include "../../segment/PresentSet.h"
+#include "../../shared/PresentSet.h"
 #include "../../shared/Assertions.h"
 #include "../../shared/LittleEndian.h"
 #include "../../shared/conversions.h"

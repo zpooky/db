@@ -23,22 +23,24 @@ private:
   tx::Tx<hash_t> &m_tx;
   journal::Journals<hash_t> &m_journals;
   std::unique_ptr<Segments<Meta_t>> m_segments;
-  tx::LineAtomicity m_atomicity;
+  // tx::LineAtomicity m_atomicity;
 
 private:
 public:
   explicit Store(db::Context<hash_t> &ctx, tx::Tx<hash_t> &tx)
-      : m_ctx(ctx), m_tx(tx), m_journals(ctx.journal()), m_segments(nullptr),
-        m_atomicity{} {
+      : m_ctx(ctx), m_tx(tx), m_journals(ctx.journal()),
+        m_segments(nullptr) //, m_atomicity{}
+  {
 
-    auto &conf = ctx.config();
-    auto &root = conf.root;
+    auto &config = ctx.config();
+    auto &root = config.root;
     auto table_name = Meta_t::table_name();
     auto table_root = root.cdx(table_name);
     vfs::mkdir(table_root);
 
     page::PageFilesParser<Meta_t> parser(ctx, table_root, tx);
     m_segments.reset(parser());
+    std::atomic_thread_fence(std::memory_order_release);
   }
 
   Store(const Store<Meta_t> &&) = delete;
@@ -79,9 +81,7 @@ public:
 };
 }
 namespace {
-struct TransactionalStore {
-
-};
+struct TransactionalStore {};
 }
 
 #endif

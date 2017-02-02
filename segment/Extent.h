@@ -2,7 +2,7 @@
 #define _DB_SEGMENT_EXTENT_H
 
 #include "../segment/ReservationSet.h"
-#include "PresentSet.h"
+#include "../shared/PresentSet.h"
 
 namespace db {
 /**

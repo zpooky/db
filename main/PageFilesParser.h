@@ -9,6 +9,7 @@
 #include "../segment/Segment.h"
 #include "../segment/Segments.h"
 #include "../shared/entities.h"
+#include "../transaction/PresentSetReplay.h"
 #include "SegmentBuilder.h"
 #include "Tx.h"
 #include <functional>
@@ -37,6 +38,7 @@ public:
 
   PageFilesParser(const PageFilesParser &) = delete;
   PageFilesParser(const PageFilesParser &&) = delete;
+
   ~PageFilesParser() {
   }
 
@@ -64,26 +66,27 @@ private:
   }
 
   FilePageMeta meta(const db::File &f) const {
-    // TODO
     auto id = db::Segment_name::id(f.filename());
+    // TODO
     db::table::version v(1);
     return FilePageMeta(id, f, Line_t::size(), Meta_t::extent_lines(), v);
   }
 
-  auto parse(const std::vector<db::File> &files, MaxIdReplay &idReplay) const {
-    std::vector<db::Segment<Meta_t>> result;
+  auto parse(const std::vector<db::File> &files, MaxIdReplay &idReplay,
+             tx::PresentSetReplay &psReplay) const {
     // TODO preallocate vector
+    std::vector<db::Segment<Meta_t>> result;
 
     for (const auto &file : files) {
       auto seg_meta = meta(file);
-      ReplayPageFile<Meta_t> r(seg_meta);
       // TODO create checksum verify *Builder*
       SegmentBuilder<Meta_t> segmentReplay(seg_meta);
-
-      using Function_t = std::function<void(const db::LineMeta &)>;
-      std::vector<Function_t> xs{segmentReplay, idReplay};
-      r.replay(xs);
-
+      {
+        ReplayPageFile<Meta_t> r(seg_meta);
+        using Function_t = std::function<void(const db::LineMeta &)>;
+        std::vector<Function_t> xs{segmentReplay, idReplay, psReplay};
+        r.replay(xs);
+      }
       auto segment(segmentReplay.build());
       result.push_back(std::move(segment));
     }
@@ -100,7 +103,8 @@ public:
     PageFactory factory(m_context, next_id, m_root);
 
     MaxIdReplay idReplay;
-    auto segments = parse(files, idReplay);
+    tx::PresentSetReplay psReplay;
+    auto segments = parse(files, idReplay, psReplay);
     auto raw_id = idReplay.next();
 
     using Segments_t = typename db::Segments<Meta_t>;

@@ -10,27 +10,29 @@
   struct id {                                                                  \
     using id_type = uint64_t;                                                  \
     id_type _id;                                                               \
-    constexpr id() : _id() {                                                             \
+    constexpr id() : _id() {                                                   \
     }                                                                          \
-    constexpr explicit id(id_type p_id) : _id(p_id) {                                    \
+    constexpr explicit id(id_type p_id) : _id(p_id) {                          \
     }                                                                          \
-    constexpr id(const id &) = default;                                                  \
-    constexpr id(id &&) = default;                                                       \
-    constexpr id &operator=(const id &) = default;                                       \
-    constexpr id &operator=(id &&) = default;                                            \
-    constexpr id operator+(uint64_t i) const {                                           \
+                                                                               \
+    constexpr id(const id &) = default;                                        \
+    constexpr id(id &&) = default;                                             \
+    constexpr id &operator=(const id &) = default;                             \
+    constexpr id &operator=(id &&) = default;                                  \
+                                                                               \
+    constexpr id operator+(uint64_t i) const {                                 \
       return id(_id + i);                                                      \
     }                                                                          \
-    constexpr bool operator==(const id &o) const {                                       \
+    constexpr bool operator==(const id &o) const {                             \
       return _id == o._id;                                                     \
     }                                                                          \
-    constexpr bool operator!=(const id &o) const {                                       \
+    constexpr bool operator!=(const id &o) const {                             \
       return !operator==(o);                                                   \
     }                                                                          \
-    constexpr bool operator<(const id &o) const {                                        \
+    constexpr bool operator<(const id &o) const {                              \
       return _id < o._id;                                                      \
     }                                                                          \
-    constexpr bool operator>(const id &o) const {                                        \
+    constexpr bool operator>(const id &o) const {                              \
       return _id > o._id;                                                      \
     }                                                                          \
   };
@@ -49,7 +51,7 @@ constexpr id START_ID(1);
 } // namespace tx
 
 namespace page {
-using position = uint64_t;
+using position = size_t;
 
 } // namespace page
 

@@ -29,13 +29,15 @@ int main(int, char *[]) {
   db::Store<TestTableMetax> t1_store{ctx, tx};
   db::Store<Test2TableMetax> t2_store{ctx, tx};
   {
-    auto t = tx.begin();
     for (size_t i(0); i < TestTableMetax::extent_lines() * 4; ++i) {
+      auto t = tx.begin();
       TestTable entry;
       auto tid = t1_store.create(t, entry);
       t1_store.read(t, tid);
       t1_store.remove(t, tid);
+      tx.commit(t);
     }
+    auto t = tx.begin();
     Test2Table entry2;
     t2_store.create(t, entry2);
     tx.commit(t);

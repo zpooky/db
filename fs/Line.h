@@ -4,6 +4,7 @@
 #include "../shared/shared.h"
 
 namespace db {
+  //TODO move to shared - since it is used by tx which should not know about "fs"
 struct LineMeta {
   const db::raw::id id;
   const db::raw::version_t version;
