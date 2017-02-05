@@ -74,6 +74,10 @@ public:
       m_transaction.rollback(tx);
     }));
   }
+
+  void introduce(CommitTree&&t){
+    m_transaction.introduce(std::move(t));
+  }
 };
 }
 #endif

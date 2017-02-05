@@ -3,14 +3,13 @@
 
 #include "../collection/List.h"
 #include "../shared/Assertions.h"
+#include "../shared/IdGenerator.h"
 #include "../shared/shared.h"
 #include "../shared/vfs.h"
-#include "../shared/IdGenerator.h"
 #include "../transaction/LineAtomicity.h"
 #include "Context.h"
 #include "Segment.h"
 #include <algorithm>
-#include <atomic>
 #include <functional>
 #include <vector>
 
@@ -41,7 +40,7 @@ private:
   db::IdGenerator<db::raw::id> m_id;
 
 public:
-  explicit Segments(db::raw::id start, PageFactory &&f, Segments_t &&seg)
+  explicit Segments(const db::raw::id &start, PageFactory &&f, Segments_t &&seg)
       : m_factory{std::move(f)}, m_segments{std::move(seg)}, m_id(start) {
     //                db::assert_is_context<Meta_t>();
   }

@@ -14,6 +14,10 @@ public:
   }
   void operator()(const db::LineMeta &) {
   }
+
+  CommitTree build() {
+    return CommitTree(m_table);
+  }
 };
 }
 #endif

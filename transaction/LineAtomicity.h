@@ -186,7 +186,7 @@ public:
   }
 
   void introduce(tx::CommitTree&&) {
-    std::unique_ptr<std::mutex> lck(m_commit_lock);
+    std::unique_lock<std::mutex> lck(m_commit_lock);
   }
 
 private:

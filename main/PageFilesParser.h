@@ -73,8 +73,8 @@ private:
     return FilePageMeta(id, f, Line_t::size(), Meta_t::extent_lines(), v);
   }
 
-  auto parse(const std::vector<db::File> &files, MaxIdReplay &idReplay,
-             tx::PresentSetReplay &psReplay) const {
+  auto parse(const std::vector<db::File> &files, MaxIdReplay &idr,
+             tx::PresentSetReplay &psr) const {
     // TODO preallocate vector
     std::vector<db::Segment<Meta_t>> result;
 
@@ -85,7 +85,7 @@ private:
       {
         ReplayPageFile<Meta_t> r(seg_meta);
         using Function_t = std::function<void(const db::LineMeta &)>;
-        std::vector<Function_t> xs{segmentReplay, idReplay, psReplay};
+        std::vector<Function_t> xs{segmentReplay, idr, psr};
         r.replay(xs);
       }
       auto segment(segmentReplay.build());
@@ -101,13 +101,14 @@ public:
     auto max = max_id(files);
     db::segment::id next_id(max + 1);
 
-    PageFactory factory(m_context, next_id, m_root);
+    db::TableSegment segment(m_table, next_id);
+    PageFactory factory(segment, m_context.journal(), m_root);
 
     MaxIdReplay idReplay;
     tx::PresentSetReplay psReplay(m_table);
 
     auto segments = parse(files, idReplay, psReplay);
-    auto raw_id = idReplay.next();
+    db::raw::id raw_id(idReplay.next());
 
     using Segments_t = typename db::Segments<Meta_t>;
     return new Segments_t(raw_id, std::move(factory), std::move(segments));

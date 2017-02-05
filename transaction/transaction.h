@@ -1,8 +1,8 @@
 #ifndef DB_TX_TRANSACTION_H
 #define DB_TX_TRANSACTION_H
 
-#include "Settings.h"
 #include "../shared/shared.h"
+#include "Settings.h"
 
 namespace tx {
 
@@ -11,10 +11,10 @@ private:
   // journal::Journals<hash_t> &journal;
 public:
   const tx::Settings settings;
-  const tx::id tid;
+  const tx::id xid;
   const journal::id jid;
-  explicit Transaction(tx::id p_tid, journal::id p_jid, tx::Settings &&s)
-      : settings(s), tid(p_tid), jid(p_jid) {
+  explicit Transaction(tx::id pxid, journal::id pjid, tx::Settings &&s)
+      : settings(s), xid(pxid), jid(pjid) {
   }
   // Transaction(const Transaction&) = delete;
   // Transaction(const Transaction&) = delete;

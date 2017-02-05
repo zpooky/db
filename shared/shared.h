@@ -58,6 +58,7 @@ using position = size_t;
 namespace db {
 
 namespace table {
+// transient id used internally to identify tables
 DB_ID_CLASS()
 constexpr id START_ID;
 using version = uint64_t;
@@ -126,6 +127,14 @@ struct Reservation {
   }
   bool is_valid() const {
     return position != page::position(0) || segment != db::segment::NO_ID;
+  }
+};
+
+struct TableSegment {
+  const db::table::id table;
+  const db::segment::id segment;
+  TableSegment(const db::table::id &t, const db::segment::id &s)
+      : table(t), segment(s) {
   }
 };
 } // namespace db

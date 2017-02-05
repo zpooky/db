@@ -46,6 +46,7 @@ public:
 
   Store(const Store<Meta_t> &&) = delete;
   Store(const Store<Meta_t> &) = delete;
+
   ~Store() {
   }
 
@@ -80,9 +81,6 @@ public:
    */
   // void del(const db::Transaction &, db::raw::version_t);
 };
-}
-namespace {
-struct TransactionalStore {};
 }
 
 #endif

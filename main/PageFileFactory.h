@@ -22,18 +22,20 @@ private:
 private:
   db::IdGenerator<db::segment::id> m_counter;
   const db::Directory m_root;
+  const db::table::id m_table;
   journal::Journals<hash_t> &m_journal;
 
 public:
-  PageFileFactory(db::Context<hash_t> &ctx, db::segment::id start,
+  PageFileFactory(const db::TableSegment &id, journal::Journals<hash_t> &j,
                   const db::Directory &root)
-      : m_counter(start), m_root(root), m_journal(ctx.journal()) {
+      : m_counter(id.segment), m_root(root), m_table(id.table), m_journal(j) {
   }
 
   PageFileFactory(PageFileFactory<Meta_t> &&o)
       : m_counter{std::move(o.m_counter)}, m_root(o.m_root),
         m_journal(o.m_journal) {
   }
+
   PageFileFactory(const PageFileFactory<Meta_t> &) = delete;
 
   ~PageFileFactory() {
