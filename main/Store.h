@@ -23,13 +23,14 @@ private:
   tx::Tx<hash_t> &m_tx;
   journal::Journals<hash_t> &m_journals;
   std::unique_ptr<Segments<Meta_t>> m_segments;
+  const db::table::id m_id;
   // tx::LineAtomicity m_atomicity;
 
 private:
 public:
   explicit Store(db::Context<hash_t> &ctx, tx::Tx<hash_t> &tx)
-      : m_ctx(ctx), m_tx(tx), m_journals(ctx.journal()),
-        m_segments(nullptr) //, m_atomicity{}
+      : m_ctx(ctx), m_tx(tx), m_journals(ctx.journal()), m_segments(nullptr),
+        m_id(ctx.next_id()) //, m_atomicity{}
   {
 
     auto &config = ctx.config();
@@ -38,7 +39,7 @@ public:
     auto table_root = root.cdx(table_name);
     vfs::mkdir(table_root);
 
-    page::PageFilesParser<Meta_t> parser(ctx, table_root, tx);
+    page::PageFilesParser<Meta_t> parser(m_id, ctx, table_root, tx);
     m_segments.reset(parser());
     std::atomic_thread_fence(std::memory_order_release);
   }

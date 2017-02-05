@@ -59,6 +59,7 @@ namespace db {
 
 namespace table {
 DB_ID_CLASS()
+constexpr id START_ID;
 using version = uint64_t;
 
 namespace name {

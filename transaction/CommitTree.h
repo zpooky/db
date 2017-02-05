@@ -4,17 +4,19 @@
 #include "../shared/ExtentSet.h"
 #include "../shared/shared.h"
 #include <stdint.h>
+#include "../collection/CachedAllocator.h"
 
 namespace tx {
 
 class CommitTree {
 private:
   const db::table::id m_table;
-  db::ExtentSet<32> es;
+  db::HeapExtentSet es;
 
 public:
-  explicit CommitTree(const db::table::id &table)
-      : m_table(table), es(db::segment::id(0)) {
+public:
+  explicit CommitTree(const db::table::id &table, sp::CachedAllocator &a)
+      : m_table(table), es(db::segment::id(0), a) {
   }
 
   // void introduce(const db::ExtentSet &) {

@@ -28,7 +28,7 @@ public:
   }
 
   explicit Extent(db::segment::id sid, PresentSet<lines> &&p)
-      : m_reservations{p.get_bitset()}, segment_id(sid) {
+      : m_reservations{p.bitset()}, segment_id(sid) {
   }
 
   Extent(Extent &&o)

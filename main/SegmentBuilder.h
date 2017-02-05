@@ -4,6 +4,7 @@
 #include "../page/FilePage.h"
 #include "../page/io/FilePageMeta.h"
 #include "../segment/Segment.h"
+#include "../shared/PageRange.h"
 #include <bitset>
 #include <deque>
 #include <vector>
@@ -119,11 +120,12 @@ public:
     auto &builders = m_extents.builders();
     std::vector<db::Extent<Meta_t>> extents;
     page::position start(0);
-    auto id(m_segment.id);
+    db::segment::id id(m_segment.id);
     for (auto &extent : builders) {
-      auto ext_lines(extent.lines());
-      extents.emplace_back(id, PresentSet(extent.present(), start, ext_lines));
-      start = page::position(start + ext_lines);
+      auto extent_lines(extent.lines());
+      db::PageRange range(start, extent_lines);
+      extents.emplace_back(id, PresentSet(extent.present(), range));
+      start = page::position(start + extent_lines);
     }
 
     return db::Segment<Meta_t>{std::move(page), db::Extents<Meta_t>(extents)};

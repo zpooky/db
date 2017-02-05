@@ -6,13 +6,13 @@
 namespace tx {
 class PresentSetReplay {
 private:
-  db::segment::id m_segment;
+  db::table::id m_table;
 
 public:
-  explicit PresentSetReplay(const db::segment::id &segment)
-      : m_segment(segment) {
+  explicit PresentSetReplay(const db::table::id &t)
+      : m_table(t) {
   }
-  void operator()(const db::LineMeta &line) {
+  void operator()(const db::LineMeta &) {
   }
 };
 }

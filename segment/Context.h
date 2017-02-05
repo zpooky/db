@@ -8,6 +8,7 @@
 #include "../journal/JournalThread.h"
 #include "../journal/Journals.h"
 #include "../shared/Configuration.h"
+#include "../shared/IdGenerator.h"
 #include "../shared/LittleEndian.h"
 #include "../shared/entities.h"
 #include "../shared/shared.h"
@@ -27,11 +28,12 @@ private:
   journal::JournalThread<hash_t> m_runnable;
   journal::Journals<hash_t> m_journal;
   std::thread m_thread;
+  db::IdGenerator<db::table::id> m_table_ids;
 
 public:
   explicit Context(const Configuration &conf)
       : m_config(conf), m_runnable(conf.root.cd("journal")),
-        m_journal(m_runnable), m_thread([&] { m_runnable(); }) {
+        m_journal(m_runnable), m_thread([&] { m_runnable(); }), m_table_ids{db::table::START_ID} {
   }
 
   Context(const Context &&) = delete;
@@ -56,6 +58,10 @@ public:
   }
   journal::Journals<hash_t> &journal() {
     return m_journal;
+  }
+
+  db::table::id next_id() {
+    return m_table_ids.next();
   }
 };
 }

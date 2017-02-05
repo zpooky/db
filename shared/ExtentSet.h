@@ -4,35 +4,44 @@
 #include "../collection/CachedAllocator.h"
 #include "PresentSet.h"
 #include "shared.h"
+#include <algorithm>
 
 namespace db {
-template <size_t size>
-class ExtentSet {
+class HeapExtentSet {
 private:
-  using PS = db::PresentSet<size>;
+  using PS = db::HeapPresentSet;
   using Extents_t = std::vector<PS>;
 
 public:
-  using Alloc = sp::CachedAllocator<PS>;
+  using Allocator = sp::CachedAllocator;
 
 private:
   Extents_t m_extents;
   PageRange m_range;
   const db::segment::id m_segment;
-  Alloc &m_allocator;
+  Allocator &m_allocator;
 
 public:
-  ExtentSet(const db::segment::id &segment, const Alloc &alloc)
-      : m_extents(), m_range(0, 0), m_segment(segment), m_allocator(alloc) {
+  HeapExtentSet(const db::segment::id &segment, Allocator &alloc)
+      : m_extents{}, m_range(0, 0), m_segment(segment), m_allocator(alloc) {
   }
 
   /**
    * introduce new extents
    */
-  void introduce(const db::PresentSet<size> &o) {
+  template <size_t capacity>
+  void introduce(const db::PresentSet<capacity> &o) {
+    // TODO sort
+    m_extents.emplace_back(o, m_allocator);
+    auto size(m_range.size() + o.range().size());
+    assert(size > m_range.size());
+    m_range = PageRange(0, size);
   }
 
-  bool operator[](page::position p) const {
+  bool operator[](page::position search) const {
+    auto begin(m_extents.begin());
+    auto end(m_extents.end());
+    // std::binary_search(begin, end, search);
     return false;
   }
 };

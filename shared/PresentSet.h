@@ -1,9 +1,11 @@
-#ifndef DB_PRESENTSET_H
-#define DB_PRESENTSET_H
+#ifndef DB_PRESENT_SET_H
+#define DB_PRESENT_SET_H
 
+#include "../collection/HeapBitset.h"
 #include "PageRange.h"
 #include "shared.h"
 #include <bitset>
+#include <cassert>
 
 namespace db {
 /**
@@ -11,19 +13,26 @@ namespace db {
  * segment::id -> Segment
  * page::position -> Segment -> value
  */
-template <page::position capacity>
+template <size_t capacity>
 class PresentSet {
 private:
   static_assert(capacity % 8 == 0, "");
   using Bitset_t = std::bitset<capacity>;
 
 private:
-  const Bitset_t m_bitset;
+  Bitset_t m_bitset;
   const PageRange m_range;
 
 public:
-  PresentSet(const Bitset_t &init, page::position strt, page::position sz)
-      : m_bitset(init), m_range(strt, sz) {
+  /**
+   * strt: absolute
+   * sz: relative to strt
+   *
+   * present range[strt, (strt+sz)]
+   */
+  PresentSet(const Bitset_t &init, const PageRange &range)
+      : m_bitset(init), m_range(range) {
+    assert(range.size() <= capacity);
   }
 
   PresentSet(const PresentSet &) = delete;
@@ -44,15 +53,52 @@ public:
     return m_range(idx);
   }
 
-  const Bitset_t &get_bitset() const & {
+  const PageRange &range() const & {
+    return m_range;
+  }
+
+  const Bitset_t &bitset() const & {
     return m_bitset;
   }
-  // Bitset_t &get_bitset() & {
-  //   return m_bitset;
-  // }
-  // Bitset_t &&get_bitset() && {
-  //   return std::move(m_bitset);
-  // }
+
+  Bitset_t &bitset() & {
+    return m_bitset;
+  }
+
+  Bitset_t &&bitset() && {
+    return std::move(m_bitset);
+  }
+};
+
+class HeapPresentSet {
+private:
+  sp::HeapBitset m_bitset;
+  const PageRange m_range;
+
+public:
+  template <size_t capacity>
+  HeapPresentSet(const sp::CachedAllocator &a, const PresentSet<capacity> &init,
+                 const PageRange &r)
+      : m_bitset(init.bitset(), a), m_range(r) {
+    assert(m_range.size() <= capacity);
+  }
+
+  HeapPresentSet(const HeapPresentSet &) = delete;
+
+  HeapPresentSet(HeapPresentSet &&o)
+      : m_bitset(std::move(o.m_bitset)), m_range(o.m_range) {
+  }
+
+  ~HeapPresentSet() {
+  }
+
+  bool operator<(const page::position &p) const {
+    return m_range < p;
+  }
+  bool operator<(const HeapPresentSet &o) const {
+    return m_range < o.m_range;
+  }
+
 };
 }
 #endif // DB_PRESENTSET_H

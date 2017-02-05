@@ -27,12 +27,13 @@ private:
 private:
   db::Context<hash_t> &m_context;
   const db::Directory m_root;
+  const db::table::id m_table;
   tx::Tx<hash_t> &m_tx;
 
 public:
-  PageFilesParser(db::Context<hash_t> &ctx, const db::Directory &root,
-                  tx::Tx<hash_t> &tx)
-      : m_context(ctx), m_root(root.cd("segment")), m_tx(tx) {
+  PageFilesParser(db::table::id id, db::Context<hash_t> &ctx,
+                  const db::Directory &root, tx::Tx<hash_t> &tx)
+      : m_context(ctx), m_root(root.cd("segment")), m_table(id), m_tx(tx) {
     vfs::mkdir(m_root);
   }
 
@@ -103,7 +104,8 @@ public:
     PageFactory factory(m_context, next_id, m_root);
 
     MaxIdReplay idReplay;
-    tx::PresentSetReplay psReplay;
+    tx::PresentSetReplay psReplay(m_table);
+
     auto segments = parse(files, idReplay, psReplay);
     auto raw_id = idReplay.next();
 
