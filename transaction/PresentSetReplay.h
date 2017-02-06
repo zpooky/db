@@ -2,6 +2,7 @@
 #define DB_TX_PRESENT_SET_H
 
 #include "../fs/Line.h"
+#include "CommitTree.h"
 
 namespace tx {
 class PresentSetReplay {

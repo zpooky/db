@@ -132,7 +132,7 @@ public:
   MMapFilePage &operator=(const MMapFilePage &) = delete;
   MMapFilePage &operator=(const MMapFilePage &&) = delete;
 
-  void write(page::position p, const db::Line<Table_t, hash_t> &l) {
+  void write(page::position p, const db::Line<Table_t> &l) {
     // TODO header
     size_t offset = l.size() * p;
     assert(offset + l.size() <= m_buffer.size());
@@ -150,8 +150,7 @@ class FilePage {
 private:
   using Page_t = typename Meta_t::Page;
   using Table_t = typename Meta_t::latest;
-  using hash_t = typename Meta_t::hash_t;
-  using Line_t = db::Line<Table_t, hash_t>;
+  using Line_t = db::Line<Table_t>;
   using version_t = db::raw::version_t;
   using id_t = db::raw::id;
 

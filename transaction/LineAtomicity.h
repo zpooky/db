@@ -189,6 +189,10 @@ public:
     std::unique_lock<std::mutex> lck(m_commit_lock);
   }
 
+  void release(const db::table::id &){
+    std::unique_lock<std::mutex> lck(m_commit_lock);
+  }
+
 private:
   /* m_current RefCount should be pinned
    * before calling this function

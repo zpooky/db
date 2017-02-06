@@ -11,6 +11,8 @@
 #include "../shared/entities.h"
 #include "../transaction/PresentSetReplay.h"
 #include "SegmentBuilder.h"
+#include "TransactionalGuard.h"
+#include "TransactionalSegments.h"
 #include "Tx.h"
 #include <functional>
 #include <vector>
@@ -20,19 +22,18 @@ template <typename Meta_t>
 class PageFilesParser {
 private:
   using Table_t = typename Meta_t::latest;
-  using hash_t = typename Meta_t::hash_t;
   using PageFactory = typename Meta_t::PageFactory;
-  using Line_t = db::Line<Table_t, hash_t>;
+  using Line_t = db::Line<Table_t>;
 
 private:
-  db::Context<hash_t> &m_context;
+  db::Context &m_context;
   const db::Directory m_root;
   const db::table::id m_table;
-  tx::Tx<hash_t> &m_tx;
+  tx::Tx &m_tx;
 
 public:
-  PageFilesParser(db::table::id id, db::Context<hash_t> &ctx,
-                  const db::Directory &root, tx::Tx<hash_t> &tx)
+  PageFilesParser(db::table::id id, db::Context &ctx, const db::Directory &root,
+                  tx::Tx &tx)
       : m_context(ctx), m_root(root.cd("segment")), m_table(id), m_tx(tx) {
     vfs::mkdir(m_root);
   }
@@ -95,7 +96,7 @@ private:
   }
 
 public:
-  db::Segments<Meta_t> *operator()() {
+  tx::TxSegments<Meta_t> operator()() {
     auto files = segment_files();
 
     auto max = max_id(files);
@@ -111,9 +112,10 @@ public:
     db::raw::id raw_id(idReplay.next());
 
     using Segments_t = typename db::Segments<Meta_t>;
-    return new Segments_t(raw_id, std::move(factory), std::move(segments));
+    auto segs = new Segments_t(raw_id, std::move(factory), std::move(segments));
+    return tx::TxSegments<Meta_t>(segs, tx::TxGuard(m_tx, psReplay.build()));
   }
 };
-}
+} // namespace page
 
 #endif

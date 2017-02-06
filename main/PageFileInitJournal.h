@@ -4,8 +4,8 @@
 #include "../journal/Journals.h"
 #include "../page/FilePage.h"
 #include "../page/format/Format.h"
-#include "../shared/PresentSet.h"
 #include "../segment/Segment.h"
+#include "../shared/PresentSet.h"
 #include "../shared/entities.h"
 
 namespace page {
@@ -13,17 +13,16 @@ template <typename Meta_t>
 class PageFileInitJournal {
 private:
   using Table_t = typename Meta_t::latest;
-  using hash_t = typename Meta_t::hash_t;
   using Extent_t = db::Extent<Meta_t>;
   using Extents_t = db::Extents<Meta_t>;
 
 private:
   const db::Directory &m_root;
-  journal::Journals<hash_t> &m_journal;
+  journal::Journals &m_journal;
 
 public:
   explicit PageFileInitJournal(const db::Directory &root,
-                               journal::Journals<hash_t> &journal)
+                               journal::Journals &journal)
       : m_root(root), m_journal{journal} {
   }
 
@@ -31,7 +30,7 @@ public:
   PageFileInitJournal(const PageFileInitJournal &&) = delete;
 
   db::Segment<Meta_t> create(db::segment::id sid) {
-    auto jid = m_journal.template begin();
+    auto jid = m_journal.begin();// TODO RAII
 
     m_journal.template create<Meta_t>(jid, sid);
 
@@ -48,7 +47,7 @@ public:
 
     db::Segment<Meta_t> res{FilePage<Meta_t>(move(meta)), move(extents)};
 
-    m_journal.template commit(jid);
+    m_journal.commit(jid);// TODO RAII with begin
     return res;
   }
 };

@@ -81,8 +81,7 @@ public:
 template <typename Meta_t>
 FilePageMeta V1SegmentInitializer<Meta_t>::create(db::segment::id sid) {
   using Table_t = typename Meta_t::latest;
-  using hash_t = typename Meta_t::hash_t;
-  using Line_t = typename db::Line<Table_t, hash_t>;
+  using Line_t = typename db::Line<Table_t>;
   db::Filename filename{db::Segment_name::name(sid)};
 
   using capacity = unsigned long long;

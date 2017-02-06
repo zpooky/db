@@ -57,7 +57,7 @@ struct TestTableMetax {
     return {'t', 'e', 's', 't', '_', 't', 'a', 'b', 'l', 'e', 0};
   }
 
-  using hash_t = sp::hash::crc32;
+  using hash_t = sp::crc32;
 
   static constexpr size_t extent_lines() {
     return 1024ul;
@@ -121,7 +121,7 @@ struct Test2TableMetax {
     return {'t', 'e', 's', 't', '2', '_', 't', 'a', 'b', 'l', 'e', 0};
   }
 
-  using hash_t = sp::hash::crc32;
+  using hash_t = sp::crc32;
 
   static constexpr size_t extent_lines() {
     return 1024ul;

@@ -19,21 +19,21 @@ namespace db {
  * - Segment file journal.
  *
  */
-template <typename hash_t>
 class Context {
 private:
   Configuration m_config;
 
 private:
-  journal::JournalThread<hash_t> m_runnable;
-  journal::Journals<hash_t> m_journal;
+  journal::JournalThread m_runnable;
+  journal::Journals m_journal;
   std::thread m_thread;
   db::IdGenerator<db::table::id> m_table_ids;
 
 public:
   explicit Context(const Configuration &conf)
       : m_config(conf), m_runnable(conf.root.cd("journal")),
-        m_journal(m_runnable), m_thread([&] { m_runnable(); }), m_table_ids{db::table::START_ID} {
+        m_journal(m_runnable), m_thread([&] { m_runnable(); }),
+        m_table_ids{db::table::START_ID} {
   }
 
   Context(const Context &&) = delete;
@@ -56,7 +56,7 @@ public:
   const Configuration &config() const {
     return m_config;
   }
-  journal::Journals<hash_t> &journal() {
+  journal::Journals &journal() {
     return m_journal;
   }
 

@@ -3,6 +3,7 @@
 
 #include "../shared/Buffer.h"
 #include "../shared/entities.h"
+#include "../shared/hash.h"
 #include "../shared/shared.h"
 
 namespace journal {
@@ -38,10 +39,12 @@ enum class EntryType : uint8_t {
   LINE = 2
 };
 
-template <typename hash_t>
 struct JournalLine {
-private:
+public:
+  using hash_t = sp::crc32;
   using hash_type = typename hash_t::type;
+
+private:
   using name_type = db::table::name::type;
   using segment_id = db::segment::id;
   // TODO encapsulate
@@ -99,7 +102,7 @@ private:
   }
 
 public:
-  void swap(JournalLine<hash_t> &o) {
+  void swap(JournalLine &o) {
     std::swap(hash, o.hash);
     std::swap(table, o.table);
     std::swap(id, o.id);
@@ -109,48 +112,42 @@ public:
   }
 };
 
-template <typename hash_t>
-JournalLine<hash_t>
-segment_line(journal::id p_id, const db::table::name::type &p_table,
-             Type p_type, EntryType p_entry_type, db::HeapBuffer &&b) {
-  hash_t h;
-  h.update(p_id);
-  h.update(p_table);
-  h.update(static_cast<std::underlying_type<Type>::type>(p_type));
-  h.update(static_cast<std::underlying_type<EntryType>::type>(p_entry_type));
+JournalLine segment_line(const journal::id &jid,
+                          const db::table::name::type &t, Type type,
+                          EntryType etype, db::HeapBuffer &&b) {
+  typename JournalLine::hash_t h;
+  h.update(jid);
+  h.update(t);
+  h.update(static_cast<std::underlying_type<Type>::type>(type));
+  h.update(static_cast<std::underlying_type<EntryType>::type>(etype));
   h.update(b);
-  return {h.digest(), p_id, p_table, p_type, p_entry_type, std::move(b)};
+  return {h.digest(), jid, t, type, etype, std::move(b)};
 }
+
 namespace line {
-template <typename hash_t>
-JournalLine<hash_t> segment_line(journal::id p_id, Type p_type) {
-  return segment_line<hash_t>(p_id, {0}, p_type, EntryType::NOP,
-                              db::HeapBuffer(0));
+JournalLine segment_line(const journal::id &jid, Type type) {
+  return segment_line(jid, {0}, type, EntryType::NOP, db::HeapBuffer(0));
 }
 
-template <typename hash_t>
-JournalLine<hash_t> empty_segment_line() {
-  using name_type = db::table::name::type;
-  constexpr name_type name{0};
-  return segment_line<hash_t>(journal::NO_ID, name, Type::INTERNAL);
-}
+// JournalLine empty_segment_line() {
+//   using name_type = db::table::name::type;
+//   constexpr name_type name{0};
+//   return segment_line(journal::NO_ID, name, Type::INTERNAL );
+// }
 
-template <typename hash_t>
-JournalLine<hash_t> create(journal::id jid, const db::table::name::type &table,
-                           EntryType type, db::HeapBuffer &&b) {
+JournalLine create(journal::id jid, const db::table::name::type &table,
+                   EntryType type, db::HeapBuffer &&b) {
   assert(type != EntryType::NOP);
-  return segment_line<hash_t>(jid, table, Type::ENTRY, type, std::move(b));
+  return segment_line(jid, table, Type::ENTRY, type, std::move(b));
 }
 
-template <typename hash_t>
-JournalLine<hash_t> begin(journal::id jid) {
-  return segment_line<hash_t>(jid, Type::BEGIN);
+JournalLine begin(journal::id jid) {
+  return segment_line(jid, Type::BEGIN);
 }
 
-template <typename hash_t>
-JournalLine<hash_t> commit(journal::id jid) {
-  return segment_line<hash_t>(jid, Type::COMMIT);
+JournalLine commit(journal::id jid) {
+  return segment_line(jid, Type::COMMIT);
 }
-}
-}
+} // namespace line
+} // namespace journal
 #endif

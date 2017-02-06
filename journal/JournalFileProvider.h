@@ -10,7 +10,6 @@ namespace journal {
 /**
  * A pool of journal files
  */
-template <typename hash_t>
 class JournalFileProvider {
 private:
   /**

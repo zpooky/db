@@ -23,10 +23,10 @@ private:
   db::IdGenerator<db::segment::id> m_counter;
   const db::Directory m_root;
   const db::table::id m_table;
-  journal::Journals<hash_t> &m_journal;
+  journal::Journals &m_journal;
 
 public:
-  PageFileFactory(const db::TableSegment &id, journal::Journals<hash_t> &j,
+  PageFileFactory(const db::TableSegment &id, journal::Journals &j,
                   const db::Directory &root)
       : m_counter(id.segment), m_root(root), m_table(id.table), m_journal(j) {
   }

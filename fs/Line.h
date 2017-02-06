@@ -31,7 +31,7 @@ struct LineMeta {
   }
 };
 // TODO maybe do not copy Table_t data
-template <typename Table_t, typename hash_t>
+template <typename Table_t>
 class Line {
 public:
   const LineMeta meta;
@@ -45,11 +45,11 @@ public:
       : meta{m}, data(std::move(table)) {
   }
 
-  Line(Line<Table_t, hash_t> &&o)
+  Line(Line<Table_t> &&o)
       : meta{std::move(o.meta)}, data(std::move(o.data)) {
   }
 
-  Line(Line<Table_t, hash_t> &) = delete;
+  Line(Line<Table_t> &) = delete;
 
   template <typename Endianess, typename Buffer>
   void write(Buffer &b) const {
@@ -64,10 +64,10 @@ public:
 
   // TODO endianess should be base on the file no determined in compile time
   template <typename Endianess, typename Buffer>
-  static Line<Table_t, hash_t> read(Buffer &b) {
+  static Line<Table_t> read(Buffer &b) {
     auto meta = db::LineMeta::read<Endianess, Buffer>(b);
     auto data = Table_t::template read<Endianess, Buffer>(b);
-    return Line<Table_t, hash_t>(meta, data);
+    return Line<Table_t>(meta, data);
   }
 
 private:

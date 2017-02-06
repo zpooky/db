@@ -36,10 +36,10 @@ public:
 
   Queue(const Queue<T> &) = delete;
 
-  //        Queue(Queue<T> &&o) :
-  //                m_default{std::move(o.m_default)} {
-  //
-  //        }
+  Queue(Queue<T> &&o)
+      : m_mutex(std::move(o.m_mutex)), m_condition(std::move(o.m_condition)),
+        m_sleeping(std::move(o.m_sleeping)), m_fifo(std::move(m_fifo)) {
+  }
 
   //        template<typename Q>
   //        void enqueue(Q &&);
@@ -65,14 +65,14 @@ template <typename T>
 T Queue<T>::dequeue() {
   // auto val = nullptr;
   // if (val != nullptr) {
-    m_sleeping.fetch_add(uint32_t(1));
-    do {
-      std::unique_lock<std::mutex> lck(m_mutex);
-      m_condition.wait(lck);
+  m_sleeping.fetch_add(uint32_t(1));
+  do {
+    std::unique_lock<std::mutex> lck(m_mutex);
+    m_condition.wait(lck);
 
-      //                break;
-    } while (true);
-    m_sleeping.fetch_sub(1);
+    //                break;
+  } while (true);
+  m_sleeping.fetch_sub(1);
   // }
   //        return
 }

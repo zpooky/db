@@ -33,16 +33,13 @@
  */
 namespace journal {
 
-template <typename hash_t>
 class JournalPageBufferedFileWriter;
 
-template <typename hash_t>
-using JPBFW = JournalPageBufferedFileWriter<hash_t>;
+using JPBFW = JournalPageBufferedFileWriter;
 
-template <typename hash_t>
 class JournalPageBufferedFileWriter {
 private:
-  JournalFileProvider<hash_t> &m_provider;
+  JournalFileProvider &m_provider;
 
   db::AlignedBuffer m_buffer;
 
@@ -51,25 +48,25 @@ private:
   // (this is not enough since we need to ensure
   // that the page cache in the db is also flushed)
   // std::vector<journal_id> id m_pending;
-  using JLine = JournalLine<hash_t>;
+  using JLine = JournalLine;
 
 public:
-  using JFP = JournalFileProvider<hash_t>;
+  using JFP = JournalFileProvider;
 
   JournalPageBufferedFileWriter(JFP &provider, size_t sector_size)
       : m_provider{provider}, m_buffer{sector_size} {
   }
-  JournalPageBufferedFileWriter(JFP &provider, JPBFW<hash_t> &&o)
+  JournalPageBufferedFileWriter(JFP &provider, JPBFW &&o)
       : m_provider(provider), m_buffer{std::move(o.m_buffer)} {
   }
 
-  JournalPageBufferedFileWriter(const JPBFW<hash_t> &&) = delete;
+  JournalPageBufferedFileWriter(const JPBFW &&) = delete;
 
-  JournalPageBufferedFileWriter(const JPBFW<hash_t> &) = delete;
+  JournalPageBufferedFileWriter(const JPBFW &) = delete;
 
-  JPBFW<hash_t> &operator=(const JPBFW<hash_t> &&) = delete;
+  JPBFW &operator=(const JPBFW &&) = delete;
 
-  JPBFW<hash_t> &operator=(const JPBFW<hash_t> &) = delete;
+  JPBFW &operator=(const JPBFW &) = delete;
 
   ~JournalPageBufferedFileWriter() {
   }
@@ -80,7 +77,7 @@ public:
   void write(std::vector<JLine> &&events) {
     // assert(!events.empty());
     m_provider.with([&](db::DirectFileWriter &writer) {
-      auto flush_ids = sort(events);
+      auto flush_ids(sort(events));
       bool require_flush(false);
 
       for (auto &event : events) {
@@ -107,7 +104,10 @@ public:
   }
 
   void force_flush() {
-    m_provider.with([&](auto &writer) { force_flush(writer); });
+    m_provider.with([&](auto &writer) {
+      //
+      force_flush(writer);
+    });
   }
 
 private:
@@ -123,7 +123,7 @@ private:
     }
   }
 
-  auto sort(std::vector<JLine> &events) const {
+  std::vector<journal::id> sort(std::vector<JLine> &events) const {
     // TODO implement real
     auto cmp = [](const JLine &f, const JLine &s) { return false; };
     std::sort(begin(events), end(events), cmp);

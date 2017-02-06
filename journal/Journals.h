@@ -16,28 +16,26 @@
 #include <utility>
 
 namespace journal {
-template <typename hash_t>
-using Consumer_t = Consumer<JournalLine<hash_t>>;
+using Consumer_t = Consumer<JournalLine>;
 
-template <typename hash_t>
 class Journals {
 private:
-  Consumer_t<hash_t> &m_consumer;
+private:
+  Consumer_t &m_consumer;
   db::IdGenerator<journal::id> m_id;
 
 public:
-  Journals(Consumer_t<hash_t> &c, journal::id start = journal::START_ID)
+  Journals(Consumer_t &c, journal::id start = journal::START_ID)
       : m_consumer(c), m_id{start} {
     assert(start != journal::NO_ID);
   }
 
-  Journals(Journals<hash_t> &&o)
-      : m_consumer(o.m_consumer), m_id(std::move(o.m_id)) {
+  Journals(Journals &&o) : m_consumer(o.m_consumer), m_id(std::move(o.m_id)) {
   }
 
-  Journals(const Journals<hash_t> &) = delete;
+  Journals(const Journals &) = delete;
 
-  ~Journals(){
+  ~Journals() {
   }
 
 public:
@@ -47,7 +45,7 @@ public:
    */
   journal::id begin() {
     auto journal_id(m_id.next());
-    m_consumer.add(journal::line::begin<hash_t>(journal_id));
+    m_consumer.add(journal::line::begin(journal_id));
     return journal_id;
   }
   /**
@@ -63,8 +61,7 @@ public:
     SegmentSpec<Table_t>::create(b, t);
     constexpr auto table = Meta_t::table_name();
     constexpr auto type = EntryType::LINE;
-    m_consumer.add(
-        journal::line::create<hash_t>(jid, table, type, std::move(b)));
+    m_consumer.add(journal::line::create(jid, table, type, std::move(b)));
   }
   /**
    * Journal Type: ENTRY
@@ -77,18 +74,17 @@ public:
     PageFileSpec<Table_t>::create(b, sid);
     constexpr auto table = Meta_t::table_name();
     constexpr auto type = EntryType::SEGMENT;
-    m_consumer.add(
-        journal::line::create<hash_t>(jid, table, type, std::move(b)));
+    m_consumer.add(journal::line::create(jid, table, type, std::move(b)));
   }
 
-  // void rollback() {
-  // }
+  void rollback(const journal::id &) {
+  }
   /**
    * Journal TYPE: COMMIT
    * Journal entry for commit journal transaction
    */
-  void commit(journal::id id) {
-    m_consumer.add(journal::line::commit<hash_t>(id));
+  void commit(const journal::id &id) {
+    m_consumer.add(journal::line::commit(id));
   }
 };
 }

@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "../segment/Context.h"
-#include "../shared/hash.h"
 #include "../transaction/LineAtomicity.h"
 #include "../transaction/Settings.h"
 #include "../transaction/transaction.h"
@@ -12,7 +11,6 @@
 using namespace journal;
 using namespace db::fs;
 using namespace std;
-using namespace sp::hash;
 
 int main(int, char *[]) {
   cout << "sector size:" << vfs::sector::logical::size("") << endl;
@@ -22,10 +20,9 @@ int main(int, char *[]) {
   db::Configuration conf(root);
   vfs::mkdir(root);
 
-  using hash_t = crc32;
-  db::Context<hash_t> ctx(conf);
+  db::Context ctx(conf);
 
-  tx::Tx<hash_t> tx{ctx};
+  tx::Tx tx{ctx};
   db::Store<TestTableMetax> t1_store{ctx, tx};
   db::Store<Test2TableMetax> t2_store{ctx, tx};
   {

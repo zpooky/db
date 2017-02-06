@@ -38,7 +38,7 @@ public:
 
 TEST(LineTest, test) {
   using Table_t = StructLineTest;
-  using Line_t = Line<Table_t, int>;
+  using Line_t = Line<Table_t>;
   using data_t = StructLineTest::data_t;
   using Buffer_t = db::Buffer<Line_t::size()>;
 

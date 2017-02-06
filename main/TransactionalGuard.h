@@ -6,30 +6,47 @@
 
 namespace tx {
 
-template <typename hash_t>
-class TransactionalGuard {
+class TxGuard {
 private:
-  Tx<hash_t> *m_tx;
-  const db::table::id m_table;
+  Tx *m_tx;
+  db::table::id m_table;
 
 public:
-  TransactionalGuard(Tx<hash_t> &tx, CommitTree &&t)
-      : m_tx(&tx), m_table(t.table()) {
+  TxGuard() : m_tx(nullptr), m_table(db::table::NO_ID) {
+  }
+
+  TxGuard(Tx &tx, CommitTree &&t) : m_tx(&tx), m_table(t.table()) {
     m_tx->introduce(std::move(t));
   }
 
-  TransactionalGuard(TransactionalGuard &&o)
-      : m_tx(nullptr), m_table(o.m_table) {
-    std::swap(m_tx, o.m_tx);
+  TxGuard(TxGuard &&o) : m_tx(nullptr), m_table(db::table::NO_ID) {
+    swap(o);
   }
 
-  TransactionalGuard(const TransactionalGuard &) = delete;
+  TxGuard &operator=(TxGuard &&o) {
+    if (this != &o) {
+      assign(std::move(o));
+    }
+    return *this;
+  }
 
-  ~TransactionalGuard() {
+  TxGuard(const TxGuard &) = delete;
+
+  ~TxGuard() {
     if (m_tx) {
       m_tx->release(m_table);
       m_tx = nullptr;
     }
+  }
+
+  void swap(TxGuard &o) {
+    std::swap(m_tx, o.m_tx);
+    std::swap(m_table, o.m_table);
+  }
+
+private:
+  void assign(TxGuard o) {
+    swap(o);
   }
 };
 

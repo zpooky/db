@@ -39,14 +39,15 @@
 
 namespace journal {
 DB_ID_CLASS()
-constexpr id START_ID(1);
 constexpr id NO_ID(0);
+constexpr id START_ID(NO_ID + 1);
 
 } // namespace journal
 
 namespace tx {
 DB_ID_CLASS()
-constexpr id START_ID(1);
+constexpr id NO_ID(0);
+constexpr id START_ID(NO_ID + 1);
 
 } // namespace tx
 
@@ -60,7 +61,8 @@ namespace db {
 namespace table {
 // transient id used internally to identify tables
 DB_ID_CLASS()
-constexpr id START_ID;
+constexpr id NO_ID(0);
+constexpr id START_ID(NO_ID + 1);
 using version = uint64_t;
 
 namespace name {
@@ -78,7 +80,7 @@ using version = uint16_t;
 
 DB_ID_CLASS()
 constexpr id NO_ID(0);
-constexpr id START_ID(1);
+constexpr id START_ID(NO_ID + 1);
 } // namespace segment
 namespace raw {
 

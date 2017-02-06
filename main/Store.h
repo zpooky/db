@@ -19,17 +19,17 @@ private:
   using page_t = typename Meta_t::Page;
 
 private:
-  Context<hash_t> &m_ctx;
-  tx::Tx<hash_t> &m_tx;
-  journal::Journals<hash_t> &m_journals;
-  std::unique_ptr<Segments<Meta_t>> m_segments;
+  Context &m_ctx;
+  tx::Tx &m_tx;
+  journal::Journals &m_journals;
+  tx::TxSegments<Meta_t> m_segments;
   const db::table::id m_id;
   // tx::LineAtomicity m_atomicity;
 
 private:
 public:
-  explicit Store(db::Context<hash_t> &ctx, tx::Tx<hash_t> &tx)
-      : m_ctx(ctx), m_tx(tx), m_journals(ctx.journal()), m_segments(nullptr),
+  explicit Store(db::Context &ctx, tx::Tx &tx)
+      : m_ctx(ctx), m_tx(tx), m_journals(ctx.journal()), m_segments(),
         m_id(ctx.next_id()) //, m_atomicity{}
   {
 
@@ -40,7 +40,7 @@ public:
     vfs::mkdir(table_root);
 
     page::PageFilesParser<Meta_t> parser(m_id, ctx, table_root, tx);
-    m_segments.reset(parser());
+    m_segments = parser();
     std::atomic_thread_fence(std::memory_order_release);
   }
 

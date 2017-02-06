@@ -3,8 +3,8 @@
 
 #include "../journal/Journals.h"
 #include "../segment/Context.h"
-#include "../shared/shared.h"
 #include "../shared/IdGenerator.h"
+#include "../shared/shared.h"
 #include "../transaction/LineAtomicity.h"
 #include "../transaction/Settings.h"
 #include "../transaction/transaction.h"
@@ -14,14 +14,22 @@ template <typename Function>
 class RAII {
 private:
   Function release;
+  bool present;
 
 public:
-  explicit RAII(Function f) : release(f) {
+  explicit RAII(Function f) : release(f), present(true) {
   }
+
   RAII(const RAII &) = delete;
-  RAII(const RAII &&) = delete;
+  RAII(RAII &&o) : release(std::move(o.release)), present(false) {
+    std::swap(present, o.present);
+  }
+
   ~RAII() {
-    release();
+    if (present) {
+      release();
+      present = false;
+    }
   }
 };
 template <typename Function>
@@ -31,15 +39,14 @@ RAII<Function> raii(Function f) {
 }
 namespace tx {
 
-template <typename hash_t>
 class Tx {
 private:
-  journal::Journals<hash_t> &m_journal;
+  journal::Journals &m_journal;
   Transactionx<10> m_transaction;
   db::IdGenerator<tx::id> m_counter;
 
 public:
-  explicit Tx(db::Context<hash_t> &ctx)
+  explicit Tx(db::Context &ctx)
       : m_journal(ctx.journal()), m_transaction(), m_counter(tx::START_ID) {
   }
 
@@ -68,15 +75,19 @@ public:
       m_journal.rollback(tx.jid);
     }));
 
-    //rollback probobly does not have the same constraints as commit.
+    // rollback probobly does not have the same constraints as commit.
     auto r2(raii([&] {
       //
       m_transaction.rollback(tx);
     }));
   }
 
-  void introduce(CommitTree&&t){
+  void introduce(CommitTree &&t) {
     m_transaction.introduce(std::move(t));
+  }
+
+  void release(const db::table::id &table) {
+    m_transaction.release(table);
   }
 };
 }

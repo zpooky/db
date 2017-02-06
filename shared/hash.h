@@ -9,8 +9,6 @@
 #include <string.h>
 
 namespace sp {
-namespace hash {
-using std::array;
 
 //    uint16_t gen_crc16(const uint8_t *data, uint16_t size) {
 //        const int CRC16 = 0x8005;
@@ -70,10 +68,10 @@ template <size_t T_bytes>
 class crc {
 private:
 public:
-  using type = array<uint8_t, T_bytes>;
+  using type = std::array<uint8_t, T_bytes>;
 
   template <size_t t_size>
-  type digest(const array<uint8_t, t_size> &) {
+  type digest(const std::array<uint8_t, t_size> &) {
     //            const uint8_t *c = "123456789";
     //            gen_crc16(c, strlen(c));
 
@@ -112,6 +110,5 @@ public:
 };
 
 using crc32 = crc<4>;
-}
-}
+} // namespace sp
 #endif //_SP_HASH_H
