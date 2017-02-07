@@ -92,13 +92,12 @@ public:
   ~HeapPresentSet() {
   }
 
-  bool operator<(const page::position &p) const {
+  bool operator<(page::position p) const {
     return m_range < p;
   }
   bool operator<(const HeapPresentSet &o) const {
     return m_range < o.m_range;
   }
-
 };
 }
 #endif // DB_PRESENTSET_H

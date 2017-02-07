@@ -8,8 +8,8 @@
 #include <iostream>
 
 namespace page {
-//TODO remove Meta_t 
-template<typename Meta_t>
+// TODO remove Meta_t
+template <typename Meta_t>
 class ReplayPageFile {
 private:
   // using Table_t = typename Meta_t::Table;
@@ -24,7 +24,7 @@ private:
 public:
   explicit ReplayPageFile(const FilePageMeta &meta) : m_meta(meta) {
   }
-  
+
   ReplayPageFile(const ReplayPageFile &&) = delete;
   ReplayPageFile(const ReplayPageFile &) = delete;
 
@@ -32,7 +32,7 @@ private:
   template <typename Functions>
   void apply(Functions &fs, const db::LineMeta &l) const {
     for (auto &f : fs) {
-      f(l);
+      f(m_meta, l);
     }
   }
 
@@ -54,12 +54,8 @@ public:
         fr.read(buffer);
 
         if (buffer.position() == buffer.capacity()) {
-          // std::cout<<current<<"\n";
           buffer.flip();
           auto meta = db::LineMeta::read<Endianess, Buffer_t>(buffer);
-          // if (meta) {
-          //   auto data = Table_t::template read<Endianess, Buffer_t>(buffer);
-          // }
           apply(fs, meta);
 
           buffer.clear();

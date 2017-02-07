@@ -22,8 +22,8 @@ private:
   Allocator &m_allocator;
 
 public:
-  HeapExtentSet(const db::segment::id &segment, Allocator &alloc)
-      : m_extents{}, m_range(0, 0), m_segment(segment), m_allocator(alloc) {
+  HeapExtentSet(const db::segment::id &s, Allocator &a)
+      : m_extents{}, m_range(0, 0), m_segment(s), m_allocator(a) {
   }
 
   /**
@@ -38,9 +38,10 @@ public:
     m_range = PageRange(0, size);
   }
 
-  bool operator[](page::position search) const {
+  bool operator[](page::position) const {
     auto begin(m_extents.begin());
     auto end(m_extents.end());
+    // TODO
     // std::binary_search(begin, end, search);
     return false;
   }

@@ -2,6 +2,7 @@
 #define _DB_PAGE_MAX_ID_REPLAY
 
 #include "../fs/Line.h"
+#include "../page/io/FilePageMeta.h"
 #include "../shared/shared.h"
 
 namespace page {
@@ -16,7 +17,13 @@ private:
 public:
   MaxIdReplay() : m_greatest(db::raw::EMPTY) {
   }
-  void operator()(const db::LineMeta &line) {
+
+  MaxIdReplay(const MaxIdReplay &) = delete;
+  MaxIdReplay(const MaxIdReplay &&) = delete;
+  ~MaxIdReplay() {
+  }
+
+  void operator()(const FilePageMeta &, const db::LineMeta &line) {
     m_greatest = std::max(line.id, m_greatest);
   }
 

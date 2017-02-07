@@ -20,6 +20,11 @@ public:
   explicit CachedAllocator(size_t cached) : m_cached(cached) {
   }
 
+  CachedAllocator(CachedAllocator &&o) : m_cached(o.m_cached) {
+  }
+
+  CachedAllocator(const CachedAllocator &) = delete;
+
   ~CachedAllocator() {
   }
 
@@ -38,5 +43,5 @@ T *CachedAllocator::allocate(size_t) {
 template <typename T>
 void CachedAllocator::deallocate(T *, size_t) {
 }
-}
+} // namespace sp
 #endif

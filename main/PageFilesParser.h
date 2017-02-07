@@ -9,13 +9,48 @@
 #include "../segment/Segment.h"
 #include "../segment/Segments.h"
 #include "../shared/entities.h"
-#include "../transaction/PresentSetReplay.h"
+#include "PresentSetReplay.h"
 #include "SegmentBuilder.h"
 #include "TransactionalGuard.h"
 #include "TransactionalSegments.h"
 #include "Tx.h"
 #include <functional>
 #include <vector>
+
+namespace {
+template <typename T>
+class RW {
+private:
+  T &data;
+
+public:
+  explicit RW(T &d) : data(d) {
+  }
+
+  RW(RW &o) : data(o.data) {
+  }
+
+  RW(RW &&o) : data(o.data) {
+  }
+
+  RW<T> &operator=(RW<T> &o) {
+    data = o.data;
+  }
+
+  RW<T> &operator=(RW<T> &&o) {
+    data = o.data;
+  }
+
+  void operator()(const page::FilePageMeta &f, const db::LineMeta &l) {
+    data(f, l);
+  }
+};
+
+template <typename T>
+RW<T> rw(T &d) {
+  return RW<T>(d);
+}
+}
 
 namespace page {
 template <typename Meta_t>
@@ -24,6 +59,8 @@ private:
   using Table_t = typename Meta_t::latest;
   using PageFactory = typename Meta_t::PageFactory;
   using Line_t = db::Line<Table_t>;
+  using Function_t =
+      std::function<void(const FilePageMeta &, const db::LineMeta &)>;
 
 private:
   db::Context &m_context;
@@ -75,7 +112,7 @@ private:
   }
 
   auto parse(const std::vector<db::File> &files, MaxIdReplay &idr,
-             tx::PresentSetReplay &psr) const {
+             tx::PresentSetReplay<Meta_t> &psr) const {
     // TODO preallocate vector
     std::vector<db::Segment<Meta_t>> result;
 
@@ -84,9 +121,12 @@ private:
       // TODO create checksum verify *Builder*
       SegmentBuilder<Meta_t> segmentReplay(seg_meta);
       {
+        Function_t segReplay = rw(segmentReplay);
+        Function_t idReplay = rw(idr);
+        Function_t presentSetReplay = rw(psr);
+        std::vector<Function_t> xs{segReplay, idReplay, presentSetReplay};
+
         ReplayPageFile<Meta_t> r(seg_meta);
-        using Function_t = std::function<void(const db::LineMeta &)>;
-        std::vector<Function_t> xs{segmentReplay, idr, psr};
         r.replay(xs);
       }
       auto segment(segmentReplay.build());
@@ -106,7 +146,7 @@ public:
     PageFactory factory(segment, m_context.journal(), m_root);
 
     MaxIdReplay idReplay;
-    tx::PresentSetReplay psReplay(m_table);
+    tx::PresentSetReplay<Meta_t> psReplay(m_table);
 
     auto segments = parse(files, idReplay, psReplay);
     db::raw::id raw_id(idReplay.next());
