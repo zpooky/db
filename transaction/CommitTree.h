@@ -10,7 +10,7 @@ namespace tx {
 
 class CommitTree {
 private:
-  using Allocator = sp::CachedAllocator;
+  using Allocator = sp::ParrentAllocator;
   using Extents_t = std::vector<db::HeapExtentSet>;
 
 private:

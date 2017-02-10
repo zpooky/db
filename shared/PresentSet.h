@@ -98,6 +98,10 @@ public:
   bool operator<(const HeapPresentSet &o) const {
     return m_range < o.m_range;
   }
+
+  constexpr static size_t size() {
+    return 0;
+  }
 };
 }
 #endif // DB_PRESENTSET_H

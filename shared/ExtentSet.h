@@ -2,14 +2,16 @@
 #define DB_EXTENT_SET_H
 
 #include "../collection/CachedAllocator.h"
+#include "../shared/Configuration.h"
 #include "PresentSet.h"
 #include "shared.h"
 #include <algorithm>
 
 namespace db {
 class HeapExtentSet {
+public:
+  using PS = db::PresentSet<db::Configuration::extent_lines()>;
 private:
-  using PS = db::HeapPresentSet;
   using Extents_t = std::vector<PS>;
 
 public:
@@ -19,11 +21,12 @@ private:
   Extents_t m_extents;
   PageRange m_range;
   const db::segment::id m_segment;
-  Allocator &m_allocator;
+  Allocator m_allocator;
 
 public:
-  HeapExtentSet(const db::segment::id &s, Allocator &a)
-      : m_extents{}, m_range(0, 0), m_segment(s), m_allocator(a) {
+  HeapExtentSet(const db::segment::id &s, Allocator &&a, Extents_t &&exts)
+      : m_extents{std::move(exts)}, m_range(0, 0), m_segment(s),
+        m_allocator(std::move(a)) {
   }
 
   /**

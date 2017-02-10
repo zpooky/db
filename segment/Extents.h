@@ -9,11 +9,10 @@ template <typename Meta_t>
 class Extents {
 private:
   using Table_t = typename Meta_t::latest;
-  using Extent_t = Extent<Meta_t>;
   using Maybe_t = sp::Maybe<Reservation<Table_t>>;
 
 private:
-  sp::con::Stack<Extent_t> m_extents;
+  sp::con::Stack<Extent<Meta_t>> m_extents;
 
 public:
   template <typename Collection>

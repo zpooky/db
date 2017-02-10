@@ -60,7 +60,7 @@ struct TestTableMetax {
   using hash_t = sp::crc32;
 
   static constexpr size_t extent_lines() {
-    return 1024ul;
+    return db::Configuration::extent_lines();
   }
 
   using Page = page::FilePage<TestTableMetax>;
@@ -124,7 +124,7 @@ struct Test2TableMetax {
   using hash_t = sp::crc32;
 
   static constexpr size_t extent_lines() {
-    return 1024ul;
+    return db::Configuration::extent_lines();
   }
 
   using Page = page::FilePage<Test2TableMetax>;

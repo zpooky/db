@@ -1,6 +1,7 @@
 #ifndef DB_EXTENTS_BUILER_H
 #define DB_EXTENTS_BUILER_H
 
+#include "../shared/shared.h"
 #include <bitset>
 #include <cstddef>
 #include <deque>
@@ -58,10 +59,12 @@ private:
 
 private:
   std::deque<ExtentBuilder_t> m_extents;
+  db::segment::id m_segment;
   ExtentBuilder_t *m_current;
 
 public:
-  ExtentsBuilder() : m_extents(), m_current(nullptr) {
+  explicit ExtentsBuilder(const db::segment::id &id = db::segment::NO_ID)
+      : m_extents(), m_current(nullptr), m_segment(id) {
   }
 
 private:
@@ -78,10 +81,29 @@ public:
     m_current->next(present);
   }
 
-  std::deque<ExtentBuilder_t> &builders() {
+  void swap(ExtentsBuilder<lines> &o) noexcept {
+    std::swap(m_extents, o.m_extents);
+    std::swap(m_segment, o.m_segment);
+    std::swap(m_current, o.m_current);
+  }
+
+  const db::segment::id &segment() const {
+    return m_segment;
+  }
+
+  const std::deque<ExtentBuilder_t> &builders() const & {
     return m_extents;
   }
+
+  std::deque<ExtentBuilder_t> &builders() & {
+    return m_extents;
+  }
+
+  std::deque<ExtentBuilder_t> &&builders() && {
+    return std::move(m_extents);
+  }
 };
+
 } // namespace db
 
 #endif

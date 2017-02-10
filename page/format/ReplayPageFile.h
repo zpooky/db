@@ -45,6 +45,7 @@ public:
     auto file = m_meta.file;
     auto parser = Format::parser<Meta_t>(file);
     // std::cout << file.path << std::endl;
+    // TODO fadvice READ_AHEAD/SEQUENTIAL
 
     parser.parse([&](db::fs::FileReader &fr) {
       Buffer_t buffer(m_meta.line_size);

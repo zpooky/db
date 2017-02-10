@@ -33,14 +33,6 @@ public:
   RW(RW &&o) : data(o.data) {
   }
 
-  RW<T> &operator=(RW<T> &o) {
-    data = o.data;
-  }
-
-  RW<T> &operator=(RW<T> &&o) {
-    data = o.data;
-  }
-
   void operator()(const page::FilePageMeta &f, const db::LineMeta &l) {
     data(f, l);
   }
@@ -65,13 +57,15 @@ private:
 private:
   db::Context &m_context;
   const db::Directory m_root;
+  const db::Configuration m_config;
   const db::table::id m_table;
   tx::Tx &m_tx;
 
 public:
   PageFilesParser(db::table::id id, db::Context &ctx, const db::Directory &root,
                   tx::Tx &tx)
-      : m_context(ctx), m_root(root.cd("segment")), m_table(id), m_tx(tx) {
+      : m_context(ctx), m_root(root.cd("segment")), m_config(ctx.config()),
+        m_table(id), m_tx(tx) {
     vfs::mkdir(m_root);
   }
 
@@ -146,7 +140,7 @@ public:
     PageFactory factory(segment, m_context.journal(), m_root);
 
     MaxIdReplay idReplay;
-    tx::PresentSetReplay<Meta_t> psReplay(m_table);
+    tx::PresentSetReplay<Meta_t> psReplay(m_config, m_table);
 
     auto segments = parse(files, idReplay, psReplay);
     db::raw::id raw_id(idReplay.next());

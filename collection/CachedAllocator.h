@@ -17,7 +17,7 @@ public:
   // using size_type = size_t;
 
 public:
-  explicit CachedAllocator(size_t cached) : m_cached(cached) {
+  CachedAllocator(void *, size_t cached) : m_cached(cached) {
   }
 
   CachedAllocator(CachedAllocator &&o) : m_cached(o.m_cached) {
@@ -29,19 +29,28 @@ public:
   }
 
   template <typename T>
-  T *allocate(size_t);
+  T *allocate();
 
   template <typename T>
-  void deallocate(T *, size_t);
+  void deallocate(T *);
 };
 
 template <typename T>
-T *CachedAllocator::allocate(size_t) {
+T *CachedAllocator::allocate() {
   return nullptr;
 }
 
 template <typename T>
-void CachedAllocator::deallocate(T *, size_t) {
+void CachedAllocator::deallocate(T *) {
 }
+
+class ParrentAllocator {
+private:
+public:
+  template <typename T>
+  CachedAllocator child(size_t) {
+    return CachedAllocator(nullptr, 0);
+  }
+};
 } // namespace sp
 #endif

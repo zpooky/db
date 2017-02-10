@@ -6,6 +6,7 @@
 #include "../segment/Segment.h"
 #include "../shared/PageRange.h"
 #include "ExtentsBuilder.h"
+#include "Util.h"
 #include <vector>
 
 namespace page {
@@ -20,6 +21,7 @@ private:
   db::ExtentsBuilder<lines> m_extents;
 
 public:
+  //,SegmentFileHint(Size)
   explicit SegmentBuilder(const FilePageMeta &meta)
       : m_meta(meta), m_extents() {
   }
@@ -39,21 +41,11 @@ public:
     // should work with present set and reservation set
 
     // TODO test FIFO order of extents
-    using PresentSet = db::PresentSet<lines>;
-    FilePage<Meta_t> page(m_meta);
 
     auto &builders = m_extents.builders();
-    std::vector<db::Extent<Meta_t>> extents;
-    page::position start(0);
-    db::segment::id id(m_meta.id);
-    for (auto &extent : builders) {
-      auto extent_lines(extent.lines());
-      db::PageRange range(start, extent_lines);
-      extents.emplace_back(id, PresentSet(extent.present(), range));
-      start = page::position(start + extent_lines);
-    }
-
-    return db::Segment<Meta_t>{std::move(page), db::Extents<Meta_t>(extents)};
+    return db::Segment<Meta_t>{
+        FilePage<Meta_t>(m_meta),
+        db::Extents<Meta_t>(db::segment::extents<Meta_t>(m_meta.id, builders))};
   }
 };
 }

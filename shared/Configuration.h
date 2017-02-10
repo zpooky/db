@@ -5,10 +5,25 @@
 
 namespace db {
 struct Configuration {
+  /**
+   * db root directory
+   */
   const Directory root;
+  /**
+   * TODO make configurable
+   * max extents per segments file
+   */
+  const size_t segment_extents;
 
-public:
-  explicit Configuration(const Directory &p_root) : root(p_root) {
+  explicit Configuration(const Directory &p_root)
+      : root(p_root), segment_extents(100) {
+  }
+
+  /**
+   * lines per extent
+   */
+  static constexpr size_t extent_lines() {
+    return 1024ul;
   }
 };
 }

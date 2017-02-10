@@ -26,7 +26,7 @@ int main(int, char *[]) {
   db::Store<TestTableMetax> t1_store{ctx, tx};
   db::Store<Test2TableMetax> t2_store{ctx, tx};
   {
-    for (size_t i(0); i < TestTableMetax::extent_lines() * 4; ++i) {
+    for (size_t i(0); i < db::Configuration::extent_lines() + 4; ++i) {
       auto t = tx.begin();
       TestTable entry;
       auto tid = t1_store.create(t, entry);
@@ -35,8 +35,10 @@ int main(int, char *[]) {
       tx.commit(t);
     }
     auto t = tx.begin();
-    Test2Table entry2;
-    t2_store.create(t, entry2);
+    for (size_t i(0); i < db::Configuration::extent_lines() + 1; ++i) {
+      Test2Table entry2;
+      t2_store.create(t, entry2);
+    }
     tx.commit(t);
   }
 
