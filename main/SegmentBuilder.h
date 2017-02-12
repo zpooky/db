@@ -36,11 +36,6 @@ public:
 
   db::Segment<Meta_t> build() {
     // TODO make Line_size dynamic(based o:n version)
-    // TODO calculate no of lines and have a linked bitset list if there are
-    // more lines present in file than in lines() constexpr-
-    // should work with present set and reservation set
-
-    // TODO test FIFO order of extents
 
     auto &builders = m_extents.builders();
     return db::Segment<Meta_t>{

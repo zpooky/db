@@ -28,8 +28,6 @@ private:
   db::table::id m_table;
 
 public:
-  // SegmentConfig: extentsPerSegment(eps): Int
-  // child = parent.child(eps*sizeof(HeapExtSet::PS))
   explicit PresentSetReplay(const db::Configuration &c, const db::table::id &t)
       : m_builders(), m_extents(), m_allocator(), m_config(c), m_table(t) {
   }
@@ -47,10 +45,10 @@ public:
       db::ExtentsBuilder<lines> n(segment);
       m_builders.swap(n);
       size_t actual_extents(0); // TODO actual impl
-      size_t extents(std::max(m_config.segment_extents, actual_extents));
-      auto child = m_allocator.child<db::HeapExtentSet::PS>(extents);
+      size_t extents(std::max(m_config.extents, actual_extents));
+      auto child = m_allocator.child_st<db::HeapExtentSet::AllocType>(extents);
       using std::move;
-      m_extents.emplace_back(segment, move(child),
+      m_extents.emplace_back(segment, m_config.extents, move(child),
                              db::segment::present_sets(n.builders()));
     }
     m_builders.next(bool(l));

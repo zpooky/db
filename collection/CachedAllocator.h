@@ -2,6 +2,7 @@
 #define DB_COLLECTION_CACHED_ALLOCATOR_H
 
 #include <cstddef>
+#include <stdlib.h>
 
 namespace sp {
 
@@ -37,18 +38,22 @@ public:
 
 template <typename T>
 T *CachedAllocator::allocate() {
-  return nullptr;
+  return (T *)malloc(sizeof(T));
 }
 
 template <typename T>
-void CachedAllocator::deallocate(T *) {
+void CachedAllocator::deallocate(T *d) {
+  free(d);
 }
 
 class ParrentAllocator {
 private:
 public:
+  /**
+   * single threaded using std::bitset
+   */
   template <typename T>
-  CachedAllocator child(size_t) {
+  CachedAllocator child_st(size_t) {
     return CachedAllocator(nullptr, 0);
   }
 };

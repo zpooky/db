@@ -75,6 +75,7 @@ private:
 public:
   void next(bool present) {
     if (is_full()) {
+      // TODO test FIFO order of extents
       m_extents.emplace_back();
       m_current = &m_extents.back();
     }

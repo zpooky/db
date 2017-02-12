@@ -44,13 +44,21 @@ public:
   ~PresentSet() {
   }
 
+  bool operator<(page::position p) const {
+    return m_range < p;
+  }
+
   bool operator<(const PresentSet<capacity> &o) const {
     return m_range < o.m_range;
   }
 
+  bool operator==(page::position p) const {
+    return m_range.in_range(p);
+  }
+
   bool operator[](page::position p) const {
-    page::position idx(m_range.from_absolute(p));
-    return m_range(idx);
+    auto idx = m_range.from_absolute(p);
+    return m_bitset[idx];
   }
 
   const PageRange &range() const & {
@@ -97,10 +105,6 @@ public:
   }
   bool operator<(const HeapPresentSet &o) const {
     return m_range < o.m_range;
-  }
-
-  constexpr static size_t size() {
-    return 0;
   }
 };
 }

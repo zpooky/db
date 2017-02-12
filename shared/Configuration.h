@@ -13,10 +13,9 @@ struct Configuration {
    * TODO make configurable
    * max extents per segments file
    */
-  const size_t segment_extents;
+  const size_t extents;
 
-  explicit Configuration(const Directory &p_root)
-      : root(p_root), segment_extents(100) {
+  explicit Configuration(const Directory &p_root) : root(p_root), extents(100) {
   }
 
   /**
