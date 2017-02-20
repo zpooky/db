@@ -13,6 +13,7 @@
 #include <type_traits>
 
 namespace sp {
+  namespace con {
 
 template <size_t T_Size, typename Byte_t = uint8_t>
 class Bitset {
@@ -375,6 +376,7 @@ std::ostream &operator<<(std::ostream &os, const Bitset<size, Type> &b) {
   }
   return os;
 }
-}
+} // namespace con
+} // namespace sp
 
 #endif // PROJECT_BITSET_H

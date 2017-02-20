@@ -96,9 +96,8 @@ public:
   template <typename K, typename Comp>
   void insertion_sort(K *arr, size_t &size, K &value, Comp lt) {
     size_t mid(size / 2);
-    if (lt(arr[mid], value)) {
-
-    }
+    // if (lt(arr[mid], value)) {
+    // }
     arr[size++] = value;
     // TODO sort
   }
@@ -132,11 +131,13 @@ public:
       // std::cout << "~LazyVector()" << m_size << "|" << m_capacity << "\n";
       for (size_t i(0); i < m_size; ++i) {
         auto cur = m_arr[i];
-        // std::cout << "dec(" << it << ")" << i++ << "\n";
-        cur->dec();
-        if (!cur->is_valid()) {
-          // std::cout << "deallocate(" << it << ")\n";
-          // m_allocator.deallocate(it);
+        if (cur) {
+          // std::cout << "dec(" << it << ")" << i++ << "\n";
+          cur->dec();
+          if (!cur->is_valid()) {
+            // std::cout << "deallocate(" << it << ")\n";
+            // m_allocator.deallocate(it);
+          }
         }
       }
       delete[] m_arr;
@@ -145,7 +146,7 @@ public:
   }
 };
 
-class HeapExtentSet {
+class ExtentSet {
 private:
   using PS = db::PresentSet<db::Configuration::extent_lines()>;
   using Vector_t = LazyVector<PS>;
@@ -161,21 +162,21 @@ private:
   Vector_t m_extents;
 
 public:
-  HeapExtentSet(const db::segment::id &s, size_t max_extents, Allocator &&a,
-                std::vector<PS> &&exts)
+  ExtentSet(db::segment::id s, size_t max_extents, Allocator &&a,
+            std::vector<PS> &&exts)
       : m_range(0, 0), m_segment(s), m_allocator(std::move(a)),
         m_extents{m_allocator, max_extents, std::move(exts)} {
     // TODO define range
   }
 
-  HeapExtentSet(const HeapExtentSet &) = delete;
+  ExtentSet(const ExtentSet &) = delete;
 
-  HeapExtentSet(HeapExtentSet &&o)
+  ExtentSet(ExtentSet &&o)
       : m_range(o.m_range), m_segment(o.m_segment),
         m_allocator(std::move(o.m_allocator)), m_extents(std::move(m_extents)) {
   }
 
-  ~HeapExtentSet() {
+  ~ExtentSet() {
   }
 
   /**

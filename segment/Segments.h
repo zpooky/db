@@ -84,16 +84,14 @@ public:
 private:
   auto &free_page() {
     auto p = [](const Segment<Meta_t> &s) -> bool {
-      const auto &r = s.reservations();
-      return r.has_free();
+      return s.has_free();
     };
 
     auto f = [&]() {
       //
       return this->m_factory();
     };
-    auto &seg = m_segments.find(p, f);
-    return seg.reservations();
+    return m_segments.find(p, f);
   }
 };
 }

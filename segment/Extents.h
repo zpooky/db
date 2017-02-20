@@ -8,17 +8,13 @@ namespace db {
 template <typename Meta_t>
 class Extents {
 private:
-  using Table_t = typename Meta_t::latest;
-  using Maybe_t = sp::Maybe<Reservation<Table_t>>;
-
-private:
   sp::con::Stack<Extent<Meta_t>> m_extents;
 
 public:
   template <typename Collection>
   explicit Extents(Collection &&e) : m_extents(std::move(e)) {
   }
-  Maybe_t reserve() {
+  auto reserve() {
     // TODO think of something better
     // algorithm instead of loops
     for (auto &e : m_extents) {
@@ -27,7 +23,7 @@ public:
         return maybe;
       }
     }
-    return Maybe_t();
+    return sp::Maybe<page::position>();
   }
 
   bool has_free() const {

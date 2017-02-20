@@ -8,6 +8,7 @@ namespace sp {
 
 class CachedAllocator {
 private:
+  void *m_root;
   const size_t m_cached;
 
 public:
@@ -18,10 +19,11 @@ public:
   // using size_type = size_t;
 
 public:
-  CachedAllocator(void *, size_t cached) : m_cached(cached) {
+  CachedAllocator(void *root, size_t cached) : m_root(root), m_cached(cached) {
   }
 
-  CachedAllocator(CachedAllocator &&o) : m_cached(o.m_cached) {
+  CachedAllocator(CachedAllocator &&o)
+      : m_root(o.m_root), m_cached(o.m_cached) {
   }
 
   CachedAllocator(const CachedAllocator &) = delete;
@@ -49,6 +51,8 @@ void CachedAllocator::deallocate(T *d) {
 class ParrentAllocator {
 private:
 public:
+  ParrentAllocator() {
+  }
   /**
    * single threaded using std::bitset
    */

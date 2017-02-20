@@ -12,7 +12,7 @@
 namespace page {
 
 template <typename Meta_t>
-class SegmentBuilder {
+class SegmentReplay {
 private:
   static constexpr size_t lines = Meta_t::extent_lines();
 
@@ -22,12 +22,11 @@ private:
 
 public:
   //,SegmentFileHint(Size)
-  explicit SegmentBuilder(const FilePageMeta &meta)
-      : m_meta(meta), m_extents() {
+  explicit SegmentReplay(const FilePageMeta &meta) : m_meta(meta), m_extents() {
   }
 
-  SegmentBuilder(const SegmentBuilder &&) = delete;
-  SegmentBuilder(const SegmentBuilder &) = delete;
+  SegmentReplay(const SegmentReplay &&) = delete;
+  SegmentReplay(const SegmentReplay &) = delete;
 
 public:
   void operator()(const FilePageMeta &, const db::LineMeta &line) {
@@ -39,8 +38,8 @@ public:
 
     auto &builders = m_extents.builders();
     return db::Segment<Meta_t>{
-        FilePage<Meta_t>(m_meta),
-        db::Extents<Meta_t>(db::segment::extents<Meta_t>(m_meta.id, builders))};
+        m_meta.id, FilePage<Meta_t>(m_meta),
+        db::Extents<Meta_t>(db::segment::extents<Meta_t>(builders))};
   }
 };
 }

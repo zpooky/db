@@ -13,6 +13,7 @@ namespace db {
  * segment::id -> Segment
  * page::position -> Segment -> value
  */
+
 template <size_t capacity>
 class PresentSet {
 private:

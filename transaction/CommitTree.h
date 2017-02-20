@@ -10,25 +10,24 @@ namespace tx {
 
 class CommitTree {
 private:
-  using Allocator = sp::ParrentAllocator;
-  using Extents_t = std::vector<db::HeapExtentSet>;
+  using Extents_t = std::vector<db::ExtentSet>;
 
 private:
   const db::table::id m_table;
-  // db::HeapExtentSet es;
-  Allocator m_allocator;
+  Extents_t m_segments;
+  sp::ParrentAllocator m_allocator;
 
 public:
-  explicit CommitTree(const db::table::id &t, Allocator &&a, Extents_t &&)
-      : m_table(t), m_allocator(std::move(a)) {
+  explicit CommitTree(const db::table::id &t, sp::ParrentAllocator &&a, Extents_t &&s)
+      : m_table(t), m_segments(std::move(s)), m_allocator(std::move(a)) {
   }
 
   const db::table::id &table() const & {
     return m_table;
   }
 
-  // void introduce(const db::ExtentSet &) {
-  // }
+  void introduce(const db::ExtentSet &e) {
+  }
 };
-}
+} // namespace tx
 #endif

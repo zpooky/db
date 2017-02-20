@@ -15,14 +15,13 @@ namespace segment {
 // TODO merge function with presents_sets...
 template <typename Meta_t, size_t lines = Meta_t::extent_lines()>
 std::vector<Extent<Meta_t>>
-extents(const db::segment::id &id,
-        const std::deque<ExtentBuilder<lines>> &builders) {
+extents(const std::deque<ExtentBuilder<lines>> &builders) {
   std::vector<Extent<Meta_t>> extents;
   page::position start(0);
   for (auto &extent : builders) {
     auto extent_lines(extent.lines());
     db::PageRange range(start, extent_lines);
-    extents.emplace_back(id, PresentSet<lines>(extent.present(), range));
+    extents.emplace_back(PresentSet<lines>(extent.present(), range));
     start = page::position(start + extent_lines);
   }
   return extents;

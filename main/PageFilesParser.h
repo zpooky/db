@@ -10,7 +10,7 @@
 #include "../segment/Segments.h"
 #include "../shared/entities.h"
 #include "PresentSetReplay.h"
-#include "SegmentBuilder.h"
+#include "SegmentReplay.h"
 #include "TransactionalGuard.h"
 #include "TransactionalSegments.h"
 #include "Tx.h"
@@ -113,12 +113,12 @@ private:
     for (const auto &file : files) {
       auto seg_meta = meta(file);
       // TODO create checksum verify *Builder*
-      SegmentBuilder<Meta_t> segmentReplay(seg_meta);
+      SegmentReplay<Meta_t> segmentReplay(seg_meta);
       {
         Function_t segReplay = rw(segmentReplay);
         Function_t idReplay = rw(idr);
-        Function_t presentSetReplay = rw(psr);
-        std::vector<Function_t> xs{segReplay, idReplay, presentSetReplay};
+        Function_t psReplay = rw(psr);
+        std::vector<Function_t> xs{segReplay, idReplay, psReplay};
 
         ReplayPageFile<Meta_t> r(seg_meta);
         r.replay(xs);
@@ -146,7 +146,8 @@ public:
     db::raw::id raw_id(idReplay.next());
 
     using Segments_t = typename db::Segments<Meta_t>;
-    auto segs = new Segments_t(raw_id, std::move(factory), std::move(segments));
+    using std::move;
+    auto segs = new Segments_t(raw_id, move(factory), move(segments));
     return tx::TxSegments<Meta_t>(segs, tx::TxGuard(m_tx, psReplay.build()));
   }
 };

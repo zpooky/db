@@ -22,13 +22,13 @@ private:
 
 private:
   db::ExtentsBuilder<lines> m_builders;
-  std::vector<db::HeapExtentSet> m_extents;
+  std::vector<db::ExtentSet> m_extents;
   sp::ParrentAllocator m_allocator;
   db::Configuration m_config;
   db::table::id m_table;
 
 public:
-  explicit PresentSetReplay(const db::Configuration &c, const db::table::id &t)
+  explicit PresentSetReplay(const db::Configuration &c, db::table::id t)
       : m_builders(), m_extents(), m_allocator(), m_config(c), m_table(t) {
   }
 
@@ -46,7 +46,7 @@ public:
       m_builders.swap(n);
       size_t actual_extents(0); // TODO actual impl
       size_t extents(std::max(m_config.extents, actual_extents));
-      auto child = m_allocator.child_st<db::HeapExtentSet::AllocType>(extents);
+      auto child = m_allocator.child_st<db::ExtentSet::AllocType>(extents);
       using std::move;
       m_extents.emplace_back(segment, m_config.extents, move(child),
                              db::segment::present_sets(n.builders()));

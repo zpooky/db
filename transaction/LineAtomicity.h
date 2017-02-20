@@ -1,33 +1,34 @@
-#ifndef _DB_TRANSACTION_LINE_ATOMICITY_H
-#define _DB_TRANSACTION_LINE_ATOMICITY_H
+#ifndef DB_TRANSACTION_LINE_ATOMICITY_H
+#define DB_TRANSACTION_LINE_ATOMICITY_H
 
+#include "../collection/HashMap.h"
 #include "../collection/List.h"
 #include "../collection/ReferenceCounter.h"
+#include "CommitTree.h"
 #include "transaction.h"
 #include <atomic>
 #include <cassert>
 #include <condition_variable>
 #include <mutex>
-#include "CommitTree.h"
 
 namespace {
 class Meta {
 private:
+  sp::StaticHashMap<db::segment::id, tx::CommitTree> m_commit;
+
 public:
   Meta() {
   }
 
   template <typename Presents>
-  explicit Meta(const Presents &) {
+  explicit Meta(const Presents &) : m_commit() {
   }
 
-  Meta(const Meta &, const sp::Stack<tx::Transaction> &) {
+  Meta(const Meta &, const sp::Stack<tx::Transaction> &) : m_commit() {
   }
 
-  Meta(const Meta &&) = delete;
-
-private:
-  // db::segment::id
+  Meta(Meta &&o) : m_commit(std::move(o.m_commit)) {
+  }
 };
 
 class Managed {
@@ -185,11 +186,11 @@ public:
   void rollback(const Transaction &) {
   }
 
-  void introduce(tx::CommitTree&&) {
+  void introduce(tx::CommitTree &&) {
     std::unique_lock<std::mutex> lck(m_commit_lock);
   }
 
-  void release(const db::table::id &){
+  void release(const db::table::id &) {
     std::unique_lock<std::mutex> lck(m_commit_lock);
   }
 
