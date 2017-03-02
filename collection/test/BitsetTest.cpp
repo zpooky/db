@@ -1,7 +1,3 @@
-//
-// Created by spooky on 2016-07-08.
-//
-
 #include "../Bitset.h"
 #include "gtest/gtest.h"
 #include <iostream>

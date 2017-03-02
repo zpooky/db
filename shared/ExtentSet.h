@@ -65,9 +65,9 @@ public:
     for (auto &c : v) {
       insert(std::move(c));
     }
-    for (size_t i(m_size); i < m_capacity; ++i) {
-      m_arr[i] = nullptr;
-    }
+    // for (size_t i(m_size); i < m_capacity; ++i) {
+    //   m_arr[i] = nullptr;
+    // }
   }
 
   LazyVector(const LazyVector &) = delete;
@@ -94,12 +94,26 @@ public:
   }
 
   template <typename K, typename Comp>
-  void insertion_sort(K *arr, size_t &size, K &value, Comp lt) {
+  void insertion_sort(K *arr, size_t start, size_t size, K &value,
+                      const Comp &lt) {
     size_t mid(size / 2);
-    // if (lt(arr[mid], value)) {
-    // }
-    arr[size++] = value;
-    // TODO sort
+    if (lt(arr[mid], value)) { // lt
+    } else {                   // gt
+    }
+    // arr[size++] = value;
+    swap(value, arr, size);
+  }
+
+  template <typename K, typename Comp>
+  void insertion_sort(K *arr, size_t &size, K &value, const Comp &lt) {
+    insertion_sort(arr, 0, size, value, lt);
+  }
+
+  template <typename K>
+  void swap(K &k, K *arr, size_t size) {
+    for (size_t i(0); i < size; ++i) {
+      std::swap(k, arr[i]);
+    }
   }
 
   void insert(T &&c) {
@@ -109,7 +123,7 @@ public:
     new (ptr) AllocType(std::move(c));
     auto lt = [](const AllocType *f, const AllocType *s) {
       //
-      return f->data < s->data;
+      return f && f->data < s->data;
     };
     insertion_sort(m_arr, m_size, ptr, lt);
   }

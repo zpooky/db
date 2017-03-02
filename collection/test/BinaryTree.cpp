@@ -1,6 +1,3 @@
-//
-// Created by spooky on 2016-09-29.
-//
 #include "gtest/gtest.h"
 #include "../collection/BinaryTree.h"
 #include<iostream>
